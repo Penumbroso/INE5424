@@ -3,7 +3,7 @@
 #include <utility/ostream.h>
 #include <pci.h>
 
-__USING_SYS
+using namespace EPOS;
 
 int main()
 {
@@ -53,7 +53,7 @@ int main()
         cout << "\n";
     }
 
-    cout << "Finish!\n";
+    cout << "Finish!" << endl;
 
     return 0;
 }

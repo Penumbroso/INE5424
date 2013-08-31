@@ -8,9 +8,11 @@
 
 extern "C"
 {
+    using namespace EPOS;
+
     // Standard C Library allocators
     inline void * malloc(size_t bytes) {
-        return EPOS::Application::heap()->alloc(bytes);
+	return Application::_heap->alloc(bytes);
     }
 
     inline void * calloc(size_t n, unsigned int bytes) {
@@ -20,7 +22,7 @@ extern "C"
     }
 
     inline void free(void * ptr) {
-        return EPOS::Application::heap()->free(ptr);
+        Application::_heap->free(ptr);
     }
 }
 
@@ -33,12 +35,8 @@ inline void * operator new[](size_t bytes) {
     return malloc(bytes);
 }
 
-inline void operator delete(void * object) {
-    return free(object);
-}
-
-inline void operator delete[](void * object) {
-    return free(object);
-}
+// Delete cannot be declared inline due to virtual destructors
+void operator delete(void * ptr);
+void operator delete[](void * ptr);
 
 #endif

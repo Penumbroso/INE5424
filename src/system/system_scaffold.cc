@@ -3,22 +3,28 @@
 #include <utility/ostream.h>
 #include <utility/heap.h>
 #include <machine.h>
-#include <thread.h>
-#include <system.h>
 #include <display.h>
+#include <system.h>
+#include <thread.h>
 
 // LIBC Heritage
-
-__USING_SYS
-
 extern "C" {
+    using namespace EPOS;
+
+    void _panic() {
+        Machine::panic();
+    }
+
     void _exit(int s) {
         Thread::exit(s); for(;;);
     }
 
+    void _print(const char * s) {
+        Display::puts(s);
+    }
+
     void __cxa_pure_virtual() {
-        db<void>(ERR) << "__cxa_pure_virtual() called!\n";
-        Machine::panic();
+        db<void>(ERR) << "Pure Virtual mehtod called!" << endl;
     }
 }
 
@@ -31,23 +37,20 @@ class First_Object
 {
 public:
     First_Object() {
-        Display::remap();
+	Display::remap();
     }
 };
 
 // Global objects
-// These objects might be reconstructed several times in multicore configurations,
+// These objects might be reconstructed several times in SMP configurations,
 // so their constructors must be stateless!
 First_Object __entry;
 OStream kout;
 OStream kerr;
 
 // System class attributes
-System_Info<Machine> * System::_si =
-    reinterpret_cast<System_Info<Machine> *>(Memory_Map<Machine>::SYS_INFO);
-
-Heap System::_heap;
-
-System_Info<Machine> * const System::info() { return _si; }
+System_Info<Machine> * System::_si = reinterpret_cast<System_Info<Machine> *>(Memory_Map<Machine>::SYS_INFO);
+char System::_preheap[];
+Heap * System::_heap;
 
 __END_SYS

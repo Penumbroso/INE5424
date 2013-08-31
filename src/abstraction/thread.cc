@@ -14,7 +14,6 @@ Thread* volatile Thread::_running;
 Thread::Queue Thread::_ready;
 Thread::Queue Thread::_suspended;
 
-
 // This_Thread class attributes
 bool This_Thread::_not_booting;
 
@@ -22,12 +21,13 @@ bool This_Thread::_not_booting;
 // Methods
 void Thread::common_constructor(Log_Addr entry, unsigned int stack_size) 
 {
-    db<Thread>(TRC) << "Thread(entry=" << (void *)entry 
-		    << ",state=" << _state
-		    << ",stack={b=" << _stack
-		    << ",s=" << stack_size
-		    << "},context={b=" << _context
-		    << "," << *_context << "}) => " << this << "\n";
+    db<Thread>(TRC) << "Thread(entry=" << entry
+                    << ",state=" << _state
+                    << ",priority=" << _link.rank()
+                    << ",stack={b=" << _stack
+                    << ",s=" << stack_size
+                    << "},context={b=" << _context
+                    << "," << *_context << "}) => " << this << endl;
 
     switch(_state) {
         case RUNNING: break;
@@ -62,8 +62,7 @@ int Thread::join()
 {
     lock();
 
-    db<Thread>(TRC) << "Thread::join(this=" << this
-		    << ",state=" << _state << ")\n";
+    db<Thread>(TRC) << "Thread::join(this=" << this << ",state=" << _state << ")" << endl;
 
     while(_state != FINISHING)
         yield(); // implicit unlock()
@@ -78,7 +77,7 @@ void Thread::pass()
 {
     lock();
 
-    db<Thread>(TRC) << "Thread::pass(this=" << this << ")\n";
+    db<Thread>(TRC) << "Thread::pass(this=" << this << ")" << endl;
 
     Thread * prev = _running;
     prev->_state = READY;
@@ -98,7 +97,7 @@ void Thread::suspend()
 {
     lock();
 
-    db<Thread>(TRC) << "Thread::suspend(this=" << this << ")\n";
+    db<Thread>(TRC) << "Thread::suspend(this=" << this << ")" << endl;
 
     if(_running != this)
         _ready.remove(this);
@@ -120,9 +119,9 @@ void Thread::suspend()
 
 void Thread::resume()
 {
-    db<Thread>(TRC) << "Thread::resume(this=" << this << ")\n";
-
     lock();
+
+    db<Thread>(TRC) << "Thread::resume(this=" << this << ")" << endl;
 
    _suspended.remove(this);
    _state = READY;
@@ -137,7 +136,7 @@ void Thread::yield()
 {
     lock();
 
-    db<Thread>(TRC) << "Thread::yield(running=" << _running << ")\n";
+    db<Thread>(TRC) << "Thread::yield(running=" << _running << ")" << endl;
 
     if(!_ready.empty()) {
         Thread * prev = _running;
@@ -158,8 +157,7 @@ void Thread::exit(int status)
 {
     lock();
 
-    db<Thread>(TRC) << "Thread::exit(running=" << _running
-                    <<",status=" << status << ")\n";
+    db<Thread>(TRC) << "Thread::wakeup_all(running=" << running() << ")" << endl;
 
     while(_ready.empty() && !_suspended.empty())
         idle(); // implicit unlock();
@@ -202,15 +200,17 @@ void Thread::implicit_exit()
 }
 
 
-void Thread::idle()
+int Thread::idle()
 {
-    db<Thread>(TRC) << "Thread::idle()\n";
+    db<Thread>(TRC) << "Thread::idle()" << endl;
 
-    db<Thread>(INF) << "There are no runnable threads at the moment!\n";
-    db<Thread>(INF) << "Halting the CPU ...\n";
+    db<Thread>(INF) << "There are no runnable threads at the moment!" << endl;
+    db<Thread>(INF) << "Halting the CPU ..." << endl;
 
     CPU::int_enable();
     CPU::halt();
+
+    return 0;
 }
 
 

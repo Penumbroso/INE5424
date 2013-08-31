@@ -12,11 +12,15 @@ __BEGIN_SYS
 // Intel 8259A Interrupt Controller (master and slave are seen as a unit)
 class i8259A
 {
+    friend class APIC;
+
 private:
     typedef CPU::Reg8 Reg8;
     typedef CPU::Reg16 Reg16;
 
-    static const unsigned int HARD_INT = 0x20;
+    static const unsigned int IRQS = 16;
+    static const unsigned int HARD_INT = 32;
+    static const unsigned int SOFT_INT = HARD_INT + IRQS;
 
 public:
     // I/O Ports
@@ -38,12 +42,10 @@ public:
 
     // IRQs
     typedef unsigned int IRQ;
-    static const unsigned int IRQS = 16;
     enum {
         IRQ_TIMER	= 0,
         IRQ_KEYBOARD	= 1,
-        IRQ_CASCADE	= 2,
-        IRQ_RESCHEDULE = 3
+        IRQ_CASCADE	= 2
     };
 
     // Interrupts
@@ -51,7 +53,7 @@ public:
     enum {
         INT_TIMER	= HARD_INT + IRQ_TIMER,
         INT_KEYBOARD	= HARD_INT + IRQ_KEYBOARD,
-        INT_RESCHEDULER = HARD_INT + IRQ_RESCHEDULE
+        INT_RESCHEDULER = SOFT_INT
     };
 
 public:
@@ -120,11 +122,11 @@ private:
     typedef CPU::Reg32 Reg32;
     typedef CPU::Log_Addr Log_Addr;
 
-    static const unsigned int HARD_INT = 0x20;
+    static const unsigned int HARD_INT = i8259A::HARD_INT;
 
 public:
     // Interrupts
-    static const unsigned int INTS = 64;
+    static const unsigned int INTS = i8259A::INTS;
     enum {
         INT_TIMER	= i8259A::INT_TIMER,
         INT_RESCHEDULER = i8259A::INT_RESCHEDULER
@@ -133,10 +135,9 @@ public:
     // Default mapping addresses
     enum {
         LOCAL_APIC_PHY_ADDR	= 0xfee00000,
-        LOCAL_APIC_LOG_ADDR	= Memory_Map<PC>::APIC_MEM,
+        LOCAL_APIC_LOG_ADDR	= Memory_Map<PC>::APIC,
         IO_APIC_PHY_ADDR	= 0xfec00000,
-        IO_APIC_LOG_ADDR	= Memory_Map<PC>::APIC_MEM +
-                                  (IO_APIC_PHY_ADDR - LOCAL_APIC_PHY_ADDR)
+        IO_APIC_LOG_ADDR	= Memory_Map<PC>::APIC + (IO_APIC_PHY_ADDR - LOCAL_APIC_PHY_ADDR)
     };
 
     // Memory-mapped registers
@@ -297,16 +298,16 @@ public:
         return read(VERSION);
     }
 
-        static void ipi_send(int dest, int interrupt);
-    static void ipi_init(System_Info<PC> *si);
-        static void ipi_start(Log_Addr entry, System_Info<PC> *si);
+    static void ipi_send(unsigned int cpu, unsigned int interrupt);
+    static void ipi_init(volatile int * status);
+    static void ipi_start(Log_Addr entry, volatile int * status);
 
     static void reset(Log_Addr addr = LOCAL_APIC_LOG_ADDR) {
         // APIC must be on very early in the boot process, so it is
         // subject to memory remappings. We also cannot be sure about 
         // global constructors here
         remap(addr);
-        if(Traits<Thread>::smp) {
+        if(Traits<System>::multicore) {
             clear();
             enable();
             connect();
@@ -402,11 +403,12 @@ private:
 };
 
 // PC_IC uses i8259A on single-processor machines and the APIC timer on MPs
-class PC_IC: public IC_Common, 
-             private IF<Traits<Thread>::smp, APIC, i8259A>::Result
+class PC_IC: public IC_Common, private IF<Traits<System>::multicore, APIC, i8259A>::Result
 {
+    friend class PC;
+
 private:
-    typedef IF<Traits<Thread>::smp, APIC, i8259A>::Result Base;
+    typedef IF<Traits<System>::multicore, APIC, i8259A>::Result Base;
 
     typedef CPU::Reg32 Reg32;
     typedef CPU::Log_Addr Log_Addr;
@@ -426,27 +428,27 @@ public:
 
     static void int_vector(Interrupt_Id i, Interrupt_Handler h) {
         db<IC>(INF) << "IC::int_vector(int=" << i << ",h=" 
-        	    << (void *)h <<")\n";
+        	    << (void *)h <<")" << endl;
         if(i < INTS) _int_vector[i] = h;
     }
 
     static void enable() {
-        db<IC>(INF) << "IC::enable()\n";
+        db<IC>(INF) << "IC::enable()" << endl;
         Base::enable();
     }
 
     static void enable(int i) {
-        db<IC>(INF) << "IC::enable(int=" << i << ")\n";
+        db<IC>(INF) << "IC::enable(int=" << i << ")" << endl;
         Base::enable(i);
     }
 
     static void disable() {
-        db<IC>(INF) << "IC::disable()\n";
+        db<IC>(INF) << "IC::disable()" << endl;
         Base::disable();
     }
 
     static void disable(int i) {
-        db<IC>(INF) << "IC::disable(int=" << i << ")\n";
+        db<IC>(INF) << "IC::disable(int=" << i << ")" << endl;
         Base::disable(i);
     }
 
@@ -454,9 +456,9 @@ public:
     using Base::irq2int;
     using Base::int2irq;
 
+private:
     static void init();
 
-private:
     static void int_dispatch();
 
     static void int_not(Interrupt_Id i);

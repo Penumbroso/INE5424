@@ -4,7 +4,7 @@
 #include <thread.h>
 #include <alarm.h>
 
-__USING_SYS
+using namespace EPOS;
 
 const int iterations = 100;
 
@@ -33,13 +33,13 @@ int main()
     int status_b = b->join();
 
     cout << "Thread A exited with status " << status_a 
-	 << " and thread B exited with status " << status_b << "\n";
+         << " and thread B exited with status " << status_b << "\n";
 
     delete a;
     delete b;
     delete m;
     
-    cout << "It should not be shown on the display!\n";
+    cout << "It should not be shown on the display!" << endl;
 
     return 0;
 }
@@ -47,10 +47,10 @@ int main()
 int func_a(void)
 {
     for(int i = iterations; i > 0; i--) {
-	for(int i = 0; i < 79; i++)
-	    cout << "a";
-	cout << "\n";
-	Alarm::delay(500000);
+        for(int i = 0; i < 79; i++)
+            cout << "a";
+        cout << "\n";
+        Alarm::delay(500000);
     }
 
     return 'A';   
@@ -59,10 +59,10 @@ int func_a(void)
 int func_b(void)
 {
     for(int i = iterations; i > 0; i--) {
-	for(int i = 0; i < 79; i++)
-	    cout << "b";
-	cout << "\n";
-	Alarm::delay(500000);
+        for(int i = 0; i < 79; i++)
+            cout << "b";
+        cout << "\n";
+        Alarm::delay(500000);
     }
 
     return 'B';   

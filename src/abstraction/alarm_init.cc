@@ -7,7 +7,7 @@ __BEGIN_SYS
 
 int Alarm::init()
 {
-    db<Init, Alarm>(TRC) << "Alarm::init()\n";
+    db<Init, Alarm>(TRC) << "Alarm::init()" << endl;
     
     _timer = new (kmalloc(sizeof(Alarm_Timer))) Alarm_Timer(&handler);
 

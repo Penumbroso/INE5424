@@ -9,43 +9,46 @@ __BEGIN_SYS
 // Class attributes
 Alarm_Timer * Alarm::_timer;
 volatile Alarm::Tick Alarm::_elapsed;
-Alarm::Queue Alarm::_requests;
+Alarm::Queue Alarm::_request;
+
 
 // Methods
-Alarm::Alarm(const Microsecond & time, Handler handler, int times):
-    _ticks(ticks(time)), _handler(handler), _times(times), _link(this, _ticks)
+Alarm::Alarm(const Microsecond & time, Handler * handler, int times)
+: _ticks(ticks(time)), _handler(handler), _times(times), _link(this, _ticks)
 {
     lock();
 
     db<Alarm>(TRC) << "Alarm(t=" << time
                    << ",tk=" << _ticks
                    << ",h=" << reinterpret_cast<void *>(handler)
-                   << ",x=" << times << ") => " << this << "\n";
+                   << ",x=" << times << ") => " << this << endl;
 
     if(_ticks) {
-        _requests.insert(&_link);
+        _request.insert(&_link);
         unlock();
     } else {
         unlock();
-        handler();
+        (*handler)();
     }
 }
+
 
 Alarm::~Alarm()
 {
     lock();
 
-    db<Alarm>(TRC) << "~Alarm()\n";
+    db<Alarm>(TRC) << "~Alarm(this=" << this << ")" << endl;
 
-    _requests.remove(this);
+    _request.remove(this);
 
     unlock();
 }
 
+
 // Class methods
 void Alarm::delay(const Microsecond & time)
 {
-    db<Alarm>(TRC) << "Alarm::delay(time=" << time << ")\n";
+    db<Alarm>(TRC) << "Alarm::delay(time=" << time << ")" << endl;
 
 	Tick t = _elapsed + ticks(time);
 
@@ -56,7 +59,7 @@ void Alarm::delay(const Microsecond & time)
 void Alarm::handler()
 {
     static Tick next_tick;
-    static Handler next_handler;
+    static Handler * next_handler;
 
     lock();
 
@@ -75,16 +78,15 @@ void Alarm::handler()
         next_tick--;
     if(!next_tick) {
         if(next_handler) {
-            db<Alarm>(TRC) << "Alarm::handler(h="
-                           << reinterpret_cast<void *>(next_handler) << ")\n";
+            db<Alarm>(TRC) << "Alarm::handler(h=" << reinterpret_cast<void *>(next_handler) << ")" << endl;
             unlock();
-            next_handler();
+            (*next_handler)();
             lock();
         }
-        if(_requests.empty())
+        if(_request.empty())
             next_handler = 0;
         else {
-            Queue::Element * e = _requests.remove();
+            Queue::Element * e = _request.remove();
             Alarm * alarm = e->object();
             next_tick = alarm->_ticks;
             next_handler = alarm->_handler;
@@ -92,7 +94,7 @@ void Alarm::handler()
                 alarm->_times--;
             if(alarm->_times) {
                 e->rank(alarm->_ticks);
-                _requests.insert(e);
+                _request.insert(e);
             }
         }
     }

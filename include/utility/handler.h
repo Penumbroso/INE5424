@@ -7,7 +7,7 @@
 
 __BEGIN_SYS
 
-typedef void (* Function_Handler)();
+typedef void (Function_Handler)();
 
 __END_SYS
 

@@ -5,7 +5,7 @@
 #include <semaphore.h>
 #include <alarm.h>
 
-__USING_SYS
+using namespace EPOS;
 
 const int iterations = 100;
 
@@ -46,7 +46,7 @@ int main()
     }
     cons->join();
 
-    cout << "The end!\n";
+    cout << "The end!" << endl;
 
     delete cons;
 

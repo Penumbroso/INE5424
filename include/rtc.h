@@ -10,13 +10,25 @@ __BEGIN_SYS
 
 class RTC_Common
 {
+private:
+    static const unsigned long MAX_LONG = (unsigned long)(-1);
+    static const unsigned long long MAX_LONG_LONG = (unsigned long long)(-1);
+    // Adjusts the precision of the basic time type according to the system's life span,
+    // forcing a compilation error through void when a counter overflow becomes possible.
+    typedef IF<(Traits<System>::LIFE_SPAN * 1000000 <= MAX_LONG), unsigned long,
+               IF<(Traits<System>::LIFE_SPAN * 1000000 <= MAX_LONG_LONG), unsigned long long,
+                  void>::Result>::Result Time_Base;
+
 protected:
     RTC_Common() {}
 
 public:
     // The time (as defined by God Chronos)
-    typedef unsigned long Microsecond;
-    typedef unsigned long Second;
+    typedef Time_Base Microsecond;
+    typedef Time_Base Second;
+
+    // Infinite times (for alarms and periodic threads)
+    enum { INFINITE = -1 };
 
     // Calendar date and time
     class Date {
@@ -39,9 +51,8 @@ public:
 
         void adjust_year(int y) { _Y += y; };
 
-        friend Debug & operator << (Debug & db, const Date & d) {
-            db << "{" << d._Y << "/" << d._M << "/" << d._D << " "
-               << d._h << ":" << d._m << ":" << d._s << "}";
+        friend OStream & operator << (OStream & db, const Date & d) {
+            db << "{" << d._Y << "/" << d._M << "/" << d._D << " " << d._h << ":" << d._m << ":" << d._s << "}";
             return db;
         }
 

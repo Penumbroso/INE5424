@@ -4,7 +4,7 @@
 #include <utility/malloc.h>
 #include <utility/list.h>
 
-__USING_SYS;
+using namespace EPOS;
 
 const int N = 10;
 
@@ -20,7 +20,6 @@ OStream cout;
 
 int main()
 {
-
     cout << "List Utility Test\n";
 
     test_simple_list();
@@ -31,7 +30,7 @@ int main()
     test_scheduling_list();
     test_grouping_list();
 
-    cout << "\nDone!\n";
+    cout << "\nDone!" << endl;
 
     return 0;
 }
@@ -141,7 +140,7 @@ void test_simple_grouping_list()
             delete d1;
         }
     } else
-        cout << "failed!\n";
+        cout << "failed!" << endl;
     cout << "Allocating 6 more elements from the list => "; 
     d1 = l.search_decrementing(6);
     if(d1) {
@@ -152,7 +151,7 @@ void test_simple_grouping_list()
         }
         cout << "\n";
     } else
-        cout << "failed!\n";
+        cout << "failed!" << endl;
     cout << "Allocating " << N * 2 << " more elements from the list => "; 
     d1 = l.search_decrementing(N * 2);
     if(d1) {
@@ -163,7 +162,7 @@ void test_simple_grouping_list()
         }
         cout << "\n";
     } else
-        cout << "failed!\n";
+        cout << "failed!" << endl;
     cout << "Allocating " << (N * 2)-7 << " more elements from the list => "; 
     d1 = l.search_decrementing((N * 2) - 7);
     if(d1) {
@@ -174,7 +173,7 @@ void test_simple_grouping_list()
         }
         cout << "\n";
     } else
-        cout << "failed!\n";
+        cout << "failed!" << endl;
     cout << "The list has now " << l.size() << " elements that group " 
          << l.grouped_size() << " elements in total\n";
 }
@@ -317,16 +316,17 @@ void test_relative_list ()
         delete e[i];
 }
 
+#include<scheduler.h>
 void test_scheduling_list ()
 {
-    cout << "\nThis is scheduling list of integers:\n";
-    Scheduling_List<int> l;
+    cout << "\nThis is priority scheduling list of integers:\n";
+    Scheduling_List<int, Scheduling_Criteria::Priority> l;
     int o[N];
-    Scheduling_List<int>::Element * e[N];
+    Scheduling_List<int, Scheduling_Criteria::Priority>::Element * e[N];
     cout << "Inserting the following integers into the list ";
     for(int i = 0; i < N; i++) {
         o[i] = i;
-        e[i] = new Scheduling_List<int>::Element(&o[i], N - i - 1);
+        e[i] = new Scheduling_List<int, Scheduling_Criteria::Priority>::Element(&o[i], N - i - 1);
         l.insert(e[i]);
         cout << i << "(" << N - i - 1 << ")";
         if(i != N - 1)
@@ -335,35 +335,35 @@ void test_scheduling_list ()
     cout << "\n";
     cout << "The list has now " << l.size() << " elements\n";
     cout << "They are: ";
-    for(Scheduling_List<int>::Iterator i = l.begin(); i != l.end(); i++) {
+    for(Scheduling_List<int, Scheduling_Criteria::Priority>::Iterator i = l.begin(); i != l.end(); i++) {
         cout << *i->object();
-        if(Scheduling_List<int>::Iterator(i->next()) != l.end())
+        if(Scheduling_List<int, Scheduling_Criteria::Priority>::Iterator(i->next()) != l.end())
             cout << ", ";
     }
     cout << "\n";
     cout << "Scheduling the list => " << *l.choose()->object() << "\n";
     cout << "They are: ";
-    for(Scheduling_List<int>::Iterator i = l.begin(); i != l.end(); i++) {
+    for(Scheduling_List<int, Scheduling_Criteria::Priority>::Iterator i = l.begin(); i != l.end(); i++) {
         cout << *i->object();
-        if(Scheduling_List<int>::Iterator(i->next()) != l.end())
+        if(Scheduling_List<int, Scheduling_Criteria::Priority>::Iterator(i->next()) != l.end())
             cout << ", ";
     }
     cout << "\n";
     cout << "Forcing scheduling of antorher element => " <<
         *l.choose_another()->object() << "\n";
     cout << "They are: ";
-    for(Scheduling_List<int>::Iterator i = l.begin(); i != l.end(); i++) {
+    for(Scheduling_List<int, Scheduling_Criteria::Priority>::Iterator i = l.begin(); i != l.end(); i++) {
         cout << *i->object();
-        if(Scheduling_List<int>::Iterator(i->next()) != l.end())
+        if(Scheduling_List<int, Scheduling_Criteria::Priority>::Iterator(i->next()) != l.end())
             cout << ", ";
     }
     cout << "\n";
     cout << "Forcing scheduling of element whose value is " << o[N/2] << " => " 
  	 << *l.choose(e[N/2])->object() << "\n";
     cout << "They are: ";
-    for(Scheduling_List<int>::Iterator i = l.begin(); i != l.end(); i++) {
+    for(Scheduling_List<int, Scheduling_Criteria::Priority>::Iterator i = l.begin(); i != l.end(); i++) {
         cout << *i->object();
-        if(Scheduling_List<int>::Iterator(i->next()) != l.end())
+        if(Scheduling_List<int, Scheduling_Criteria::Priority>::Iterator(i->next()) != l.end())
             cout << ", ";
     }
     cout << "\n";
@@ -442,7 +442,7 @@ void test_grouping_list()
             delete d1;
         }
     } else
-        cout << "failed!\n";
+        cout << "failed!" << endl;
     cout << "Allocating 6 more elements from the list => "; 
     d1 = l.search_decrementing(6);
     if(d1) {
@@ -453,7 +453,7 @@ void test_grouping_list()
         }
         cout << "\n";
     } else
-        cout << "failed!\n";
+        cout << "failed!" << endl;
     cout << "Allocating " << N * 2 << " more elements from the list => "; 
     d1 = l.search_decrementing(N * 2);
     if(d1) {
@@ -464,7 +464,7 @@ void test_grouping_list()
         }
         cout << "\n";
     } else
-        cout << "failed!\n";
+        cout << "failed!" << endl;
     cout << "Allocating " << (N * 2)-7 << " more elements from the list => "; 
     d1 = l.search_decrementing((N * 2) - 7);
     if(d1) {
@@ -475,7 +475,7 @@ void test_grouping_list()
         }
         cout << "\n";
     } else
-        cout << "failed!\n";
+        cout << "failed!" << endl;
     cout << "The list has now " << l.size() << " elements that group " 
          << l.grouped_size() << " elements in total\n";
 }

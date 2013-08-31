@@ -9,6 +9,8 @@ __BEGIN_SYS
 
 class IA32: public CPU_Common
 {
+    friend class Init_System;
+
 public:
     // CPU Flags
     typedef Reg32 Flags;
@@ -76,10 +78,9 @@ public:
         CR0_CD		= 0x40000000,
         CR0_PG		= 0x80000000,
         // Mask to clear flags (by ANDing)
-        CR0_CLEAR       = (CR0_PE | CR0_EM | CR0_TS | CR0_NE | CR0_AM |
-        		   CR0_NW | CR0_CD), 
+        CR0_CLEAR       = (CR0_PE | CR0_EM | CR0_WP),
         // Mask to set flags (by ORing)
-        CR0_SET         = (CR0_PE | CR0_MP | CR0_ET | CR0_PG) 
+        CR0_SET         = (CR0_PE | CR0_PG)
     };
 
     // Segment Flags
@@ -99,24 +100,19 @@ public:
         SEG_4K		= 0x80,
         SEG_FLT_CODE    = (SEG_PRE  | SEG_NOSYS	| SEG_CODE | SEG_ACC),
         SEG_FLT_DATA    = (SEG_PRE  | SEG_NOSYS	| SEG_RW   | SEG_ACC),
-        SEG_SYS_CODE    = (SEG_PRE  | SEG_NOSYS | SEG_RW   | SEG_CODE | SEG_ACC),
-        SEG_SYS_DATA    = (SEG_PRE  | SEG_NOSYS | SEG_RW   | SEG_ACC),
         SEG_APP_CODE    = (SEG_PRE  | SEG_NOSYS | SEG_DPL2 | SEG_DPL1 |
-        		   SEG_CODE | SEG_ACC),     // P, DPL=3, S, C, W, A
+        		   SEG_CODE | SEG_RW    | SEG_ACC),   // P, DPL=3, S, C, W, A
         SEG_APP_DATA    = (SEG_PRE  | SEG_NOSYS	| SEG_DPL2 | SEG_DPL1 |
-        		   SEG_RW   | SEG_ACC),    // P, DPL=3, S, W, A
-//        SEG_SYS_CODE    = (SEG_PRE  | SEG_NOSYS | SEG_DPL2 | SEG_DPL1 |
-//                           SEG_CODE | SEG_ACC),     // P, DPL=3, S, C, W, A
-//        SEG_SYS_DATA    = (SEG_PRE  | SEG_NOSYS | SEG_DPL2 | SEG_DPL1 |
-//        		   SEG_RW   | SEG_ACC),    // P, DPL=3, S, W, A
-        SEG_IDT_ENTRY   = (SEG_PRE  | SEG_INT   )
+        		              SEG_RW    | SEG_ACC),   // P, DPL=3, S,    W, A
+        SEG_SYS_CODE    = (SEG_PRE  | SEG_NOSYS	| SEG_CODE | SEG_ACC),
+        SEG_SYS_DATA    = (SEG_PRE  | SEG_NOSYS	| SEG_RW   | SEG_ACC),
+        SEG_IDT_ENTRY   = (SEG_PRE  | SEG_INT   | SEG_DPL1 | SEG_DPL2)
     };
 
     // DPL/RPL for application (user) and system (supervisor) modes 
     enum {
         PL_APP = 3, // GDT, RPL=3
         PL_SYS = 0  // GDT, RPL=0
-//        PL_SYS = 3  // GDT, RPL=0
     };
 
     // GDT Layout 
@@ -154,12 +150,9 @@ public:
         			  ((Reg8)(l >> 16))),
               base_31_24((Reg8)(b >> 24)) {}
 
-        friend Debug & operator << (Debug & db, const GDT_Entry & g) {
-            db << "{bas=" << (void *)((g.base_31_24 << 24) | 
-        			      (g.base_23_16 << 16) |
-        			      g.base_15_00) 
-               << ",lim=" << (void *)(((g.g_d_0_a_limit_19_16 & 0xf) << 16) |
-        			      g.limit_15_00)
+        friend OStream & operator << (OStream & db, const GDT_Entry & g) {
+            db << "{bas=" << (void *)((g.base_31_24 << 24) | (g.base_23_16 << 16) | g.base_15_00) 
+               << ",lim=" << (void *)(((g.g_d_0_a_limit_19_16 & 0xf) << 16) | g.limit_15_00)
                << ",p=" << (g.p_dpl_s_type >> 7) 
                << ",dpl=" << ((g.p_dpl_s_type >> 5) & 0x3)
                << ",s=" << ((g.p_dpl_s_type >> 4) & 0x1)
@@ -192,7 +185,7 @@ public:
 
         Reg32 offset() const { return (offset_31_16 << 16) | offset_15_00; }
 
-        friend Debug & operator << (Debug & db, const IDT_Entry & i) {
+        friend OStream & operator << (OStream & db, const IDT_Entry & i) {
             db << "{sel=" << (i.selector >> 3) 
                << ",off=" << (void *)i.offset()
                << ",p=" << (i.p_dpl_0_d_1_1_0 >> 7) 
@@ -261,7 +254,7 @@ public:
         void save() volatile;
         void load() const volatile;
 
-        friend Debug & operator << (Debug & db, const Context & c) {
+        friend OStream & operator << (OStream & db, const Context & c) {
             db << "{eflags=" << reinterpret_cast<void *>(c._eflags)
                << ",eax=" << c._eax
                << ",ebx=" << c._ebx
@@ -279,7 +272,7 @@ public:
                << ",gs=" << gs()
                << ",ss=" << ss()
                << ",cr3=" << reinterpret_cast<void *>(pdp())
-               << "}" ;
+               << "}";
             return db;
         }
 
@@ -314,6 +307,8 @@ public:
 
     static void int_enable() { ASMV("sti"); }
     static void int_disable() { ASMV("cli"); }
+    static bool int_enabled() { return (flags() & FLAG_IF); }
+
     static void halt() { ASMV("hlt"); }
 
     static void switch_context(Context * volatile * o, Context * volatile n);
@@ -341,8 +336,9 @@ public:
         return old;
     }
 
-    static int finc(volatile int & value) {
-        register int old = 1;
+    template <typename T>
+    static T finc(volatile T & value) {
+        register T old = 1;
         ASMV("lock xadd %0, %2"
              : "=a"(old)
              : "a"(old), "m"(value)
@@ -350,8 +346,9 @@ public:
         return old;
     }
 
-    static int fdec(volatile int & value) {
-        register int old = -1;
+    template <typename T>
+    static T fdec(volatile T & value) {
+        register T old = -1;
         ASMV("lock xadd %0, %2"
              : "=a"(old)
              : "a"(old), "m"(value)
@@ -359,7 +356,8 @@ public:
         return old;
     }
 
-    static int cas(volatile int & value, int compare, int replacement) {
+    template <typename T>
+    static T cas(volatile T & value, T compare, T replacement) {
         ASMV("lock cmpxchgl %2, %3\n" 
              : "=a"(compare) 
              : "a"(compare), "r"(replacement), "m"(value)
@@ -374,23 +372,21 @@ public:
     static Reg32 ntohl(Reg32 v)	{ return htonl(v); }
     static Reg16 ntohs(Reg16 v)	{ return htons(v); }
 
-    static Context * init_stack(
-        Log_Addr stack, unsigned int size, void (* exit)(),
-        int (* entry)()) {
+    // The int left on the stack between thread's arguments and its context
+    // is due to the fact that the thread's function believes it's a normal
+    // function that will be invoked with a call, which pushes the return
+    // address on the stack
+    static Context * init_stack(Log_Addr stack, unsigned int size, void (* exit)(),
+                                int (* entry)()) {
         Log_Addr sp = stack + size;
         sp -= sizeof(int); *static_cast<int *>(sp) = Log_Addr(exit);
         sp -= sizeof(Context);
         return new (sp) Context(entry);
     }
 
-    // The int left on the stack between thread's arguments and its context
-    // is due to the fact that the thread's function believes it's a normal
-    // function that will be invoked with a call, which pushes the return
-    // address on the stack
     template<typename T1>
-    static Context * init_stack(
-        Log_Addr stack, unsigned int size, void (* exit)(),
-        int (* entry)(T1 a1), T1 a1) {
+    static Context * init_stack(Log_Addr stack, unsigned int size, void (* exit)(),
+                                int (* entry)(T1 a1), T1 a1) {
         Log_Addr sp = stack + size;
         sp -= sizeof(T1); *static_cast<T1 *>(sp) = a1;
         sp -= sizeof(int); *static_cast<int *>(sp) = Log_Addr(exit);
@@ -399,9 +395,8 @@ public:
     }
 
     template<typename T1, typename T2>
-    static Context * init_stack(
-        Log_Addr stack, unsigned int size, void (* exit)(),
-        int (* entry)(T1 a1, T2 a2), T1 a1, T2 a2) {
+    static Context * init_stack(Log_Addr stack, unsigned int size, void (* exit)(),
+                                int (* entry)(T1 a1, T2 a2), T1 a1, T2 a2) {
         Log_Addr sp = stack + size;
         sp -= sizeof(T2); *static_cast<T2 *>(sp) = a2;
         sp -= sizeof(T1); *static_cast<T1 *>(sp) = a1;
@@ -411,9 +406,8 @@ public:
     }
 
     template<typename T1, typename T2, typename T3>
-    static Context * init_stack(
-        Log_Addr stack, unsigned int size, void (* exit)(),
-        int (* entry)(T1 a1, T2 a2, T3 a3), T1 a1, T2 a2, T3 a3) {
+    static Context * init_stack(Log_Addr stack, unsigned int size, void (* exit)(),
+                                int (* entry)(T1 a1, T2 a2, T3 a3), T1 a1, T2 a2, T3 a3) {
         Log_Addr sp = stack + size;
         sp -= sizeof(T3); *static_cast<T3 *>(sp) = a3;
         sp -= sizeof(T2); *static_cast<T2 *>(sp) = a2;
@@ -423,23 +417,20 @@ public:
         return new (sp) Context(entry);
     }
 
-    static void system_call(Log_Addr addr) {
-        db<IA32>(TRC) << "system_call(" << addr << ") <= "
-            << "{MSR[IA32_SYSENTER_CS]=" << IA32::rdmsr(0x174)
-            << ",MSR[IA32_SYSENTER_EIP]=" << IA32::rdmsr(0x175)
-            << ",MSR[IA32_SYSENTER_ESP]=" << IA32::rdmsr(0x176)
-            << "}\n";
-
-        // Save return data in clobbered registers and enter kernel
-        ASMV("       movl    %0, %%eax               \n"
-             "       movl    %%esp, %%ecx            \n"
-             "       movl    RET, %%edx              \n"
-             "       sysenter                        \n"
-             "RET:                                   \n" : : "i"(0));
+    template<typename T1, typename T2, typename T3, typename T4>
+    static Context * init_stack(Log_Addr stack, unsigned int size, void (* exit)(),
+                                int (* entry)(T1 a1, T2 a2, T3 a3, T4 a4), T1 a1, T2 a2, T3 a3, T4 a4) {
+        Log_Addr sp = stack + size;
+        sp -= sizeof(T3); *static_cast<T4 *>(sp) = a4;
+        sp -= sizeof(T3); *static_cast<T3 *>(sp) = a3;
+        sp -= sizeof(T2); *static_cast<T2 *>(sp) = a2;
+        sp -= sizeof(T1); *static_cast<T1 *>(sp) = a1;
+        sp -= sizeof(int); *static_cast<int *>(sp) = Log_Addr(exit);
+        sp -= sizeof(Context);
+        return new (sp) Context(entry);
     }
 
-    static void system_entry();
-
+private:
     static void init();
 
     // IA32 specific methods
@@ -569,12 +560,12 @@ public:
     }
 
     static int bsf(Log_Addr addr) {
-      register unsigned int pos;
-      ASMV("bsf %1,%0" : "=a"(pos) : "m"(addr) : );
-      return pos;
+        register unsigned int pos;
+        ASMV("bsf %1,%0" : "=a"(pos) : "m"(addr) : );
+        return pos;
     }
     static int bsr(Log_Addr addr) {
-      register int pos = -1;
+        register int pos = -1;
         ASMV("bsr %1, %0" : "=a"(pos) : "m"(addr) : );
         return pos;
     }

@@ -14,6 +14,8 @@ __BEGIN_SYS
 
 class IA32_MMU: public MMU_Common<10, 10, 12>
 {
+    friend class IA32;
+
 private:
     typedef Grouping_List<Frame> List;
 
@@ -37,11 +39,12 @@ public:
             EX   = 0x200, // User Def. (0=non-executable, 1=executable)
             CT   = 0x400, // User Def. (0=non-contiguous, 1=contiguous)
             IO   = 0x800, // User Def. (0=memory, 1=I/O)
-            SYS  = (PRE | RW  | ACC),
-            APIC = (SYS | PCD),
             APP  = (PRE | RW  | ACC | USR),
+            SYS  = (PRE | RW  | ACC),
+            PCI  = (SYS | PCD | IO),
+            APIC = (SYS | PCD),
+            VGA = (SYS | PCD),
             DMA  = (SYS | PCD | CT),
-            PCI  = (SYS | PCD | IO)
         };
 
     public:
@@ -58,8 +61,7 @@ public:
 
         operator unsigned int() const { return _flags; }
 
-        friend Debug & operator << (Debug & db, IA32_Flags f)
-            { db << (void *)f._flags; return db; }
+        friend OStream & operator << (OStream & db, IA32_Flags f) { db << (void *)f._flags; return db; }
 
     private:
         unsigned int _flags;
@@ -101,7 +103,7 @@ public:
             }
         }
 
-        friend Debug & operator << (Debug & db, Page_Table & pt) {
+        friend OStream & operator << (OStream & db, Page_Table & pt) {
             db << "{\n";
             int brk = 0;
             for(unsigned int i = 0; i < PT_ENTRIES; i++)
@@ -125,9 +127,8 @@ public:
         Chunk() {}
 
         Chunk(unsigned int bytes, Flags flags)
-            : _from(0), _to(pages(bytes)), _pts(page_tables(_to - _from)),
-              _flags(IA32_Flags(flags)), _pt(calloc(_pts))
-        {
+        : _from(0), _to(pages(bytes)), _pts(page_tables(_to - _from)),
+          _flags(IA32_Flags(flags)), _pt(calloc(_pts)) {
             if(flags & IA32_Flags::CT)
         	_pt->map_contiguous(_from, _to, _flags);
             else 
@@ -135,9 +136,8 @@ public:
         }
 
         Chunk(Phy_Addr phy_addr, unsigned int bytes, Flags flags)
-            : _from(0), _to(pages(bytes)), _pts(page_tables(_to - _from)),
-              _flags(IA32_Flags(flags)), _pt(calloc(_pts))
-        {
+        : _from(0), _to(pages(bytes)), _pts(page_tables(_to - _from)),
+          _flags(IA32_Flags(flags)), _pt(calloc(_pts)) {
             _pt->remap(phy_addr, _from, _to, flags);
         }
 
@@ -234,15 +234,15 @@ public:
         	    return;
         	}
             db<IA32_MMU>(WRN) << "IA32_MMU::Directory::detach(pt=" 
-        		      << chunk.pt() << ") failed!\n";
+        		      << chunk.pt() << ") failed!" << endl;
  	}
 
  	void detach(const Chunk & chunk, Log_Addr addr) {
             unsigned int from = directory(addr);
             if(indexes((*_pd)[from]) != indexes(chunk.pt())) {
         	db<IA32_MMU>(WRN) << "IA32_MMU::Directory::detach(pt=" 
-        			  << chunk.pt() << ",addr="
-        			  << addr << ") failed!\n";
+        		 	  << chunk.pt() << ",addr="
+        			  << addr << ") failed!" << endl;
         	return;
             }
             detach(from, chunk.pt(), chunk.pts());
@@ -281,23 +281,20 @@ public:
         DMA_Buffer(unsigned int s) : Chunk(s, IA32_Flags::DMA) {
             Directory dir(current());
             _log_addr = dir.attach(*this);
-            db<IA32_MMU>(TRC) << "IA32_MMU::DMA_Buffer() => " 
-        		      << *this << "\n";
+            db<IA32_MMU>(TRC) << "IA32_MMU::DMA_Buffer() => " << *this << endl;
         }
 
         DMA_Buffer(unsigned int s, const Log_Addr & d)
-            : Chunk(s, IA32_Flags::DMA) {
+        : Chunk(s, IA32_Flags::DMA) {
             Directory dir(current());
             _log_addr = dir.attach(*this);
             memcpy(_log_addr, d, s);
-            db<IA32_MMU>(TRC) << "IA32_MMU::DMA_Buffer(phy=" << *this 
-        		      << " <= " << d <<"\n";
+            db<IA32_MMU>(TRC) << "IA32_MMU::DMA_Buffer(phy=" << *this << " <= " << d << endl;
         }
         
         Log_Addr log_address() const { return _log_addr; }
 
-        friend Debug & operator << (Debug & db,
-        			    const DMA_Buffer & b) {
+        friend OStream & operator << (OStream & db, const DMA_Buffer & b) {
             db << "{phy=" << b.phy_address()
                << ",log=" << b.log_address()
                << ",size=" << b.size() 
@@ -319,10 +316,9 @@ public:
             if(e)
         	phy = e->object() + e->size();
             else
-        	db<IA32_MMU>(WRN) << "IA32_MMU::alloc() failed!\n";
+        	db<IA32_MMU>(WRN) << "IA32_MMU::alloc() failed!" << endl;
         }
-        db<IA32_MMU>(TRC) << "IA32_MMU::alloc(frames=" << frames << ") => "
-        		  << phy << "\n";
+        db<IA32_MMU>(TRC) << "IA32_MMU::alloc(frames=" << frames << ") => " << phy << endl;
         return phy;
     }
 
@@ -336,7 +332,7 @@ public:
         // Clean up MMU flags in frame address
         frame = indexes(frame); 
 
-        db<IA32_MMU>(TRC) << "IA32_MMU::free(frame=" << frame << ",n=" << n << ")\n";
+        db<IA32_MMU>(TRC) << "IA32_MMU::free(frame=" << frame << ",n=" << n << ")" << endl;
 
         if(frame && n) {
             List::Element * e = new (phy2log(frame)) List::Element(frame, n);
@@ -358,19 +354,16 @@ public:
     }
 
     static void flush_tlb() {
-        db<IA32_MMU>(TRC) << "IA32_MMU::flush_tlb()\n";
-
         ASMV("movl %cr3,%eax");
         ASMV("movl %eax,%cr3");
     }
     static void flush_tlb(Log_Addr addr) {
-        db<IA32_MMU>(TRC) << "IA32_MMU::flush_tlb(" << addr << ")\n";
         ASMV("invlpg %0" : : "m"(addr));
     }
 
+private:
     static void init();
 
-private:
     static Log_Addr phy2log(Phy_Addr phy) { return phy | PHY_MEM; }
 
 private:

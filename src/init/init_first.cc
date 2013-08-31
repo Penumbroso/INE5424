@@ -11,12 +11,11 @@ class Init_First
 public:
     Init_First() {
 
-        db<Init>(TRC) << "Init_First()\n";
+        db<Init>(TRC) << "Init_First()" << endl;
 
         // Initialize the Thread abstraction,
         // thus creating the first application thread
-        db<Init>(INF) << "Starting the application thread ...\n";
-        db<Init>(INF) << "Init ends here!\n\n";
+        db<Init>(INF) << "INIT ends here!" << endl;
         if(Traits<Thread>::enabled)
             Thread::init();
     }

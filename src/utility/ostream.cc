@@ -1,20 +1,21 @@
 // EPOS OStream Implementation
 
 #include <utility/ostream.h>
+#include <machine.h>
 #include <display.h>
+
+extern "C" { void _print(const char *s); }
 
 __BEGIN_SYS
 
 const char OStream::_digits[] = "0123456789abcdef";
 
+
 void OStream::print(const char * s)
 {
-//     static volatile bool lock = false;
-
-//     if(Traits<Thread>::smp) while(CPU::tsl(lock));
-    Display::puts(s); 
-//     if(Traits<Thread>::smp) lock = false;
+    _print(s);
 }
+
 
 int OStream::itoa(int v, char * s)
 {
@@ -27,6 +28,7 @@ int OStream::itoa(int v, char * s)
 
     return utoa(static_cast<unsigned int>(v), s, i);
 } 
+
 
 int OStream::utoa(unsigned int v, char * s, unsigned int i)
 {
@@ -51,6 +53,7 @@ int OStream::utoa(unsigned int v, char * s, unsigned int i)
     return i;
 }
 
+
 int OStream::llitoa(long long int v, char * s)
 {
     unsigned int i = 0;
@@ -62,6 +65,7 @@ int OStream::llitoa(long long int v, char * s)
 
     return llutoa(static_cast<unsigned long long int>(v), s, i);
 } 
+
 
 int OStream::llutoa(unsigned long long int v, char * s, unsigned int i)
 {
@@ -85,6 +89,7 @@ int OStream::llutoa(unsigned long long int v, char * s, unsigned int i)
 
     return i;
 }
+
 
 int OStream::ptoa(const void * p, char * s)
 {

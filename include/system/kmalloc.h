@@ -7,12 +7,12 @@
 
 __BEGIN_SYS
 
-inline void * kmalloc(unsigned int bytes) { 
-    return System::heap()->alloc(bytes);
+inline void * kmalloc(size_t bytes) {
+    return System::_heap->alloc(bytes);
 }
 
 inline void kfree(void * ptr) {
-    System::heap()->free(ptr);
+    System::_heap->free(ptr);
 }
 
 __END_SYS

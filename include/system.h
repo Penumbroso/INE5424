@@ -5,21 +5,32 @@
 
 #include <utility/heap.h>
 
-__BEGIN_SYS
+extern "C"
+{
+    void * malloc(size_t);
+    void free(void *);
+}
 
-//class Machine;
+__BEGIN_SYS
 
 class System
 {
-public:
-    static System_Info<Machine> * const info();
-    static Heap * const heap() { return &_heap; }
+    friend class Init_System;
+    friend class Init_Application;
+    friend void * kmalloc(size_t);
+    friend void kfree(void *);
 
+public:
+    static System_Info<Machine> * const info() { return _si; }
+
+private:
     static void init();
 
 private:
     static System_Info<Machine> * _si;
-    static Heap _heap;
+
+    static char _preheap[sizeof(Heap)];
+    static Heap * _heap;
 };
 
 __END_SYS

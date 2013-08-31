@@ -3,15 +3,16 @@
 #ifndef __thread_h
 #define __thread_h
 
-#include <system/kmalloc.h>
 #include <utility/queue.h>
 #include <cpu.h>
 #include <machine.h>
+#include <system/kmalloc.h>
 
 __BEGIN_SYS
 
 class Thread
 {
+    friend class Init_First;
     friend class Synchronizer_Common;
     friend class Alarm;
 
@@ -35,7 +36,7 @@ public:
     };
 
     // Thread Priority
-    typedef short Priority;
+    typedef unsigned int Priority;
     enum {
         HIGH = 0,
         NORMAL = 15,
@@ -121,11 +122,9 @@ public:
     void suspend();
     void resume();
 
-    static Thread* self() { return running(); }
+    static Thread * self() { return running(); }
     static void yield();
     static void exit(int status = 0);
-
-    static void init();
 
 protected:
     void common_constructor(Log_Addr entry, unsigned int stack_size);
@@ -142,13 +141,9 @@ protected:
 
     static void dispatch(Thread * prev, Thread * next) {
         if(prev != next) {
-            // prev->_context->save(); // can be used to force an update
-            db<Thread>(TRC) << "Thread::dispatch(prev=" << prev
-                			<< ",next=" << next << ")\n";
-            db<Thread>(INF) << "prev={" << prev << ","
-			                << *prev->_context << "}\n";
-            db<Thread>(INF) << "next={" << next << ","
-                    		<< *next->_context << "}\n";
+            db<Thread>(TRC) << "Thread::dispatch(prev=" << prev << ",next=" << next << ")" << endl;
+            db<Thread>(INF) << "prev={" << prev << ",ctx=" << *prev->_context << "}" << endl;
+            db<Thread>(INF) << "next={" << next << ",ctx=" << *next->_context << "}" << endl;
 
             CPU::switch_context(&prev->_context, next->_context);
         }
@@ -156,7 +151,10 @@ protected:
         CPU::int_enable();
     }
 
-    static void idle();
+    static int idle();
+
+private:
+    static void init();
 
 protected:
     Log_Addr _stack;

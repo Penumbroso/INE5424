@@ -8,20 +8,11 @@ typedef __SIZE_TYPE__ size_t;
 inline void * operator new(size_t s, void * a) { return a; }
 inline void * operator new[](size_t s, void * a) { return a; }
 
-void * operator new(size_t bytes);
-void * operator new[](size_t bytes);
-
-void operator delete(void * ptr) __attribute__ ((weak));
-void operator delete[](void * ptr) __attribute__ ((weak));
-
 __BEGIN_SYS
 
 // Dummy class for incomplete architectures and machines 
 template<int>
 class Dummy;
-
-// Self reference for objects
-enum Self { SELF };
 
 // Utilities
 class Debug;

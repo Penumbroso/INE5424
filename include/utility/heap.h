@@ -17,25 +17,23 @@ public:
     using Grouping_List<char>::size;
 
     Heap() {
-        db<Init, Heap>(TRC) << "Heap() => " << this << "\n";
+        db<Init, Heap>(TRC) << "Heap() => " << this << endl;
     }
 
     Heap(void * addr, unsigned int bytes) {
-        db<Init, Heap>(TRC) << "Heap(addr=" << addr << ",bytes=" << bytes
-                            << ") => " << this << "\n";
+        db<Init, Heap>(TRC) << "Heap(addr=" << addr << ",bytes=" << bytes << ") => " << this << endl;
 
         free(addr, bytes);
     }
 
     void * alloc(unsigned int bytes) {
-        db<Heap>(TRC) << "Heap::alloc(this=" << this
-                      << ",bytes=" << bytes;
+        db<Heap>(TRC) << "Heap::alloc(this=" << this << ",bytes=" << bytes;
 
         if(!bytes)
             return 0;
 
         if(!Traits<CPU>::unaligned_memory_access)
-            while((bytes % sizeof(void *)) != 0)
+            while((bytes % sizeof(void *)))
                 ++bytes;
 
         bytes += sizeof(int);         // add room for size
@@ -52,7 +50,7 @@ public:
 
         *addr++ = bytes;
 
-        db<Heap>(TRC) << ") => " << reinterpret_cast<void *>(addr) << "\n";
+        db<Heap>(TRC) << ") => " << reinterpret_cast<void *>(addr) << endl;
 
         return addr;
     }
@@ -60,11 +58,10 @@ public:
     void free(void * ptr, unsigned int bytes) {
         db<Heap>(TRC) << "Heap::free(this=" << this
                       << ",ptr=" << ptr
-                      << ",bytes=" << bytes << ")\n";
+                      << ",bytes=" << bytes << ")" << endl;
 
         if(ptr && (bytes >= sizeof(Element))) {
-            Element * e = new (ptr)
-                    Element(reinterpret_cast<char *>(ptr), bytes);
+            Element * e = new (ptr) Element(reinterpret_cast<char *>(ptr), bytes);
             Element * m1, * m2;
             insert_merging(e, &m1, &m2);
         }

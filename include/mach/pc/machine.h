@@ -16,8 +16,10 @@ __BEGIN_SYS
 
 class PC: public Machine_Common
 {
+    friend class Init_System;
+
 private:
-    static const bool smp = Traits<Thread>::smp;
+    static const bool smp = Traits<System>::multicore;
     
     typedef IA32::Reg32 Reg32;
     typedef IA32::Log_Addr Log_Addr;
@@ -39,9 +41,9 @@ public:
         }
     };
 
-    static void smp_barrier(int n_cpus = _n_cpus) {
-        static volatile int ready[2];
-        static volatile int i;
+    static void smp_barrier(unsigned long n_cpus = _n_cpus) {
+        static volatile unsigned long ready[2];
+        static volatile unsigned long i;
 
         if(smp) {
             int j = i;
@@ -57,6 +59,7 @@ public:
         }
     }
 
+private:
     static void init();
 
 private:

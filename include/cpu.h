@@ -10,6 +10,9 @@ __BEGIN_SYS
 class CPU_Common
 {	
 protected:
+    static const bool BIG_ENDIAN = (Traits<CPU>::ENDIANESS == Traits<CPU>::BIG);
+
+protected:
     CPU_Common() {}
 
 public:
@@ -53,12 +56,12 @@ public:
         template <typename T>
         Log_Addr & operator&=(T a) { _addr &= a; return *this; }
 
-        friend Debug & operator << (Debug & db, Log_Addr a)
-        { db << (void *)a._addr; return db; }
+        friend OStream & operator<< (OStream & db, const Log_Addr & a) { db << reinterpret_cast<void *>(a._addr); return db; }
 
     private:
         unsigned int _addr;
     };
+
     typedef Log_Addr Phy_Addr;
 
     typedef unsigned long Hertz;
@@ -93,6 +96,11 @@ public:
         }
         return old;
     }
+
+    static Reg32 htonl(Reg32 v) { return (BIG_ENDIAN) ? v : swap32(v); }
+    static Reg16 htons(Reg16 v) { return (BIG_ENDIAN) ? v : swap16(v); }
+    static Reg32 ntohl(Reg32 v) { return htonl(v); }
+    static Reg16 ntohs(Reg16 v) { return htons(v); }
 
 protected:
     static Reg32 swap32(Reg32 v) {
