@@ -11,14 +11,14 @@ class Init_Application
 {
 public:
     Init_Application() {
-	db<Init>(TRC) << "\nInit_Application()" << endl;
+        db<Init>(TRC) << "Init_Application()" << endl;
 
 	// Initialize Application's heap
 	db<Init>(INF) << "Initializing application's heap \n";
 	Application::_heap = new (&Application::_preheap[0]) Heap(MMU::alloc(MMU::pages(Traits<Application>::HEAP_SIZE)),
                                                                   Traits<Application>::HEAP_SIZE);
 
-	db<Init>(INF) << "done!\n\n";
+	db<Init>(INF) << "done!" << endl;
     }
 };
 

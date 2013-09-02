@@ -350,7 +350,7 @@ public:
     static const unsigned int FREQUENCY = Timer::FREQUENCY;
 
 public:
-    Alarm_Timer(const Handler * handler): PC_Timer(FREQUENCY, handler, ALARM) {}
+    Alarm_Timer(const Handler & handler): PC_Timer(FREQUENCY, handler, ALARM) {}
 };
 
 
@@ -361,7 +361,7 @@ private:
     typedef RTC::Microsecond Microsecond;
 
 public:
-    Scheduler_Timer(const Microsecond & quantum, const Handler * handler)
+    Scheduler_Timer(const Microsecond & quantum, const Handler & handler)
     : PC_Timer(1000000 / quantum, handler, SCHEDULER) {}
 };
 

@@ -28,7 +28,6 @@ private:
 
 private:
     static System_Info<Machine> * _si;
-
     static char _preheap[sizeof(Heap)];
     static Heap * _heap;
 };

@@ -29,9 +29,10 @@ protected:
 public:
     // Thread State
     enum State {
-        READY,
         RUNNING,
+        READY,
         SUSPENDED,
+        WAITING,
         FINISHING
     };
 
@@ -48,64 +49,52 @@ public:
 
 public:
     Thread(int (* entry)(), 
-           const State & state = READY,
-           const Priority & priority = NORMAL,
-           unsigned int stack_size = STACK_SIZE)
+           const State & state = READY, const Priority & priority = NORMAL, unsigned int stack_size = STACK_SIZE)
     : _state(state), _link(this, priority)
     {
         lock();
 
         _stack = kmalloc(stack_size);
-        _context = CPU::init_stack(_stack, stack_size,
-                                   &implicit_exit, entry);
+        _context = CPU::init_stack(_stack, stack_size, &implicit_exit, entry);
 
         common_constructor(entry, stack_size); // implicit unlock
     }
 
     template<typename T1>
     Thread(int (* entry)(T1 a1), T1 a1,
-           const State & state = READY,
-           const Priority & priority = NORMAL,
-           unsigned int stack_size = STACK_SIZE)
+           const State & state = READY, const Priority & priority = NORMAL, unsigned int stack_size = STACK_SIZE)
     : _state(state), _link(this, priority)
     {
         lock();
 
         _stack = kmalloc(stack_size);
-        _context = CPU::init_stack(_stack, stack_size,
-                                   &implicit_exit, entry, a1);
+        _context = CPU::init_stack(_stack, stack_size, &implicit_exit, entry, a1);
 
         common_constructor(entry, stack_size); // implicit unlock()
     }
 
     template<typename T1, typename T2>
     Thread(int (* entry)(T1 a1, T2 a2), T1 a1, T2 a2,
-           const State & state = READY,
-           const Priority & priority = NORMAL,
-           unsigned int stack_size = STACK_SIZE)
+           const State & state = READY, const Priority & priority = NORMAL, unsigned int stack_size = STACK_SIZE)
     : _state(state), _link(this, priority)
     {
         lock();
 
         _stack = kmalloc(stack_size);
-        _context = CPU::init_stack(_stack, stack_size,
-                                   &implicit_exit, entry, a1, a2);
+        _context = CPU::init_stack(_stack, stack_size, &implicit_exit, entry, a1, a2);
 
         common_constructor(entry, stack_size); // implicit unlock()
     }
 
     template<typename T1, typename T2, typename T3>
     Thread(int (* entry)(T1 a1, T2 a2, T3 a3), T1 a1, T2 a2, T3 a3,
-           const State & state = READY,
-           const Priority & priority = NORMAL,
-           unsigned int stack_size = STACK_SIZE)
+           const State & state = READY, const Priority & priority = NORMAL, unsigned int stack_size = STACK_SIZE)
     : _state(state), _link(this, priority)
     {
         lock();
 
         _stack = kmalloc(stack_size);
-        _context = CPU::init_stack(_stack, stack_size,
-                                   &implicit_exit, entry, a1, a2, a3);
+        _context = CPU::init_stack(_stack, stack_size, &implicit_exit, entry, a1, a2, a3);
 
         common_constructor(entry, stack_size); // implicit unlock()
     }
@@ -132,7 +121,6 @@ protected:
     static Thread * volatile running() { return _running; }
 
     static void lock() { CPU::int_disable(); }
-
     static void unlock() { CPU::int_enable(); }
 
     static void reschedule();

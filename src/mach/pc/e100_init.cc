@@ -38,13 +38,13 @@ void E100::init(unsigned int unit)
     db<Init, E100>(INF) << "E100::init: I/O memory at " 
         		<< hdr.region[PCI_REG_MEM].phy_addr
         		<< " mapped to " 
-        		<< hdr.region[PCI_REG_MEM].log_addr << "\n";
+        		<< hdr.region[PCI_REG_MEM].log_addr << endl;
 
     // Get I/O irq
     IO_Irq irq = hdr.interrupt_line;
     db<Init, E100>(INF) << "E100::init: PCI interrut pin "
         		<< hdr.interrupt_pin << " routed to IRQ "
-        		<< hdr.interrupt_line << "\n";
+        		<< hdr.interrupt_line << endl;
 
     // Allocate a DMA Buffer for init block, rx and tx rings
     DMA_Buffer * dma_buf = new(kmalloc(sizeof(MMU::DMA_Buffer))) DMA_Buffer(DMA_BUFFER_SIZE);

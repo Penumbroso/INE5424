@@ -16,7 +16,7 @@ void Thread::init()
     _running = new (kmalloc(sizeof(Thread))) Thread(entry, RUNNING, NORMAL);
 
     if(preemptive)
-        _timer = new (kmalloc(sizeof(Scheduler_Timer))) Scheduler_Timer(QUANTUM, &reschedule);
+        _timer = new (kmalloc(sizeof(Scheduler_Timer))) Scheduler_Timer(QUANTUM, reschedule);
 
     db<Init, Thread>(INF) << "Dispatching the first thread: " << _running << endl;
 

@@ -1095,6 +1095,7 @@ private:
     Element * volatile _chosen;
 };
 
+
 // Doubly-Linked, Grouping List
 template <typename T, 
           typename El = List_Elements::Doubly_Linked_Grouping<T> >
