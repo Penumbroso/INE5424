@@ -5,6 +5,8 @@
 #ifndef __ostream_h
 #define __ostream_h
 
+extern "C" { void _print(const char * s); }
+
 __BEGIN_SYS
 
 class OStream
@@ -160,7 +162,7 @@ public:
     }
 
 private:
-    void print(const char * s);
+    void print(const char * s) { _print(s); }
 
     int itoa(int v, char * s);
     int utoa(unsigned int v, char * s, unsigned int i = 0);

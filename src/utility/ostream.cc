@@ -1,21 +1,10 @@
 // EPOS OStream Implementation
 
 #include <utility/ostream.h>
-#include <machine.h>
-#include <display.h>
-
-extern "C" { void _print(const char *s); }
 
 __BEGIN_SYS
 
 const char OStream::_digits[] = "0123456789abcdef";
-
-
-void OStream::print(const char * s)
-{
-    _print(s);
-}
-
 
 int OStream::itoa(int v, char * s)
 {
@@ -104,6 +93,5 @@ int OStream::ptoa(const void * p, char * s)
 
     return j + 2;
 }    
-
 
 __END_SYS
