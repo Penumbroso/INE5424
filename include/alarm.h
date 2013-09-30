@@ -25,9 +25,6 @@ private:
 public:
     typedef RTC::Microsecond Microsecond;
     
-    // An alarm handler
-    typedef Function_Handler Handler;
-
     // Infinite times (for alarms)
     enum { INFINITE = RTC::INFINITE };
     
