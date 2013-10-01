@@ -117,6 +117,16 @@ template <> struct Traits<Thread>: public Traits<void>
     static const bool trace_idle = false;
 };
 
+template <> struct Traits<Address_Space>: public Traits<void>
+{
+    static const bool enabled = Traits<System>::multiheap;
+};
+
+template <> struct Traits<Segment>: public Traits<void>
+{
+    static const bool enabled = Traits<System>::multiheap;
+};
+
 template <> struct Traits<Alarm>: public Traits<void>
 {
     static const bool visible = false;

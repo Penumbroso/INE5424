@@ -71,6 +71,10 @@ class E100;
 // Abstractions	- Process
 class Thread;
 
+// Abstractions	- Memory
+class Segment;
+class Address_Space;
+
 // Abstractions	- Synchronization
 class Synchronizer;
 class Mutex;
@@ -106,6 +110,9 @@ enum
     NIC_ID,
 
     THREAD_ID,
+
+    SEGMENT_ID,
+    ADDRESS_SPACE_ID,
 
     MUTEX_ID,
     SEMAPHORE_ID,
