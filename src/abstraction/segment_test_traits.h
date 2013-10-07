@@ -93,7 +93,7 @@ template <> struct Traits<System>: public Traits<void>
     static const bool multithread = true;
     static const bool multitask = false && (mode != Traits<Build>::LIBRARY);
     static const bool multicore = false && multithread;
-    static const bool multiheap = (mode != Traits<Build>::LIBRARY) || Traits<Scratchpad>::enabled;
+    static const bool multiheap = true;
 
     enum {FOREVER = 0, SECOND = 1, MINUTE = 60, HOUR = 3600, DAY = 86400,
           WEEK = 604800, MONTH = 2592000, YEAR = 31536000};

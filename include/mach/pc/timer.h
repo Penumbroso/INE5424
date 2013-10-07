@@ -169,14 +169,14 @@ public:
 
     // Port B (status/control)
     enum {
-        MEMORY_PARITY   	= 0x80, // R/O
-        IO_CHECK	 	= 0x40, // R/O
-        I8253_OUT2  	    	= 0x20, // R/O, i8253 CH 2 (speaker)
-        I8253_OUT1       	= 0x10, // R/O, i8253 CH 1 (DRAM refresh)
-        IO_CHECK_ENABLE	    	= 0x08, // R/W
-        MEMORY_PARITY_ENABLE	= 0x04, // R/W
-        SPEAKER	    		= 0x02, // R/W, speaker enable
-        I8253_GATE2	        = 0x01  // R/W, i8253 CH 2 (speaker)
+        MEMORY_PARITY           = 0x80, // R/O
+        IO_CHECK                = 0x40, // R/O
+        I8253_OUT2              = 0x20, // R/O, i8253 CH 2 (speaker)
+        I8253_OUT1              = 0x10, // R/O, i8253 CH 1 (DRAM refresh)
+        IO_CHECK_ENABLE         = 0x08, // R/W
+        MEMORY_PARITY_ENABLE    = 0x04, // R/W
+        SPEAKER                 = 0x02, // R/W, speaker enable
+        I8253_GATE2             = 0x01  // R/W, i8253 CH 2 (speaker)
     };
 
 public:

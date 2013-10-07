@@ -4,6 +4,9 @@
 
 __BEGIN_SYS
 
+// Class attributes
+Address_Space * Address_Space::_master;
+
 // Methods
 
 Address_Space::Address_Space(MMU::Page_Directory * pd) : MMU::Directory(pd)
@@ -50,5 +53,13 @@ Address_Space::Phy_Addr Address_Space::physical(Address_Space::Log_Addr address)
 {
     return Directory::physical(address);
 }
+
+Address_Space * Address_Space::self()
+{
+    db <Address_Space> (TRC) << "Address_Space::self() => {Directory::pd=" << _master->pd() << "}" << endl;
+
+    return _master;
+}
+
 
 __END_SYS

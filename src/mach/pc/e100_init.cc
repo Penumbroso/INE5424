@@ -1,8 +1,8 @@
 // EPOS PC Intel PRO/100 (i82559) Ethernet NIC Mediator Initialization
 
+#include <system.h>
 #include <mach/pc/machine.h>
 #include <mach/pc/e100.h>
-#include <system/kmalloc.h>
 
 __BEGIN_SYS
 
@@ -27,7 +27,7 @@ void E100::init(unsigned int unit)
         db<Init, E100>(WRN) << "E100::init: PCI header failed!" << endl;
         return;
     }
-    db<Init, E100>(INF) << "E100::init: PCI header=" << hdr << "}\n";
+    db<Init, E100>(INF) << "E100::init: PCI header=" << hdr << endl;
     if(!(hdr.command & PC_PCI::COMMAND_MEMORY))
         db<Init, E100>(WRN) << "E100::init: I/O memory unaccessible!" << endl;
     if(!(hdr.command & PC_PCI::COMMAND_MASTER))
@@ -47,10 +47,10 @@ void E100::init(unsigned int unit)
         		<< hdr.interrupt_line << endl;
 
     // Allocate a DMA Buffer for init block, rx and tx rings
-    DMA_Buffer * dma_buf = new(kmalloc(sizeof(MMU::DMA_Buffer))) DMA_Buffer(DMA_BUFFER_SIZE);
+    DMA_Buffer * dma_buf = new (SYSTEM) DMA_Buffer(DMA_BUFFER_SIZE);
 
     // Initialize the device
-    E100 * dev = new (kmalloc(sizeof(E100))) E100(unit, io_mem, irq, dma_buf);
+    E100 * dev = new (SYSTEM) E100(unit, io_mem, irq, dma_buf);
 
     // Register the device
     _devices[unit].in_use = false;

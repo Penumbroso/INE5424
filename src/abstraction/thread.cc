@@ -1,6 +1,5 @@
 // EPOS Thread Abstraction Implementation
 
-#include <system/kmalloc.h>
 #include <machine.h>
 #include <thread.h>
 #include <alarm.h>
@@ -25,7 +24,7 @@ void Thread::common_constructor(Log_Addr entry, unsigned int stack_size)
     db<Thread>(TRC) << "Thread(entry=" << entry
                     << ",state=" << _state
                     << ",priority=" << _link.rank()
-                    << ",stack={b=" << _stack
+                    << ",stack={b=" << reinterpret_cast<void*>(_stack)
                     << ",s=" << stack_size
                     << "},context={b=" << _context
                     << "," << *_context << "}) => " << this << endl;
@@ -78,7 +77,25 @@ Thread::~Thread()
 
     unlock();
 
-    kfree(_stack);
+    delete _stack;
+}
+
+
+void Thread::priority(const Priority & p)
+{
+    lock();
+
+    db<Thread>(TRC) << "Thread::priority(this=" << this << ",prio=" << p << ")\n";
+
+    _link.rank(p);
+
+    if(_state != RUNNING) {
+        _ready.remove(this);
+        _ready.insert(&_link);
+    }
+    
+    if(preemptive)
+        reschedule();
 }
 
 
@@ -97,11 +114,10 @@ int Thread::join()
     if(_state != FINISHING) {
         _joining = running();
         _joining->suspend();
-    }
+    } else
+        unlock();
 
-    unlock();
-
-    return *static_cast<int *>(_stack);
+    return *reinterpret_cast<int *>(_stack);
 }
 
 
@@ -190,7 +206,7 @@ void Thread::exit(int status)
 
     Thread * prev = _running;
     prev->_state = FINISHING;
-    *static_cast<int *>(prev->_stack) = status;
+   *reinterpret_cast<int *>(prev->_stack) = status;
 
     _thread_count--;
 
@@ -212,8 +228,7 @@ void Thread::exit(int status)
 
 void Thread::sleep(Queue * q)
 {
-    db<Thread>(TRC) << "Thread::sleep(running=" << running()
-                    << ",q=" << q << ")\n";
+    db<Thread>(TRC) << "Thread::sleep(running=" << running() << ",q=" << q << ")\n";
 
     Thread * prev = running();
     prev->_state = WAITING;
@@ -229,8 +244,7 @@ void Thread::sleep(Queue * q)
 
 void Thread::wakeup(Queue * q)
 {
-    db<Thread>(TRC) << "Thread::wakeup(running=" << running()
-                    << ",q=" << q << ")\n";
+    db<Thread>(TRC) << "Thread::wakeup(running=" << running() << ",q=" << q << ")\n";
 
     if(!q->empty()) {
         Thread * t = q->remove()->object();
@@ -248,8 +262,7 @@ void Thread::wakeup(Queue * q)
 
 void Thread::wakeup_all(Queue * q)
 {
-    db<Thread>(TRC) << "Thread::wakeup_all(running=" << running()
-                    << ",q=" << q << ")\n";
+    db<Thread>(TRC) << "Thread::wakeup_all(running=" << running() << ",q=" << q << ")\n";
 
     while(!q->empty()) {
         Thread * t = q->remove()->object();
@@ -281,16 +294,16 @@ int Thread::idle()
 {
     while(true) {
         if(Traits<Thread>::trace_idle)
-            db<Thread>(TRC) << "Thread::idle()" << endl;
+            db<Thread>(TRC) << "Thread::idle(this=" << running() << ")" << endl;
 
         if(_thread_count <= 1) { // Only idle is left
             CPU::int_disable();
-            db<Thread>(WRN) << "The last thread has exited!\n";
+            db<Thread>(WRN) << "The last thread has exited!" << endl;
             if(reboot) {
-                db<Thread>(WRN) << "Rebooting the machine ...\n";
+                db<Thread>(WRN) << "Rebooting the machine ..." << endl;
                 Machine::reboot();
             } else {
-                db<Thread>(WRN) << "Halting the machine ...\n";
+                db<Thread>(WRN) << "Halting the machine ..." << endl;
                 CPU::halt();
             }
         } else {

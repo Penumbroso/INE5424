@@ -27,7 +27,7 @@ MODE_LIBRARY	:= library
 ARCH_IA32       := ia32
 
 # Supported machines
-MACH_PC		:= pc
+MACH_PC		    := pc
 
 # Makefile hacks
 APPLICATIONS	:= $(subst .cc,,$(shell find $(APP) -name \*.cc -printf "%f\n"))
@@ -157,7 +157,7 @@ CXX		= $(COMP_PREFIX)g++ -c --no-exceptions --no-rtti --no-use-cxa-atexit
 CXXFLAGS	= $(MACH_CC_FLAGS) -O2 -nostdinc -Wall -Werror -fdata-sections -ffunction-sections -I$(INCLUDE)
 
 LD		= $(COMP_PREFIX)ld
-LDFLAGS		= $(MACH_LD_FLAGS) -nostdlib -L$(LIB) -Bstatic
+LDFLAGS		= $(MACH_LD_FLAGS) -L$(LIB) -Bstatic
 
 OBJCOPY		= $(COMP_PREFIX)objcopy
 OBJCOPYFLAGS	:=
@@ -165,10 +165,10 @@ OBJCOPYFLAGS	:=
 OBJDUMP		= $(COMP_PREFIX)objdump
 OBJDUMPFLAGS	:=
 
-MAKE		:= make
+MAKE		:= make --print-directory
 MAKECLEAN	:= make -i clean
-MAKETEST	:= make test
-MAKEFLAGS	:= --no-builtin-rules --print-directory
+MAKETEST	:= make --no-print-directory --silent
+MAKEFLAGS	:= --no-builtin-rules
 
 MKBI		:= $(BIN)/eposmkbi $(EPOS)
 

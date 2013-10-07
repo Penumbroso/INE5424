@@ -75,5 +75,6 @@ __END_SYS
 #include "uart.h"
 #include "display.h"
 #include "nic.h"
+#include "scratchpad.h"
 
 #endif

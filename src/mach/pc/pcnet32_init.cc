@@ -1,8 +1,8 @@
 // EPOS PC AMD PCNet II (Am79C970A) Ethernet NIC Mediator Initialization
 
+#include <system.h>
 #include <mach/pc/machine.h>
 #include <mach/pc/pcnet32.h>
-#include <system/kmalloc.h>
 
 __BEGIN_SYS
 
@@ -18,8 +18,7 @@ void PCNet32::init(unsigned int unit)
     }
 
     // Try to enable IO regions and bus master
-    PC_PCI::command(loc, PC_PCI::command(loc) 
-        	    | PC_PCI::COMMAND_IO | PC_PCI::COMMAND_MASTER);
+    PC_PCI::command(loc, PC_PCI::command(loc) | PC_PCI::COMMAND_IO | PC_PCI::COMMAND_MASTER);
 
     // Get the config space header and check it we got IO and MASTER
     PC_PCI::Header hdr;
@@ -28,7 +27,7 @@ void PCNet32::init(unsigned int unit)
         db<Init, PCNet32>(WRN) << "PCNet32::init: PCI header failed!" << endl;
         return;
     }
-    db<Init, PCNet32>(INF) << "PCNet32::init: PCI header=" << hdr << "}\n";
+    db<Init, PCNet32>(INF) << "PCNet32::init: PCI header=" << hdr << endl;
     if(!(hdr.command & PC_PCI::COMMAND_IO))
         db<Init, PCNet32>(WRN) << "PCNet32::init: I/O unaccessible!" << endl;
     if(!(hdr.command & PC_PCI::COMMAND_MASTER))
@@ -36,8 +35,7 @@ void PCNet32::init(unsigned int unit)
 
     // Get I/O base port
     IO_Port io_port = hdr.region[PCI_REG_IO].phy_addr;
-    db<Init, PCNet32>(INF) << "PCNet32::init: I/O port at " 
-        		   << (void *)(int)io_port << endl;
+    db<Init, PCNet32>(INF) << "PCNet32::init: I/O port at " << (void *)(int)io_port << endl;
 
     // Get I/O irq
     IO_Irq irq = hdr.interrupt_line;
@@ -46,10 +44,10 @@ void PCNet32::init(unsigned int unit)
         		   << hdr.interrupt_line << endl;
 
     // Allocate a DMA Buffer for init block, rx and tx rings
-    DMA_Buffer * dma_buf = new (kmalloc(sizeof(MMU::DMA_Buffer))) DMA_Buffer(DMA_BUFFER_SIZE);
+    DMA_Buffer * dma_buf = new (SYSTEM) DMA_Buffer(DMA_BUFFER_SIZE);
 
     // Initialize the device
-    PCNet32 * dev = new (kmalloc(sizeof(PCNet32))) PCNet32(unit, io_port, irq, dma_buf);
+    PCNet32 * dev = new (SYSTEM) PCNet32(unit, io_port, irq, dma_buf);
 
     // Register the device
     _devices[unit].in_use = false;

@@ -1,6 +1,5 @@
 // EPOS Alarm Abstraction Implementation
 
-#include <system/kmalloc.h>
 #include <semaphore.h>
 #include <alarm.h>
 
