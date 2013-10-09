@@ -100,6 +100,16 @@ class E100;
 
 // Abstractions	- Process
 class Thread;
+class Active;
+
+// Abstractions - Scheduler
+template <typename> class Scheduler;
+namespace Scheduling_Criteria
+{
+    class Priority;
+    class FCFS;
+    class RR;
+};
 
 // Abstractions	- Memory
 class Segment;
@@ -141,6 +151,7 @@ enum
     NIC_ID,
 
     THREAD_ID,
+    ACTIVE_ID,
 
     ADDRESS_SPACE_ID,
     SEGMENT_ID,

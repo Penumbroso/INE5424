@@ -10,21 +10,27 @@ void Thread::init()
 {
     int (* entry)() = reinterpret_cast<int (*)()>(System::info()->lmm.app_entry);
 
-    db<Init, Thread>(TRC) << "Thread::init(entry=" << (void *) entry << ")" << endl;
+    db<Init, Thread>(TRC) << "Thread::init(entry=" << reinterpret_cast<void *>(entry) << ")" << endl;
+
+    // The installation of the scheduler timer handler must precede the
+    // creation of threads, since the constructor can induce a reschedule
+    // and this in turn can call timer->reset()
+    // Letting reschedule() happen during thread creation is harmless, since
+    // MAIN is created first and dispatch won't replace it nor by itself
+    // neither by IDLE (that has a lower priority)
+    if(Criterion::timed && (Machine::cpu_id() == 0))
+        _timer = new (SYSTEM) Scheduler_Timer(QUANTUM, time_slicer);
 
     // Create the application's main thread
     // This must precede idle, thus avoiding implicit rescheduling
-    _running = new (SYSTEM) Thread(entry, RUNNING, MAIN);
+    Thread * first = new (SYSTEM) Thread(entry, RUNNING, MAIN);
     new (SYSTEM) Thread(&idle, READY, IDLE);
 
-    if(preemptive)
-        _timer = new (SYSTEM) Scheduler_Timer(QUANTUM, reschedule);
-
-    db<Init, Thread>(INF) << "Dispatching the first thread: " << _running << endl;
+    db<Init, Thread>(INF) << "Dispatching the first thread: " << first << endl;
 
     This_Thread::not_booting();
 
-    _running->_context->load();
+    first->_context->load();
 }
 
 __END_SYS
