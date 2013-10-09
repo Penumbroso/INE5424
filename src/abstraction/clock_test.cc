@@ -3,7 +3,7 @@
 #include <utility/ostream.h>
 #include <clock.h>
 
-using namespace EPOS;
+__USING_SYS;
 
 int main()
 {
