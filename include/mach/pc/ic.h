@@ -49,7 +49,7 @@ public:
     };
 
     // Interrupts
-    static const unsigned int INTS = 48;
+    static const unsigned int INTS = 64;
     enum {
         INT_TIMER	= HARD_INT + IRQ_TIMER,
         INT_KEYBOARD	= HARD_INT + IRQ_KEYBOARD,

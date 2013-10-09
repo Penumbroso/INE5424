@@ -13,7 +13,7 @@ template <> struct Traits<PC_Common>: public Traits<void>
 
 template <> struct Traits<PC>: public Traits<PC_Common>
 {
-    static const unsigned int MAX_CPUS = 1;
+    static const unsigned int CPUS = Traits<Build>::CPUS;
 
     // Boot Image
     static const unsigned int BOOT_LENGTH_MIN   = 128;

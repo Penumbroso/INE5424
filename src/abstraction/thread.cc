@@ -10,6 +10,7 @@ __BEGIN_SYS
 volatile unsigned int Thread::_thread_count;
 Scheduler_Timer * Thread::_timer;
 Scheduler<Thread> Thread::_scheduler;
+Spin Thread::_lock;
 
 
 // This_Thread class attributes
@@ -25,7 +26,7 @@ void Thread::common_constructor(Log_Addr entry, unsigned int stack_size)
                     << ",stack={b=" << reinterpret_cast<void*>(_stack)
                     << ",s=" << stack_size
                     << "},context={b=" << _context
-                    << "," << *_context << "}) => " << this << endl;
+                    << "," << *_context << "}) => " << this << "@" << _link.rank().queue() << endl;
 
     _thread_count++;
 
@@ -34,7 +35,7 @@ void Thread::common_constructor(Log_Addr entry, unsigned int stack_size)
         _scheduler.suspend(this);
 
     if(preemptive && (_state == READY) && (_link.rank() != IDLE))
-        reschedule();
+        reschedule(_link.rank().queue());
     else
         unlock();
 }
@@ -88,6 +89,8 @@ void Thread::priority(const Criterion & c)
 
     db<Thread>(TRC) << "Thread::priority(this=" << this << ",prio=" << c << ")" << endl;
 
+    unsigned int old_cpu = _link.rank().queue();
+
     _link.rank(c);
 
     if(_state != RUNNING) {
@@ -95,8 +98,13 @@ void Thread::priority(const Criterion & c)
         _scheduler.insert(this);
     }
 
-    if(preemptive)
-        reschedule();
+    if(preemptive) {
+        reschedule(old_cpu);
+        if(smp) {
+            lock();
+            reschedule(_link.rank().queue());
+        }
+    }
 }
 
 
@@ -169,7 +177,7 @@ void Thread::resume()
         _scheduler.resume(this);
         
         if(preemptive)
-            reschedule();
+            reschedule(_link.rank().queue());
     } else {
         db<Thread>(WRN) << "Resume called for unsuspended object!" << endl;
 
@@ -240,7 +248,7 @@ void Thread::wakeup(Queue * q)
         _scheduler.resume(t);
 
         if(preemptive)
-            reschedule();
+            reschedule(t->_link.rank().queue());
     } else
         unlock();
 }
@@ -250,15 +258,18 @@ void Thread::wakeup_all(Queue * q)
 {
     db<Thread>(TRC) << "Thread::wakeup_all(running=" << running() << ",q=" << q << ")" << endl;
 
-    while(!q->empty()) {
-        Thread * t = q->remove()->object();
-        t->_state = READY;
-        t->_waiting = 0;
-        _scheduler.resume(t);
-    }
+    if(!q->empty())
+        while(!q->empty()) {
+            Thread * t = q->remove()->object();
+            t->_state = READY;
+            t->_waiting = 0;
+            _scheduler.resume(t);
 
-    if(preemptive)
-        reschedule();
+            if(preemptive) {
+                reschedule(t->_link.rank().queue());
+                lock();
+            }
+         }
     else
         unlock();
 }
@@ -272,6 +283,25 @@ void Thread::reschedule()
     Thread * next = _scheduler.choose();
 
     dispatch(prev, next);
+}
+
+void Thread::reschedule(unsigned int cpu)
+{
+    if(!smp || (cpu == Machine::cpu_id()))
+        reschedule();
+    else {
+        db<Thread>(TRC) << "Thread::reschedule(cpu=" << cpu << ")" << endl;
+        IC::ipi_send(cpu, IC::INT_RESCHEDULER);
+        unlock();
+    }
+}
+
+
+void Thread::rescheduler(unsigned int irq)
+{
+    lock();
+
+    reschedule();
 }
 
 
@@ -293,21 +323,24 @@ int Thread::idle()
 {
     while(true) {
         if(Traits<Thread>::trace_idle)
-            db<Thread>(TRC) << "Thread::idle(this=" << running() << ")" << endl;
+            db<Thread>(TRC) << "Thread::idle(CPU=" << Machine::cpu_id() << ",this=" << running() << ")" << endl;
 
-        if(_thread_count <= 1) { // Only idle is left
+        if(_thread_count <= Machine::n_cpus()) { // Only idle is left
             CPU::int_disable();
-            db<Thread>(WRN) << "The last thread has exited!" << endl;
-            if(reboot) {
-                db<Thread>(WRN) << "Rebooting the machine ..." << endl;
-                Machine::reboot();
-            } else {
-                db<Thread>(WRN) << "Halting the machine ..." << endl;
-                CPU::halt();
+            if(Machine::cpu_id() == 0) {
+                db<Thread>(WRN) << "The last thread has exited!" << endl;
+                if(reboot) {
+                    db<Thread>(WRN) << "Rebooting the machine ..." << endl;
+                    Machine::reboot();
+                } else
+                    db<Thread>(WRN) << "Halting the machine ..." << endl;
             }
+            CPU::halt();
         } else {
             CPU::int_enable();
             CPU::halt();
+            if(_scheduler.schedulables() > 0) // A thread might have been woken up by another CPU
+                yield();
         }
     }
 

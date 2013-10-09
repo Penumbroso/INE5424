@@ -15,6 +15,7 @@ __BEGIN_SYS
 class Alarm
 {
     friend class System;
+    friend class Alarm_Chronometer;
     friend class Periodic_Thread;
     friend class RT_Thread;
     friend class Scheduling_Criteria::FCFS;
@@ -88,7 +89,7 @@ namespace Scheduling_Criteria {
     : Priority((p == IDLE) ? IDLE : Alarm::_elapsed) {}
 
 
-    inline EDF::EDF(const Microsecond & d, const Microsecond & p, const Microsecond & c)
+    inline EDF::EDF(const Microsecond & d, const Microsecond & p, const Microsecond & c, int cpu)
     : RT_Common(Alarm::ticks(d), Alarm::ticks(d), p, c) {}
 
     inline void EDF::update() {
