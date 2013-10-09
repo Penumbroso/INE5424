@@ -1,11 +1,10 @@
 // EPOS Address_Space Abstraction Implementation
 
+#include <thread.h>
+#include <task.h>
 #include <address_space.h>
 
 __BEGIN_SYS
-
-// Class attributes
-Address_Space * Address_Space::_master;
 
 // Methods
 
@@ -56,9 +55,9 @@ Address_Space::Phy_Addr Address_Space::physical(Address_Space::Log_Addr address)
 
 Address_Space * Address_Space::self()
 {
-    db <Address_Space> (TRC) << "Address_Space::self() => {Directory::pd=" << _master->pd() << "}" << endl;
+    db <Address_Space> (TRC) << "Address_Space::self() => {Directory::pd=" << Thread::self()->task()->address_space()->pd() << "}" << endl;
 
-    return _master;
+    return Thread::self()->task()->address_space();
 }
 
 
