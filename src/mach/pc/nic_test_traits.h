@@ -10,7 +10,7 @@ template <typename T>
 struct Traits
 {
     static const bool enabled = true;
-    static const bool debugged = true;
+    static const bool debugged = false;
 };
 
 template <> struct Traits<Build>
@@ -24,8 +24,8 @@ template <> struct Traits<Build>
     enum {PC};
     static const unsigned int MACH = PC;
 
-    static const unsigned int CPUS = 4;
-    static const unsigned int NODES = 1;
+    static const unsigned int CPUS = 1;
+    static const unsigned int NODES = 2;
 };
 
 
@@ -34,8 +34,8 @@ template <> struct Traits<Debug>
 {
     static const bool error   = true;
     static const bool warning = true;
-    static const bool info    = false;
-    static const bool trace   = false;
+    static const bool info    = true;
+    static const bool trace   = true;
 };
 
 template <> struct Traits<Lists>: public Traits<void>
@@ -96,7 +96,7 @@ template <> struct Traits<System>: public Traits<void>
     static const unsigned int mode = Traits<Build>::MODE;
     static const bool multithread = true;
     static const bool multitask = false && (mode != Traits<Build>::LIBRARY);
-    static const bool multicore = true && multithread;
+    static const bool multicore = false && multithread;
     static const bool multiheap = (mode != Traits<Build>::LIBRARY) || Traits<Scratchpad>::enabled;
 
     enum {FOREVER = 0, SECOND = 1, MINUTE = 60, HOUR = 3600, DAY = 86400,
@@ -120,7 +120,7 @@ template <> struct Traits<Thread>: public Traits<void>
 {
     static const bool smp = Traits<System>::multicore;
 
-    typedef Scheduling_Criteria::PEDF Criterion;
+    typedef Scheduling_Criteria::RR Criterion;
     static const unsigned int QUANTUM = 10000; // us
 
     static const bool trace_idle = false;

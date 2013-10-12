@@ -1155,6 +1155,10 @@ public:
                        << ",n=" << (e ? e->next() : (void *) -1)
                        << "}" << endl;
 
+//        unsigned int i = 0;
+//        for(; (i < H) && _chosen[i] != e; i++);
+//        if(i != H)
+//            _chosen[i] = Base::remove_head();
         if(e == _chosen[R::current_head()])
             _chosen[R::current_head()] = Base::remove_head();
         else

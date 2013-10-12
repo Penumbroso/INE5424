@@ -15,7 +15,7 @@ struct Traits
 
 template <> struct Traits<Build>
 {
-    enum {LIBRARY, BUILTIN};
+    enum {LIBRARY, BUILTIN, KERNEL};
     static const unsigned int MODE = LIBRARY;
 
     enum {IA32};
@@ -25,6 +25,7 @@ template <> struct Traits<Build>
     static const unsigned int MACH = PC;
 
     static const unsigned int CPUS = 1;
+    static const unsigned int NODES = 1;
 };
 
 

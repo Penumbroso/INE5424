@@ -23,6 +23,10 @@ template <> struct Traits<IA32_MMU>: public Traits<void>
 {
 };
 
+template <> struct Traits<IA32_PMU>: public Traits<void>
+{
+};
+
 __END_SYS
 
 #endif
