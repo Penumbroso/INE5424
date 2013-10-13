@@ -4,8 +4,6 @@
 
 __BEGIN_SYS
 
-const Ethernet::Address Ethernet::BROADCAST(0xff, 0xff, 0xff,
-        				    0xff, 0xff, 0xff);
-Ethernet::Observed Ethernet::_observed;
+const Ethernet::Address Ethernet::BROADCAST(0xff, 0xff, 0xff, 0xff, 0xff, 0xff);
 
 __END_SYS

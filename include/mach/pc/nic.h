@@ -18,9 +18,6 @@ private:
     static const unsigned int UNITS = NICS::Length;
 
 public:
-    
-    //TODO: fix multiple NIC support
-    
     PC_Ethernet(unsigned int u = 0) {
         _dev = new Meta_NIC<NICS>::Get<0>::Result(u);
     }
@@ -30,7 +27,6 @@ public:
     int send(const Address & dst, const Protocol & prot, const void * data, unsigned int size) {
         return _dev->send(dst, prot, data, size); 
     }
-
     int receive(Address * src, Protocol * prot, void * data, unsigned int size) {
         return _dev->receive(src, prot, data, size); 
     }
@@ -40,7 +36,6 @@ public:
     unsigned int mtu() const { return _dev->mtu(); }
     
     const Address & address() { return _dev->address(); }
-
     void address(const Address & address) { _dev->address(address); }
 
     const Statistics & statistics() { return _dev->statistics(); }
