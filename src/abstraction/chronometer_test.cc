@@ -10,17 +10,17 @@ int main()
 {
     OStream cout;
 
-    cout << "Chronometer test" << endl;
+    cout << "Chronometer test\n";
 
     Chronometer timepiece;
 
-    cout << "Chronometer start." << endl;
+    cout << "Chronometer start.\n";
     timepiece.start();
     Alarm::delay(1500000);
     timepiece.stop();
-    cout << "Chronometer stop." << endl;
+    cout << "Chronometer stop.\n";
 
-    cout << "\nElapsed time = " << timepiece.read() << " us" << endl;
+    cout << "\nElapsed time = " << timepiece.read() << " us\n";
 
     return 0;
 }

@@ -9,20 +9,22 @@
 
 // LIBC Heritage
 extern "C" {
+    using namespace EPOS;
+
     void _panic() {
-        EPOS::Machine::panic();
+        Machine::panic();
     }
 
     void _exit(int s) {
-        EPOS::Thread::exit(s); for(;;);
+        Thread::exit(s); for(;;);
     }
 
     void _print(const char * s) {
-        EPOS::Display::puts(s);
+        Display::puts(s);
     }
 
     void __cxa_pure_virtual() {
-        EPOS::db<void>(EPOS::ERR) << "Pure Virtual mehtod called!" << EPOS::endl;
+        db<void>(ERR) << "Pure Virtual mehtod called!" << endl;
     }
 }
 
@@ -36,12 +38,6 @@ class First_Object
 public:
     First_Object() {
 	Display::remap();
-
-	if(Traits<System>::multicore) {
-	    System_Info<Machine> * si = reinterpret_cast<System_Info<Machine> *>(Memory_Map<Machine>::SYS_INFO);
-
-	    Machine::smp_init(si->bm.n_cpus);
-	}
     }
 };
 
@@ -55,7 +51,6 @@ OStream kerr;
 // System class attributes
 System_Info<Machine> * System::_si = reinterpret_cast<System_Info<Machine> *>(Memory_Map<Machine>::SYS_INFO);
 char System::_preheap[];
-Segment * System::_heap_segment;
 Heap * System::_heap;
 
 __END_SYS

@@ -5,35 +5,8 @@ typedef __SIZE_TYPE__ size_t;
 #ifndef __types_h
 #define __types_h
 
-__BEGIN_SYS
-
-// Memory allocators
-enum System_Allocator
-{
-    SYSTEM
-};
-
-enum Scratchpad_Allocator
-{
-    SCRATCHPAD
-};
-
-__END_SYS
-
-extern "C"
-{
-    void * malloc(size_t);
-    void free(void *);
-}
-
 inline void * operator new(size_t s, void * a) { return a; }
 inline void * operator new[](size_t s, void * a) { return a; }
-
-void * operator new(size_t, const EPOS::System_Allocator &);
-void * operator new[](size_t, const EPOS::System_Allocator &);
-
-void * operator new(size_t, const EPOS::Scratchpad_Allocator &);
-void * operator new[](size_t, const EPOS::Scratchpad_Allocator &);
 
 __BEGIN_SYS
 
@@ -64,9 +37,6 @@ class IA32_TSC;
 // Hardware Mediators - Memory Management Unit
 class IA32_MMU;
 
-// Hardware Mediators - Performance Monitoring Unit
-class IA32_PMU;
-
 // Hardware Mediators - Machine
 class PC;
 
@@ -85,9 +55,6 @@ class PC_RTC;
 // Hardware Mediators - EEPROM
 class PC_EEPROM;
 
-// Hardware Mediators - Scratchpad
-class PC_Scratchpad;
-
 // Hardware Mediators - UART
 class PC_UART;
 
@@ -103,30 +70,6 @@ class E100;
 
 // Abstractions	- Process
 class Thread;
-class Active;
-class Periodic_Thread;
-class RT_Thread;
-class Task;
-
-// Abstractions - Scheduler
-template <typename> class Scheduler;
-namespace Scheduling_Criteria
-{
-    class Priority;
-    class FCFS;
-    class RR;
-    class RM;
-    class DM;
-    class EDF;
-    class CPU_Affinity;
-    class GEDF;
-    class PEDF;
-    class CEDF;
-};
-
-// Abstractions	- Memory
-class Segment;
-class Address_Space;
 
 // Abstractions	- Synchronization
 class Synchronizer;
@@ -158,17 +101,11 @@ enum
     TIMER_ID,
     RTC_ID,
     EEPROM_ID,
-    SCRATCHPAD_ID,
     UART_ID,
     DISPLAY_ID,
     NIC_ID,
 
     THREAD_ID,
-    TASK_ID,
-    ACTIVE_ID,
-
-    ADDRESS_SPACE_ID,
-    SEGMENT_ID,
 
     MUTEX_ID,
     SEMAPHORE_ID,
@@ -181,26 +118,6 @@ enum
     UNKNOWN_TYPE_ID,
     LAST_TYPE_ID = UNKNOWN_TYPE_ID - 1
 };
-
-// Type IDs for system components
-template<typename T> struct Type { static const Type_Id ID = UNKNOWN_TYPE_ID; };
-
-template<> struct Type<IA32> { static const Type_Id ID = CPU_ID; };
-template<> struct Type<IA32_TSC> { static const Type_Id ID = TSC_ID; };
-template<> struct Type<IA32_MMU> { static const Type_Id ID = MMU_ID; };
-
-template<> struct Type<PC> { static const Type_Id ID = MACHINE_ID; };
-template<> struct Type<PC_IC> { static const Type_Id ID = IC_ID; };
-template<> struct Type<PC_Timer> { static const Type_Id ID = TIMER_ID; };
-template<> struct Type<PC_UART> { static const Type_Id ID = UART_ID; };
-template<> struct Type<PC_RTC> { static const Type_Id ID = RTC_ID; };
-template<> struct Type<PC_PCI> { static const Type_Id ID = PCI_ID; };
-template<> struct Type<PC_Display> { static const Type_Id ID = DISPLAY_ID; };
-
-template<> struct Type<Thread> { static const Type_Id ID = THREAD_ID; };
-template<> struct Type<Task> { static const Type_Id ID = TASK_ID; };
-template<> struct Type<Address_Space> { static const Type_Id ID = ADDRESS_SPACE_ID; };
-template<> struct Type<Segment> { static const Type_Id ID = SEGMENT_ID; };
 
 __END_SYS
 

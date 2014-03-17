@@ -13,7 +13,7 @@ template <> struct Traits<PC_Common>: public Traits<void>
 
 template <> struct Traits<PC>: public Traits<PC_Common>
 {
-    static const unsigned int CPUS = Traits<Build>::CPUS;
+    static const unsigned int MAX_CPUS = 8;
 
     // Boot Image
     static const unsigned int BOOT_LENGTH_MIN   = 128;
@@ -92,36 +92,29 @@ template <> struct Traits<PC_Display>: public Traits<PC_Common>
 
 template <> struct Traits<PC_Ethernet>: public Traits<PC_Common>
 {
-    static const bool enabled = true;
+    static const bool enabled = false;
     typedef LIST<PCNet32> NICS;
 };
 
 template <> struct Traits<PCNet32>: public Traits<PC_Ethernet>
 {
     static const unsigned int UNITS = NICS::Count<PCNet32>::Result;
-    static const unsigned int SEND_BUFFERS = 4; // per unit
-    static const unsigned int RECEIVE_BUFFERS = 16; // per unit
+    static const unsigned int SEND_BUFFERS = 8; // per unit
+    static const unsigned int RECEIVE_BUFFERS = 8; // per unit
 };
 
 template <> struct Traits<E100>: public Traits<PC_Ethernet>
 {
     static const unsigned int UNITS = NICS::Count<E100>::Result;
-    static const unsigned int SEND_BUFFERS = 4; // per unit
-    static const unsigned int RECEIVE_BUFFERS = 16; // per unit
+    static const unsigned int SEND_BUFFERS = 8; // per unit
+    static const unsigned int RECEIVE_BUFFERS = 8; // per unit
 };
 
 template <> struct Traits<C905>: public Traits<PC_Ethernet>
 {
     static const unsigned int UNITS = NICS::Count<C905>::Result;
-    static const unsigned int SEND_BUFFERS = 4; // per unit
-    static const unsigned int RECEIVE_BUFFERS = 16; // per unit
-};
-
-template <> struct Traits<PC_Scratchpad>: public Traits<PC_Common>
-{
-    static const bool enabled = false;
-    static const unsigned int ADDRESS = Traits<PC_Display>::FRAME_BUFFER_ADDRESS;
-    static const unsigned int SIZE = Traits<PC_Display>::LINES * Traits<PC_Display>::COLUMNS;
+    static const unsigned int SEND_BUFFERS = 8; // per unit
+    static const unsigned int RECEIVE_BUFFERS = 8; // per unit
 };
 
 __END_SYS

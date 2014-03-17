@@ -19,12 +19,13 @@ public:
     static const unsigned int HEADER_SIZE = 14;
 
     typedef NIC_Common::Address<6> Address;
+    typedef NIC_Common::Observer Observer;
+    typedef NIC_Common::Observed Observed;
     typedef char PDU[MTU];
     typedef NIC_Common::CRC32 CRC;
 
     typedef unsigned short Protocol;
-    enum
-    {
+    enum {
         ARP    = 0x0806,
         RARP   = 0x8035,
         ELP    = 0x8888,
@@ -33,8 +34,7 @@ public:
     };
 
     // The Ethernet Frame (RFC 894)
-    class Frame
-    {
+    class Frame {
     public:
         Frame(const Address & src, const Address & dst, const Protocol & prot)
         : _dst(dst), _src(src), _prot(prot) { }
@@ -62,8 +62,7 @@ public:
     };
 
     // Meaningful statistics for Ethernet
-    struct Statistics: public NIC_Common::Statistics
-    {
+    struct Statistics: public NIC_Common::Statistics {
         Statistics() : rx_overruns(0), tx_overruns(0), frame_errors(0),
         	       carrier_errors(0), collisions(0) {}
 
@@ -88,7 +87,25 @@ public:
         unsigned int collisions;
     };
 
+public:
+    void attach(Observer * obs, const Protocol & prot) {
+        _observed.attach(obs, prot);
+    }
+
+    void detach(Observer * obs, const Protocol & prot) {
+        _observed.detach(obs, prot);
+    }
+
+    void notify(const Protocol & prot) {
+        _observed.notify(prot);
+    }
+
+
+public:
     static const Address BROADCAST;
+
+private:
+    static Observed _observed;
 };
 
 __END_SYS

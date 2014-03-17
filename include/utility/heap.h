@@ -10,21 +10,18 @@
 __BEGIN_SYS
 
 // Heap
-class Simple_Heap: private Grouping_List<char>
+class Heap: private Grouping_List<char>
 {
-protected:
-    static const bool typed = Traits<System>::multiheap;
-
 public:
     using Grouping_List<char>::empty;
     using Grouping_List<char>::size;
 
-    Simple_Heap() {
-        db<Init, Simple_Heap>(TRC) << "Heap() => " << this << endl;
+    Heap() {
+        db<Init, Heap>(TRC) << "Heap() => " << this << endl;
     }
 
-    Simple_Heap(void * addr, unsigned int bytes) {
-        db<Init, Simple_Heap>(TRC) << "Heap(addr=" << addr << ",bytes=" << bytes << ") => " << this << endl;
+    Heap(void * addr, unsigned int bytes) {
+        db<Init, Heap>(TRC) << "Heap(addr=" << addr << ",bytes=" << bytes << ") => " << this << endl;
 
         free(addr, bytes);
     }
@@ -39,8 +36,6 @@ public:
             while((bytes % sizeof(void *)))
                 ++bytes;
 
-        if(typed)
-            bytes += sizeof(void *);  // add room for heap pointer
         bytes += sizeof(int);         // add room for size
         if(bytes < sizeof(Element))
             bytes = sizeof(Element);
@@ -53,8 +48,6 @@ public:
 
         int * addr = reinterpret_cast<int *>(e->object() + e->size());
 
-        if(typed)
-            *addr++ = reinterpret_cast<int>(this);
         *addr++ = bytes;
 
         db<Heap>(TRC) << ") => " << reinterpret_cast<void *>(addr) << endl;
@@ -74,100 +67,14 @@ public:
         }
     }
 
-    static void typed_free(void * ptr) {
+    void free(void * ptr) {
         int * addr = reinterpret_cast<int *>(ptr);
         unsigned int bytes = *--addr;
-        Simple_Heap * heap = reinterpret_cast<Simple_Heap *>(*--addr);
-        heap->free(addr, bytes);
-    }
-
-    static void untyped_free(Simple_Heap * heap, void * ptr) {
-        int * addr = reinterpret_cast<int *>(ptr);
-        unsigned int bytes = *--addr;
-        heap->free(addr, bytes);
+        free(addr, bytes);
     }
 
 private:
     void out_of_memory();
-};
-
-
-// Wrapper for non-atomic heap
-template <typename T, bool atomic>
-class Heap_Wrapper: public T
-{
-public:
-    Heap_Wrapper() {}
-    Heap_Wrapper(void * addr, unsigned int bytes): T(addr, bytes) {}
-};
-
-
-// Wrapper for atomic heap
-template<typename T>
-class Heap_Wrapper<T, true>: public T
-{
-public:
-    Heap_Wrapper() {}
-    Heap_Wrapper(void * addr, unsigned int bytes): T(addr, bytes) {}
-
-    bool empty() {
-        enter();
-        bool tmp = T::empty();
-        leave();
-        return tmp;
-    }
-
-    unsigned int size() {
-        enter();
-        unsigned int tmp = T::size();
-        leave();
-        return tmp;
-    }
-
-    void * alloc(unsigned int bytes) {
-	enter();
-	void * tmp = T::alloc(bytes);
-	leave();
-	return tmp;
-    }
-
-    void free(void * ptr) {
-	enter();
-	T::free(ptr);
-	leave();
-    }
-
-    void free(void * ptr, unsigned int bytes) {
-	enter();
-	T::free(ptr, bytes);
-	leave();
-    }
-
-private:
-    void enter() {
-        _lock.acquire();
-        CPU::int_disable();
-    }
-
-    void leave() {
-        _lock.release();
-        CPU::int_enable();
-    }
-
-private:
-    Spin _lock;
-};
-
-
-// Heap
-class Heap: public Heap_Wrapper<Simple_Heap, Traits<System>::multicore>
-{
-private:
-    typedef Heap_Wrapper<Simple_Heap, Traits<System>::multicore> Base;
-
-public:
-    Heap() {}
-    Heap(void * addr, unsigned int bytes): Base(addr, bytes) {}
 };
 
 __END_SYS

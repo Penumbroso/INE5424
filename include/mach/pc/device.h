@@ -28,11 +28,11 @@ public:
     static void * seize(const Type_Id & type, unsigned int unit) {
         PC_Device * dev = get(type, unit);
         if(!dev) {
-            db<PC>(WRN) << "PC_Device::seize: device not found!" << endl;
+            db<PC>(WRN) << "PC_Device::seize: device not found\n";
             return 0;
         }
         if(dev->_busy) {
-            db<PC>(WRN) << "PC_Device::seize: device busy!" << endl;
+            db<PC>(WRN) << "PC_Device::seize: device busy\n";
             return 0;
         }
         dev->_busy = true;
@@ -45,7 +45,7 @@ public:
     static void release(const Type_Id & type, unsigned int unit) {
         PC_Device * dev = get(type, unit);
         if(!dev)
-            db<PC>(WRN) << "PC_Device::release: device not found!" << endl;
+            db<PC>(WRN) << "PC_Device::release: device not found\n";
         dev->_busy = false; 
     }
 

@@ -379,7 +379,7 @@ protected:
 
 class PCNet32: public Ethernet, private Am79C970A
 {
-    template <int unit> friend void call_init();
+    friend class PC_Ethernet;
 
 private:
     // PCI ID
@@ -398,7 +398,7 @@ private:
  	RX_BUFS * ((sizeof(Frame) + 15) & ~15U) +
  	TX_BUFS * ((sizeof(Frame) + 15) & ~15U); // GCC mess up MMU::align128
 
-    // Share control and interrupt dispatching info
+    // Share control and interrupt dispatiching info
     struct Device
     {
         PCNet32 * device;
@@ -420,12 +420,12 @@ public:
     void address(const Address & address) { _address = address; }
     const Statistics & statistics() { return _statistics; }
 
+    static void init(unsigned int unit);
+
 private:
     PCNet32(unsigned int unit, IO_Port io_port, IO_Irq irq, DMA_Buffer * dma);
 
     void handle_int();
-
-    static void init(unsigned int unit);
 
     static void int_handler(unsigned int interrupt);
 
