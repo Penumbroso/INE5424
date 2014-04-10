@@ -135,8 +135,6 @@ protected:
 
             CPU::switch_context(&prev->_context, next->_context);
         }
-
-        CPU::int_enable();
     }
 
     static int idle();

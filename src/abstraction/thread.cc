@@ -147,7 +147,8 @@ void Thread::yield()
         _running->_state = RUNNING;
 
         dispatch(prev, _running);
-    }
+    } else
+        idle();
 
     unlock();
 }

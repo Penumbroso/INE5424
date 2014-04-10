@@ -22,7 +22,8 @@ void Mutex::lock()
 
     begin_atomic();
     if(tsl(_locked))
-        sleep(); // implicit end_atomic()
+        while(tsl(_locked))
+            sleep(); // implicit end_atomic()
     else
         end_atomic();
 }
