@@ -52,6 +52,9 @@ Thread::~Thread()
     _ready.remove(this);
     _suspended.remove(this);
 
+    if(_waiting)
+        _waiting->remove(this);
+
     unlock();
 
     kfree(_stack);
@@ -186,6 +189,64 @@ void Thread::exit(int status)
     }
 
     unlock();
+}
+
+
+void Thread::sleep(Queue * q)
+{
+    db<Thread>(TRC) << "Thread::sleep(running=" << running()
+                    << ",q=" << q << ")\n";
+
+    while(_ready.empty())
+        idle();
+
+    Thread * prev = running();
+    prev->_state = WAITING;
+    prev->_waiting = q;
+    q->insert(&prev->_link);
+
+    _running = _ready.remove()->object();
+    _running->_state = RUNNING;
+
+    dispatch(prev, _running);
+}
+
+
+void Thread::wakeup(Queue * q)
+{
+    db<Thread>(TRC) << "Thread::wakeup(running=" << running()
+                    << ",q=" << q << ")\n";
+
+    if(!q->empty()) {
+        Thread * t = q->remove()->object();
+        t->_state = READY;
+        t->_waiting = 0;
+        _ready.insert(&t->_link);
+    }
+
+    if(preemptive)
+        reschedule();
+    else
+        unlock();
+}
+
+
+void Thread::wakeup_all(Queue * q)
+{
+    db<Thread>(TRC) << "Thread::wakeup_all(running=" << running()
+                    << ",q=" << q << ")\n";
+
+    while(!q->empty()) {
+        Thread * t = q->remove()->object();
+        t->_state = READY;
+        t->_waiting = 0;
+        _ready.insert(&t->_link);
+    }
+
+    if(preemptive)
+        reschedule();
+    else
+        unlock();
 }
 
 
