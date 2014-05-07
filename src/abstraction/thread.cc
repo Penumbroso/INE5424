@@ -40,7 +40,7 @@ void Thread::common_constructor(Log_Addr entry, unsigned int stack_size)
 
     unlock();
 
-    if(preemptive && (_link.rank() != MAIN))
+    if(preemptive)
         reschedule();
 }
 
@@ -49,21 +49,35 @@ Thread::~Thread()
 {
     lock();
 
-    db<Thread>(TRC) << "~Thread(this=" << this 
+    db<Thread>(TRC) << "~Thread(this=" << this
                     << ",state=" << _state
                     << ",priority=" << _link.rank()
                     << ",stack={b=" << _stack
                     << ",context={b=" << _context
-                    << "," << *_context << "})\n";
+                    << "," << *_context << "})" << endl;
 
-    if(_state != FINISHING)
+    // The running thread cannot delete itself!
+    assert(_state != RUNNING);
+    
+    switch(_state) {
+    case RUNNING:  // For switch completion only: the running thread would have deleted itself! Stack wouldn't have been released!
+        exit(-1);
+        break;
+    case READY:
+        _ready.remove(this);
         _thread_count--;
-
-    _ready.remove(this);
-    _suspended.remove(this);
-
-    if(_waiting)
+        break;
+    case SUSPENDED:
+        _suspended.remove(this);
+        _thread_count--;
+        break;
+    case WAITING:
         _waiting->remove(this);
+        _thread_count--;
+        break;
+    case FINISHING: // Already called exit()
+        break;
+    }
 
     if(_joining)
         _joining->resume();
@@ -245,7 +259,7 @@ void Thread::wakeup(Queue * q)
 
 void Thread::wakeup_all(Queue * q)
 {
-    db<Thread>(TRC) << "Thread::wakeup_all(running=" << running() << ",q=" << q << ")\n";
+    db<Thread>(TRC) << "Thread::wakeup_all(running=" << running() << ",q=" << q << ")" << endl;
 
     // lock() must be called before entering this method
     assert(locked());
