@@ -37,11 +37,13 @@ public:
     };
 
     // Thread Priority
-    typedef unsigned int Priority;
+    typedef int Priority;
     enum {
-        HIGH = 0,
-        NORMAL = 15,
-        LOW = 31
+        MAIN   = 0,
+        HIGH   = 1,
+        NORMAL = (unsigned(1) << (sizeof(int) * 8 - 1)) - 4,
+        LOW    = (unsigned(1) << (sizeof(int) * 8 - 1)) - 3,
+        IDLE   = (unsigned(1) << (sizeof(int) * 8 - 1)) - 2
     };
 
     // Thread Queue
@@ -155,6 +157,7 @@ protected:
     Thread * volatile _joining;
     Queue::Element _link;
 
+    static volatile unsigned int _thread_count;
     static Scheduler_Timer * _timer;
 
 private:
