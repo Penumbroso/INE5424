@@ -27,7 +27,7 @@ MODE_LIBRARY	:= library
 ARCH_IA32       := ia32
 
 # Supported machines
-MACH_PC		:= pc
+MACH_PC		    := pc
 
 # Makefile hacks
 APPLICATIONS	:= $(subst .cc,,$(shell find $(APP) -name \*.cc -printf "%f\n"))
@@ -95,9 +95,9 @@ else
 $(MACH_PC)_EMULATOR	= qemu -m $(MEM_SIZE) -nographic -no-reboot -net nic,model=pcnet -net user -fda
 endif
 ifeq ($(MODE), library)
-$(MACH_PC)_DEBUGGER	= xterm -e gdb -ex "target remote:1234" -ex "set confirm off" -ex "add-symbol-file pc_setup $(SETUP_ADDR)"
+$(MACH_PC)_DEBUGGER	= $(TERM) gdb -ex "target remote:1234" -ex "set confirm off" -ex "add-symbol-file pc_setup $(SETUP_ADDR)"
 else
-$(MACH_PC)_DEBUGGER	= xterm -e gdb -ex "target remote:1234" -ex "set confirm off" -ex "add-symbol-file pc_setup $(SETUP_ADDR)" -ex "add-symbol-file pc_init $(INIT_ADDR)" -ex "add-symbol-file pc_system $(SYS_CODE_ADDR)"
+$(MACH_PC)_DEBUGGER	= $(TERM) gdb -ex "target remote:1234" -ex "set confirm off" -ex "add-symbol-file pc_setup $(SETUP_ADDR)" -ex "add-symbol-file pc_init $(INIT_ADDR)" -ex "add-symbol-file pc_system $(SYS_CODE_ADDR)"
 endif
 MACH_CC_FLAGS		= $($(MACH)_CC_FLAGS)
 MACH_AS_FLAGS		= $($(MACH)_AS_FLAGS)
@@ -121,42 +121,42 @@ ARCH_CLOCK	= $(call GETTK,CLOCK,$(ARCH_TRAITS))
 
 # Tools and flags to compile system tools
 TCC		:= gcc -ansi -c -Werror
-TCCFLAGS	:= -Wall -O2 -I$(INCLUDE)
+TCCFLAGS	:= -m32 -Wall -O2 -I$(INCLUDE)
 
 TCXX		:= g++ -c -ansi -fno-exceptions
-TCXXFLAGS	:= -Wall -O2 -I$(INCLUDE)
+TCXXFLAGS	:= -m32 -Wall -O2 -I$(INCLUDE)
 
 TCPP		:= gcc -E 
 TCPPFLAGS	:= -I$(INCLUDE)
 
-TLD		:= gcc
-TLDFLAGS	:=
+TLD			:= gcc
+TLDFLAGS	:= -m32
 
 # Tools and flags to compile applications
-ACC		= $(BIN)/eposcc $(MACH_CC_FLAGS) -c -ansi -O2
+ACC			= $(BIN)/eposcc $(MACH_CC_FLAGS) -c -ansi -O2
 ACXX		= $(BIN)/eposcc $(MACH_CC_FLAGS) -c -ansi -O2
 AF77		= $(BIN)/eposcc $(MACH_CC_FLAGS) -c -ansi -O2
-ALD		= $(BIN)/eposcc --$(MODE) $(MACH_LD_FLAGS)
+ALD			= $(BIN)/eposcc --$(MODE) $(MACH_LD_FLAGS)
 ALDFLAGS	:= --gc-sections 
 
 # Tools and flags to compile the system
-AR		= $(COMP_PREFIX)ar
+AR			= $(COMP_PREFIX)ar
 ARFLAGS		:= rcs
 
-AS		= $(COMP_PREFIX)as
+AS			= $(COMP_PREFIX)as
 ASFLAGS		= $(MACH_AS_FLAGS)
 
-CC		= $(COMP_PREFIX)gcc -ansi -c 
+CC			= $(COMP_PREFIX)gcc -ansi -c 
 CCFLAGS		= $(MACH_CC_FLAGS) -O2 -nostdinc -Wall -Werror -I$(INCLUDE)
 CCLIB		= `$(CC) $(MACH_CC_FLAGS) -print-file-name=`
 
-CPP		= $(COMP_PREFIX)gcc -E
+CPP			= $(COMP_PREFIX)gcc -E
 CPPFLAGS	= $(MACH_CC_FLAGS) -I$(INCLUDE)
 
-CXX		= $(COMP_PREFIX)g++ -c --no-exceptions --no-rtti --no-use-cxa-atexit
+CXX			= $(COMP_PREFIX)g++ -c --no-exceptions --no-rtti --no-use-cxa-atexit
 CXXFLAGS	= $(MACH_CC_FLAGS) -O2 -nostdinc -Wall -Werror -fdata-sections -ffunction-sections -I$(INCLUDE)
 
-LD		= $(COMP_PREFIX)ld
+LD			= $(COMP_PREFIX)ld
 LDFLAGS		= $(MACH_LD_FLAGS) -nostdlib -L$(LIB) -Bstatic
 
 OBJCOPY		= $(COMP_PREFIX)objcopy
@@ -165,10 +165,10 @@ OBJCOPYFLAGS	:=
 OBJDUMP		= $(COMP_PREFIX)objdump
 OBJDUMPFLAGS	:=
 
-MAKE		:= make
+MAKE		:= make --print-directory
 MAKECLEAN	:= make -i clean
-MAKETEST	:= make test
-MAKEFLAGS	:= --no-builtin-rules --print-directory
+MAKETEST	:= make --no-print-directory --silent
+MAKEFLAGS	:= --no-builtin-rules
 
 MKBI		:= $(BIN)/eposmkbi $(EPOS)
 
@@ -186,6 +186,8 @@ CLEANDIR	:= rm -rf
 TOUCH		:= touch
 
 TEE		:= tee
+
+TERM		:= xterm -e
 
 EMULATOR	= $(MACH_EMULATOR) 
 

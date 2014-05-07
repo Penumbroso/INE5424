@@ -35,8 +35,7 @@ public:
         Machine::init();
         db<Init>(INF) << "done!" << endl;
 
-        // Initialize system abstractions else
-        
+        // Initialize system abstractions
         db<Init>(INF) << "Initializing system abstractions: " << endl;
         System::init();
         db<Init>(INF) << "done!" << endl;

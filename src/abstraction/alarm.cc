@@ -53,8 +53,8 @@ void Alarm::delay(const Microsecond & time)
 	Tick t = _elapsed + ticks(time);
 
 	while(_elapsed < t);
-
 }
+
 
 void Alarm::handler()
 {

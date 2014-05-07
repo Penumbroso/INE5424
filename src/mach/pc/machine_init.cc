@@ -14,8 +14,6 @@ void PC::init()
         PC_PCI::init();
     if(Traits<PC_Timer>::enabled)
         PC_Timer::init();
-    if(Traits<PC_Ethernet>::enabled)
-        PC_Ethernet::init();
 }
 
 __END_SYS

@@ -40,7 +40,7 @@ public:
     static void delay(const Microsecond & time);
 
 private:
-    static int init();
+    static void init();
 
     static Microsecond period() {
         return 1000000 / frequency();
@@ -77,7 +77,6 @@ public:
 
 private:
     Microsecond _time;
-
 };
 
 __END_SYS

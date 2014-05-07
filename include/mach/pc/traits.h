@@ -13,7 +13,7 @@ template <> struct Traits<PC_Common>: public Traits<void>
 
 template <> struct Traits<PC>: public Traits<PC_Common>
 {
-    static const unsigned int MAX_CPUS = 8;
+    static const unsigned int CPUS = Traits<Build>::CPUS;
 
     // Boot Image
     static const unsigned int BOOT_LENGTH_MIN   = 128;
@@ -55,6 +55,8 @@ template <> struct Traits<PC_IC>: public Traits<PC_Common>
 
 template <> struct Traits<PC_Timer>: public Traits<PC_Common>
 {
+    static const bool debugged = hysterically_debugged;
+
     // Meaningful values for the PC's timer frequency range from 100 to
     // 10000 Hz. The choice must respect the scheduler time-slice, i. e.,
     // it must be higher than the scheduler invocation frequency.
@@ -88,33 +90,6 @@ template <> struct Traits<PC_Display>: public Traits<PC_Common>
     static const int LINES = 25;
     static const int TAB_SIZE = 8;
     static const unsigned int FRAME_BUFFER_ADDRESS = 0xb8000;
-};
-
-template <> struct Traits<PC_Ethernet>: public Traits<PC_Common>
-{
-    static const bool enabled = false;
-    typedef LIST<PCNet32> NICS;
-};
-
-template <> struct Traits<PCNet32>: public Traits<PC_Ethernet>
-{
-    static const unsigned int UNITS = NICS::Count<PCNet32>::Result;
-    static const unsigned int SEND_BUFFERS = 8; // per unit
-    static const unsigned int RECEIVE_BUFFERS = 8; // per unit
-};
-
-template <> struct Traits<E100>: public Traits<PC_Ethernet>
-{
-    static const unsigned int UNITS = NICS::Count<E100>::Result;
-    static const unsigned int SEND_BUFFERS = 8; // per unit
-    static const unsigned int RECEIVE_BUFFERS = 8; // per unit
-};
-
-template <> struct Traits<C905>: public Traits<PC_Ethernet>
-{
-    static const unsigned int UNITS = NICS::Count<C905>::Result;
-    static const unsigned int SEND_BUFFERS = 8; // per unit
-    static const unsigned int RECEIVE_BUFFERS = 8; // per unit
 };
 
 __END_SYS

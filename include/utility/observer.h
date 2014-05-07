@@ -1,5 +1,12 @@
 // EPOS Observer Utility Declarations
 
+// Observation about the lack of virtual destructors in the following classes:
+// Observed x Observer is used in mediators, so they appear very early in the system.
+// To be more precise, they are used in SETUP, where we cannot yet handle a heap.
+// Since the purpose of the destructors is only to trace the classes, we accepted to
+// declare them as non-virtual. But it must be clear that this is one of the few uses
+// for them.
+
 #ifndef __observer_h
 #define	__observer_h
 
@@ -7,25 +14,29 @@
 
 __BEGIN_SYS
 
-// Observer
+// Observer x Observed
 class Observer;
 
-class Observed // Subject
+class Observed
 { 
     friend class Observer;
 
 private:
     typedef Simple_List<Observer>::Element Element;
 
-protected: 
-    Observed() {}
+protected:
+    Observed() {
+        db<Observed>(TRC) << "Observed() => " << this << endl;
+    }
 
 public: 
-    virtual ~Observed() {}
+    ~Observed() {
+        db<Observed>(TRC) << "~Observed(this=" << this << ")" << endl;
+    }
 
     virtual void attach(Observer * o);
     virtual void detach(Observer * o);
-    virtual void notify();
+    virtual bool notify();
 
 private: 
     Simple_List<Observer> _observers;
@@ -41,7 +52,7 @@ protected:
     }
 
 public: 
-    virtual ~Observer() {
+    ~Observer() {
         db<Observer>(TRC) << "~Observer(this=" << this << ")" << endl;
     }
 
@@ -51,45 +62,75 @@ private:
     Observed::Element _link;
 };
 
+inline void Observed::attach(Observer * o)
+{
+    db<Observed>(TRC) << "Observed::attach(obs=" << o << ")" << endl;
 
-// Conditionally Observed
+    _observers.insert(&o->_link);
+}
+
+inline void Observed::detach(Observer * o)
+{
+    db<Observed>(TRC) << "Observed::detach(obs=" << o << ")" << endl;
+
+    _observers.remove(&o->_link);
+}
+
+inline bool Observed::notify()
+{
+    bool notified = false;
+
+    db<Observed>(TRC) << "Observed::notify()" << endl;
+
+    for(Element * e = _observers.head(); e; e = e->next()) {
+        db<Observed>(INF) << "Observed::notify(this=" << this << ",obs=" << e->object() << ")" << endl;
+
+        e->object()->update(this);
+        notified = true;
+    }
+
+    return notified;
+}
+
+
+// Observer x Conditionally Observed
 class Conditional_Observer;
 
-class Conditionally_Observed // Subject
+class Conditionally_Observed
 {
     friend class Conditional_Observer;
 
 private:
-    typedef
-    List_Elements::Singly_Linked_Ordered<Conditional_Observer> Element;
+    typedef Simple_Ordered_List<Conditional_Observer>::Element Element;
 
-public: 
+protected:
     Conditionally_Observed() {
         db<Observed>(TRC) << "Observed() => " << this << endl;
     }
 
-    virtual ~Conditionally_Observed() {
+public:
+    ~Conditionally_Observed() {
         db<Observed>(TRC) << "~Observed(this=" << this << ")" << endl;
     }
 
     virtual void attach(Conditional_Observer * o, int c);
     virtual void detach(Conditional_Observer * o, int c);
-    virtual void notify(int c);
+    virtual bool notify(int c);
 
 private: 
-    Simple_List<Conditional_Observer, Element> _observers;
+    Simple_Ordered_List<Conditional_Observer> _observers;
 }; 
 
 class Conditional_Observer
 {
     friend class Conditionally_Observed;
 
-public: 
+public:
     Conditional_Observer(): _link(this) {
         db<Observer>(TRC) << "Observer() => " << this << endl;
     } 
 
-    virtual ~Conditional_Observer() {
+    ~Conditional_Observer() {
         db<Observer>(TRC) << "~Observer(this=" << this << ")" << endl;
     }
     
@@ -99,78 +140,37 @@ private:
     Conditionally_Observed::Element _link;
 };
 
-// Conditional Data Observer
-// An Observer that receives useful data
-template<typename T>
-class Data_Observer;
-
-template<typename T>
-class Data_Observed // Subject
+inline void Conditionally_Observed::attach(Conditional_Observer * o, int c)
 {
-    friend class Data_Observer<T>;
+    db<Observed>(TRC) << "Observed::attach(o=" << o << ",c=" << c << ")" << endl;
 
-public:
-    typedef Data_Observer<T> Observer;
-    typedef List_Elements::Singly_Linked_Ordered<Observer> Element;
+    o->_link = Element(o, c);
+    _observers.insert(&o->_link);
+}
 
-    Data_Observed() {
-        db<Observed>(TRC) << "Observed() => " << this << endl;
-    }
+inline void Conditionally_Observed::detach(Conditional_Observer * o, int c)
+{
+    db<Observed>(TRC) << "Observed::detach(obs=" << o << ",c=" << c << ")" << endl;
 
-    virtual ~Data_Observed() {
-        db<Observed>(TRC) << "~Observed(this=" << this << ")" << endl;
-    }
+    _observers.remove(&o->_link);
+}
 
-    virtual void attach(Observer * o, long c) {
-    	db<Observed>(TRC) << "Observed::attach(o=" << o << ",c=" << c << ")" << endl;
+inline bool Conditionally_Observed::notify(int c)
+{
+    bool notified = false;
 
-        	o->_link = Element(o, c);
-        	_observers.insert(&o->_link);
-    }
-    
-    virtual void detach(Observer * o, long c) {
-    	db<Observed>(TRC) << "Observed::detach(obs=" << o << ",c=" << c << ")" << endl;
+    db<Observed>(TRC) << "Observed::notify(cond=" << hex << c << ")" << endl;
 
-    	_observers.remove(&o->_link);
-    }
-
-    virtual void notify(T src,T dst,long c,void * data,unsigned int size) {
-        db<Observed>(TRC) << "Observed::notify(cond=" << c << ")" << endl;
-
-        for(Element * e = _observers.head(); e; e = e->next()) {
-        	if(e->rank() == c) {
-        		db<Observed>(INF) << "Observed::notify(this=" << this
-        			 << ",obs=" << e->object() << ")" << endl;
-        		e->object()->update(this, c, src, dst, data, size);
-        	}
+    for(Element * e = _observers.head(); e; e = e->next()) {
+        if(e->rank() == c) {
+            db<Observed>(INF) << "Observed::notify(this=" << this << ",obs=" << e->object() << ")" << endl;
+            e->object()->update(this, c);
+            notified = true;
         }
-
     }
 
-private:
-    Simple_List<Observer, Element> _observers;
-};
-
-template<typename T>
-class Data_Observer
-{
-public:
-    friend class Data_Observed<T>;
-    typedef Data_Observed<T> Observed;
-
-    Data_Observer(): _link(this) {
-        db<Observer>(TRC) << "Observer() => " << this << endl;
-    }
-
-    virtual ~Data_Observer() {
-    	db<Observer>(TRC) << "~Observer(this=" << this << ")" << endl;
-    }
-
-    virtual void update(Observed * o, long c,T src,T dst,void * data,unsigned int size) = 0;
-
-private:
-    typename Observed::Element _link;
-};
+    return notified;
+}
 
 __END_SYS
  
