@@ -1,6 +1,5 @@
 // EPOS Thread Abstraction Implementation
 
-#include <system/kmalloc.h>
 #include <machine.h>
 #include <thread.h>
 #include <alarm.h>
@@ -25,7 +24,7 @@ void Thread::common_constructor(Log_Addr entry, unsigned int stack_size)
     db<Thread>(TRC) << "Thread(entry=" << entry
                     << ",state=" << _state
                     << ",priority=" << _link.rank()
-                    << ",stack={b=" << _stack
+                    << ",stack={b=" << reinterpret_cast<void *>(_stack)
                     << ",s=" << stack_size
                     << "},context={b=" << _context
                     << "," << *_context << "}) => " << this << endl;
@@ -84,7 +83,25 @@ Thread::~Thread()
 
     unlock();
 
-    kfree(_stack);
+    delete _stack;
+}
+
+
+void Thread::priority(const Priority & p)
+{
+    lock();
+
+    db<Thread>(TRC) << "Thread::priority(this=" << this << ",prio=" << p << ")" << endl;
+
+    _link.rank(p);
+
+    if(_state != RUNNING) {
+        _ready.remove(this);
+        _ready.insert(&_link);
+    }
+
+    if(preemptive)
+        reschedule();
 }
 
 
@@ -106,7 +123,7 @@ int Thread::join()
     } else
         unlock();
 
-    return *static_cast<int *>(_stack);
+    return *reinterpret_cast<int *>(_stack);
 }
 
 
@@ -195,7 +212,7 @@ void Thread::exit(int status)
 
     Thread * prev = _running;
     prev->_state = FINISHING;
-    *static_cast<int *>(prev->_stack) = status;
+   *reinterpret_cast<int *>(prev->_stack) = status;
 
     _thread_count--;
 

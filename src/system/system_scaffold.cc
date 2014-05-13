@@ -9,22 +9,20 @@
 
 // LIBC Heritage
 extern "C" {
-    using namespace EPOS;
-
     void _panic() {
-        Machine::panic();
+        EPOS::Machine::panic();
     }
 
     void _exit(int s) {
-        Thread::exit(s); for(;;);
+        EPOS::Thread::exit(s); for(;;);
     }
 
     void _print(const char * s) {
-        Display::puts(s);
+        EPOS::Display::puts(s);
     }
 
     void __cxa_pure_virtual() {
-        db<void>(ERR) << "Pure Virtual mehtod called!" << endl;
+        EPOS::db<void>(EPOS::ERR) << "Pure Virtual mehtod called!" << EPOS::endl;
     }
 }
 
@@ -51,6 +49,7 @@ OStream kerr;
 // System class attributes
 System_Info<Machine> * System::_si = reinterpret_cast<System_Info<Machine> *>(Memory_Map<Machine>::SYS_INFO);
 char System::_preheap[];
+Segment * System::_heap_segment;
 Heap * System::_heap;
 
 __END_SYS

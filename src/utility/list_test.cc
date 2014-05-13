@@ -19,7 +19,7 @@ OStream cout;
 
 int main()
 {
-    cout << "List Utility Test\n";
+    cout << "List Utility Test" << endl;
 
     test_simple_list();
     test_simple_grouping_list();
@@ -35,7 +35,7 @@ int main()
 
 void test_simple_list ()
 {
-    cout << "\nThis is a singly-linked list of integers:\n";
+    cout << "\nThis is a singly-linked list of integers:" << endl;
     Simple_List<int> l;
     int o[N];
     Simple_List<int>::Element * e[N];
@@ -49,7 +49,7 @@ void test_simple_list ()
             cout << ", ";
     }
     cout << endl;
-    cout << "The list has now " << l.size() << " elements\n";
+    cout << "The list has now " << l.size() << " elements" << endl;
     cout << "They are: ";
     for(Simple_List<int>::Iterator i = l.begin(); i != l.end(); i++) {
         cout << *i->object();
@@ -74,14 +74,14 @@ void test_simple_list ()
             cout << ", ";
     }
     cout << endl;
-    cout << "The list has now " << l.size() << " elements\n";
+    cout << "The list has now " << l.size() << " elements" << endl;
     for(int i = 0; i < N; i++)
         delete e[i];
 }
 
 void test_simple_grouping_list() 
 {
-    cout << "\nThis is a simple grouping list of integers:\n";
+    cout << "\nThis is a simple grouping list of integers:" << endl;
     Simple_Grouping_List<int> l;
     int o[N * 2];
     Simple_Grouping_List<int>::Element * e[N * 2];
@@ -121,7 +121,7 @@ void test_simple_grouping_list()
     }
     cout << endl;
     cout << "The list has now " << l.size() << " elements that group " 
-         << l.grouped_size() << " elements in total\n";
+         << l.grouped_size() << " elements in total" << endl;
     cout << "They are: ";
     for(Simple_Grouping_List<int>::Iterator i = l.begin(); i != l.end(); i++) {
         cout << *i->object();
@@ -173,12 +173,12 @@ void test_simple_grouping_list()
     } else
         cout << "failed!" << endl;
     cout << "The list has now " << l.size() << " elements that group " 
-         << l.grouped_size() << " elements in total\n";
+         << l.grouped_size() << " elements in total" << endl;
 }
 
 void test_list ()
 {
-    cout << "\nThis is a doubly-linked list of integers:\n";
+    cout << "\nThis is a doubly-linked list of integers:" << endl;
     List<int> l;
     int o[N];
     List<int>::Element * e[N];
@@ -192,7 +192,7 @@ void test_list ()
             cout << ", ";
     }
     cout << endl;
-    cout << "The list has now " << l.size() << " elements\n";
+    cout << "The list has now " << l.size() << " elements" << endl;
     cout << "They are: ";
     for(List<int>::Iterator i = l.begin(); i != l.end(); i++) {
         cout << *i->object();
@@ -217,14 +217,14 @@ void test_list ()
             cout << ", ";
     }
     cout << endl;
-    cout << "The list has now " << l.size() << " elements\n";
+    cout << "The list has now " << l.size() << " elements" << endl;
     for(int i = 0; i < N; i++)
         delete e[i];
 }
 
 void test_ordered_list ()
 {
-    cout << "\nThis is an ordered, linked list of integers:\n";
+    cout << "\nThis is an ordered, linked list of integers:" << endl;
     Ordered_List<int> l;
     int o[N];
     Ordered_List<int>::Element * e[N];
@@ -238,7 +238,7 @@ void test_ordered_list ()
             cout << ", ";
     }
     cout << endl;
-    cout << "The list has now " << l.size() << " elements\n";
+    cout << "The list has now " << l.size() << " elements" << endl;
     cout << "They are: ";
     for(Ordered_List<int>::Iterator i = l.begin(); i != l.end(); i++) {
         cout << *i->object();
@@ -263,14 +263,14 @@ void test_ordered_list ()
             cout << ", ";
     }
     cout << endl;
-    cout << "The list has now " << l.size() << " elements\n";
+    cout << "The list has now " << l.size() << " elements" << endl;
     for(int i = 0; i < N; i++)
         delete e[i];
 }
 
 void test_relative_list ()
 {
-    cout << "\nThis is a realtive ordered, linked list of integers:\n";
+    cout << "\nThis is a realtive ordered, linked list of integers:" << endl;
     Relative_List<int> l;
     int o[N];
     Relative_List<int>::Element * e[N];
@@ -284,7 +284,7 @@ void test_relative_list ()
             cout << ", ";
     }
     cout << endl;
-    cout << "The list has now " << l.size() << " elements\n";
+    cout << "The list has now " << l.size() << " elements" << endl;
     cout << "They are: ";
     for(Relative_List<int>::Iterator i = l.begin(); i != l.end(); i++) {
         cout << *i->object();
@@ -309,14 +309,14 @@ void test_relative_list ()
             cout << ", ";
     }
     cout << endl;
-    cout << "The list has now " << l.size() << " elements\n";
+    cout << "The list has now " << l.size() << " elements" << endl;
     for(int i = 0; i < N; i++)
         delete e[i];
 }
 
 void test_grouping_list() 
 {
-    cout << "\nThis is a grouping list of 32-byte buffers:\n";
+    cout << "\nThis is a grouping list of 32-byte buffers:" << endl;
     Grouping_List<char> l;
     char o[N][32];
     Grouping_List<char>::Element * e[N];
@@ -354,7 +354,7 @@ void test_grouping_list()
     }
     cout << endl;
     cout << "The list has now " << l.size() << " elements that group "
-         << l.grouped_size() << " bytes in total\n";
+         << l.grouped_size() << " bytes in total" << endl;
     cout << "Allocating 1 byte from the list => ";
     d1 = l.search_decrementing(1);
     if(d1) {
@@ -400,5 +400,5 @@ void test_grouping_list()
     } else
         cout << "failed!" << endl;
     cout << "The list has now " << l.size() << " elements that group " 
-         << l.grouped_size() << " elements in total\n";
+         << l.grouped_size() << " elements in total" << endl;
 }

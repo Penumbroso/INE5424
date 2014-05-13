@@ -7,7 +7,8 @@ OUTPUT := $(addsuffix .out,$(APPLICATION))
 
 all:		$(IMAGE)
 
-run:		$(OUTPUT)
+run:		$(IMAGE)
+		$(EMULATOR) $(IMAGE) | $(TEE) $(OUTPUT)
 
 debug:		$(IMAGE)
 		$(EMULATOR) $(IMAGE) | $(TEE) $(OUTPUT) &

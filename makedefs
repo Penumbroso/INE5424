@@ -90,9 +90,9 @@ $(MACH_PC)_LD_FLAGS	:=
 $(MACH_PC)_CODE_NAME	:= .init
 $(MACH_PC)_DATA_NAME	:= .ctors
 ifeq ($(GDB),1)
-$(MACH_PC)_EMULATOR	= qemu -s -S -m $(MEM_SIZE) -nographic -no-reboot -net nic,model=pcnet -net user -fda
+$(MACH_PC)_EMULATOR	= qemu-system-i386 -s -S -m $(MEM_SIZE) -nographic -no-reboot -net nic,model=pcnet -net user -fda
 else
-$(MACH_PC)_EMULATOR	= qemu -m $(MEM_SIZE) -nographic -no-reboot -net nic,model=pcnet -net user -fda
+$(MACH_PC)_EMULATOR	= qemu-system-i386 -m $(MEM_SIZE) -nographic -no-reboot -net nic,model=pcnet -net user -fda
 endif
 ifeq ($(MODE), library)
 $(MACH_PC)_DEBUGGER	= $(TERM) gdb -ex "target remote:1234" -ex "set confirm off" -ex "add-symbol-file pc_setup $(SETUP_ADDR)"

@@ -4,15 +4,17 @@
 #define __malloc_h
 
 #include <utility/string.h>
+#include <system.h>
 #include <application.h>
 
 extern "C"
 {
-    using namespace EPOS;
-
     // Standard C Library allocators
     inline void * malloc(size_t bytes) {
-	return Application::_heap->alloc(bytes);
+        if(EPOS::Traits<EPOS::System>::multiheap)
+            return EPOS::Application::_heap->alloc(bytes);
+        else
+            return EPOS::System::_heap->alloc(bytes);
     }
 
     inline void * calloc(size_t n, unsigned int bytes) {
@@ -22,7 +24,10 @@ extern "C"
     }
 
     inline void free(void * ptr) {
-        Application::_heap->free(ptr);
+        if(EPOS::Traits<EPOS::System>::multiheap)
+            EPOS::Heap::typed_free(ptr);
+        else
+            EPOS::Heap::untyped_free(EPOS::System::_heap, ptr);
     }
 }
 
