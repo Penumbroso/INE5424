@@ -21,7 +21,7 @@ template <> struct Traits<PC>: public Traits<PC_Common>
 
     // Physical Memory
     static const unsigned int MEM_BASE  = 0x00000000;
-    static const unsigned int MEM_TOP   = 0x10000000; // 1792 MB (MAX for 32-bit is 0x70000000 / 1792 MB)
+    static const unsigned int MEM_TOP   = 0x10000000; // 256 MB (MAX for 32-bit is 0x70000000 / 1792 MB)
 
     // Logical Memory Map
     static const unsigned int BOOT      = 0x00007c00;
@@ -97,6 +97,7 @@ template <> struct Traits<PC_Ethernet>: public Traits<PC_Common>
     static const bool enabled = (Traits<Build>::NODES > 1);
 
     typedef LIST<PCNet32> NICS;
+    static const unsigned int UNITS = NICS::Length;
 };
 
 template <> struct Traits<PCNet32>: public Traits<PC_Ethernet>
@@ -109,15 +110,15 @@ template <> struct Traits<PCNet32>: public Traits<PC_Ethernet>
 template <> struct Traits<E100>: public Traits<PC_Ethernet>
 {
     static const unsigned int UNITS = NICS::Count<E100>::Result;
-    static const unsigned int SEND_BUFFERS = 4; // per unit
-    static const unsigned int RECEIVE_BUFFERS = 16; // per unit
+    static const unsigned int SEND_BUFFERS = 64; // per unit
+    static const unsigned int RECEIVE_BUFFERS = 64; // per unit
 };
 
 template <> struct Traits<C905>: public Traits<PC_Ethernet>
 {
     static const unsigned int UNITS = NICS::Count<C905>::Result;
-    static const unsigned int SEND_BUFFERS = 4; // per unit
-    static const unsigned int RECEIVE_BUFFERS = 16; // per unit
+    static const unsigned int SEND_BUFFERS = 64; // per unit
+    static const unsigned int RECEIVE_BUFFERS = 64; // per unit
 };
 
 template <> struct Traits<PC_Scratchpad>: public Traits<PC_Common>

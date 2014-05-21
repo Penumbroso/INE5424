@@ -1,4 +1,4 @@
-        .file   "crtn.s"
+        .file   "ia32_crtn.s"
 
         .section .init
         .globl  _init

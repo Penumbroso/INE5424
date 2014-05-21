@@ -13,7 +13,7 @@ class IA32_TSC: public TSC_Common
 public:
     IA32_TSC() {}
 
-    static Hertz frequency() { return IA32::clock(); }
+    static Hertz frequency() { return CPU::clock(); }
 
     static Time_Stamp time_stamp() {
         Time_Stamp ts;

@@ -461,28 +461,28 @@ public:
     }
 
     static void int_vector(Interrupt_Id i, Interrupt_Handler h) {
-        db<IC>(INF) << "IC::int_vector(int=" << i << ",h=" << reinterpret_cast<void *>(h) <<")" << endl;
+        db<IC>(TRC) << "IC::int_vector(int=" << i << ",h=" << reinterpret_cast<void *>(h) <<")" << endl;
         if(i < INTS)
             _int_vector[i] = h;
     }
 
     static void enable() {
-        db<IC>(INF) << "IC::enable()" << endl;
+        db<IC>(TRC) << "IC::enable()" << endl;
         Base::enable();
     }
 
     static void enable(int i) {
-        db<IC>(INF) << "IC::enable(int=" << i << ")" << endl;
+        db<IC>(TRC) << "IC::enable(int=" << i << ")" << endl;
         Base::enable(i);
     }
 
     static void disable() {
-        db<IC>(INF) << "IC::disable()" << endl;
+        db<IC>(TRC) << "IC::disable()" << endl;
         Base::disable();
     }
 
     static void disable(int i) {
-        db<IC>(INF) << "IC::disable(int=" << i << ")" << endl;
+        db<IC>(TRC) << "IC::disable(int=" << i << ")" << endl;
         Base::disable(i);
     }
 

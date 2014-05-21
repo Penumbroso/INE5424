@@ -1,4 +1,4 @@
-        .file   "crti.s"
+        .file   "ia32_crti.s"
 
 	.section .init
 	.weak	__epos_library_app_entry

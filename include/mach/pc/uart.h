@@ -147,16 +147,13 @@ private:
 
 public:
     PC_UART(unsigned int unit = 0) : NS16550AF(_ports[unit]) {}
-    PC_UART(unsigned int baud, unsigned int data_bits, unsigned int parity,
-            unsigned int stop_bits, unsigned int unit = 0) 
-    : NS16550AF(_ports[unit], CLOCK / baud, data_bits, parity, stop_bits) {}
+    PC_UART(unsigned int baud, unsigned int data_bits, unsigned int parity, unsigned int stop_bits, unsigned int unit = 0):
+        NS16550AF(_ports[unit], CLOCK / baud, data_bits, parity, stop_bits) {}
 
-    void config(unsigned int baud, unsigned int data_bits,
-        	unsigned int parity, unsigned int stop_bits) {
+    void config(unsigned int baud, unsigned int data_bits, unsigned int parity, unsigned int stop_bits) {
         NS16550AF::config(CLOCK / baud, data_bits, parity, stop_bits);
     }
-    void config(unsigned int * baud, unsigned int * data_bits,
-        	unsigned int * parity, unsigned int * stop_bits) {
+    void config(unsigned int * baud, unsigned int * data_bits, unsigned int * parity, unsigned int * stop_bits) {
         NS16550AF::config(*baud, *data_bits, *parity, *stop_bits);
         *baud = CLOCK / *baud;
     }

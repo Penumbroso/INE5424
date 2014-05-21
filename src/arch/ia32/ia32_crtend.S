@@ -1,4 +1,4 @@
-	.file	"crtstuff.c"
+	.file	"ia32_crtend.s"
 
 	.section	.ctors,"aw",@progbits
 	.align 4

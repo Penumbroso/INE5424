@@ -298,8 +298,7 @@ void PCNet32::handle_int()
         if(csr0 & CSR0_RINT) { // Frame received (possibly multiple, let's handle a whole round on the ring buffer)
 
             // Note that ISRs in EPOS are reentrant, that's why locking was carefully made atomic
-            // Therefore, several instances of this could compete to handle received buffers
-            // But since we only acknowledge interrupts at the end (by clearing flags), it should not happen
+            // Therefore, several instances of this code can compete to handle received buffers
 
             for(int count = RX_BUFS; count && !(_rx_ring[_rx_cur].status & Rx_Desc::OWN); count--, ++_rx_cur %= RX_BUFS) {
                 // NIC received a frame in _rx_buffer[_rx_cur], let's check if it has already been handled

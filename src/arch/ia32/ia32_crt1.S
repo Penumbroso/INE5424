@@ -1,4 +1,4 @@
-	.file	"crt1.s"
+	.file	"ia32_crt1.s"
 
 	.text
 	.align	4

@@ -336,8 +336,7 @@ private:
     typedef RTC::Microsecond Microsecond;
 
 public:
-    Scheduler_Timer(const Microsecond & quantum, const Handler & handler)
-    : PC_Timer(1000000 / quantum, handler, SCHEDULER) {}
+    Scheduler_Timer(const Microsecond & quantum, const Handler & handler): PC_Timer(1000000 / quantum, handler, SCHEDULER) {}
 };
 
 
@@ -359,8 +358,7 @@ private:
     typedef RTC::Microsecond Microsecond;
 
 public:
-    User_Timer(const Microsecond & quantum, const Handler & handler)
-    : PC_Timer(1000000 / quantum, handler, USER, true) {}
+    User_Timer(const Microsecond & quantum, const Handler & handler): PC_Timer(1000000 / quantum, handler, USER, true) {}
 };
 
 __END_SYS

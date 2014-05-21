@@ -1,4 +1,4 @@
-	.file	"crtbegin.s"
+	.file	"ia32_crtbegin.s"
 	
 	.section	.ctors,"aw",@progbits
 	.align 4

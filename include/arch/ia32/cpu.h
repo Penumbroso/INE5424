@@ -39,8 +39,9 @@ public:
         		    FLAG_RF | FLAG_VM | FLAG_AC)
     };
 
-    // Exceptions 
-    enum Exceptions {  // GCC BUG (anonymous enum in templates)
+    // CPU Exceptions
+    typedef Reg32 Exceptions;
+    enum  {
         EXC_BASE        = 0x00,
         EXC_DIV0	= 0x00,
         EXC_DEBUG	= 0x01,
@@ -247,15 +248,17 @@ public:
     };
 
     // CPU Context
-    class Context {
+    class Context
+    {
     public:
-        Context(Log_Addr entry) : _eflags(FLAG_DEFAULTS), _eip(entry) {}
+        Context(Log_Addr entry): _eflags(FLAG_DEFAULTS), _eip(entry) {}
 
         void save() volatile;
         void load() const volatile;
 
         friend Debug & operator<<(Debug & db, const Context & c) {
-            db << "{eflags=" << reinterpret_cast<void *>(c._eflags)
+            db << hex
+               << "{eflags=" << c._eflags
                << ",eax=" << c._eax
                << ",ebx=" << c._ebx
                << ",ecx=" << c._ecx
@@ -265,14 +268,14 @@ public:
                << ",ebp=" << reinterpret_cast<void *>(c._ebp)
                << ",esp=" << reinterpret_cast<void *>(c._esp)
                << ",eip=" << reinterpret_cast<void *>(c._eip)
-               << ",cs=" << cs()
-               << ",ds=" << ds()
-               << ",es=" << es()
-               << ",fs=" << fs()
-               << ",gs=" << gs()
-               << ",ss=" << ss()
+               << ",cs="  << cs()
+               << ",ds="  << ds()
+               << ",es="  << es()
+               << ",fs="  << fs()
+               << ",gs="  << gs()
+               << ",ss="  << ss()
                << ",cr3=" << reinterpret_cast<void *>(pdp())
-               << "}";
+               << "}"     << dec;
             return db;
         }
 
@@ -296,7 +299,7 @@ public:
     // Interrupt Service Routines
     typedef void (ISR)();
 
-    // Falut Service Routines
+    // Fault Service Routines (exception handlers)
     typedef void (FSR)(Reg32 error, Reg32 eip, Reg32 cs, Reg32 eflags);
 
 public:
@@ -311,8 +314,6 @@ public:
 
     static void halt() { ASMV("hlt"); }
 
-    static void switch_context(Context * volatile * o, Context * volatile n);
-
     static Flags flags() { return eflags(); }
     static void flags(const Flags flags) { eflags(flags); }
 
@@ -322,47 +323,35 @@ public:
     static Reg32 fr() { return eax(); }
     static void fr(const Reg32 sp) { eax(sp); }
 
+    static Log_Addr ip() { return eip(); }
+
     static Reg32 pdp() { return cr3() ; }
     static void pdp(const Reg32 pdp) { cr3(pdp); }
-
-    static Log_Addr ip() { return eip(); }
 
     template <typename T>
     static T tsl(volatile T & lock) {
         register T old = 1;
-        ASMV("lock xchg %0, %2"
-             : "=a"(old) 
-             : "a"(old), "m"(lock) 
-             : "memory"); 
+        ASMV("lock xchg %0, %2" : "=a"(old) : "a"(old), "m"(lock) : "memory"); 
         return old;
     }
 
     template <typename T>
     static T finc(volatile T & value) {
         register T old = 1;
-        ASMV("lock xadd %0, %2"
-             : "=a"(old)
-             : "a"(old), "m"(value)
-             : "memory"); 
+        ASMV("lock xadd %0, %2" : "=a"(old) : "a"(old), "m"(value) : "memory"); 
         return old;
     }
 
     template <typename T>
     static T fdec(volatile T & value) {
         register T old = -1;
-        ASMV("lock xadd %0, %2"
-             : "=a"(old)
-             : "a"(old), "m"(value)
-             : "memory"); 
+        ASMV("lock xadd %0, %2" : "=a"(old) : "a"(old), "m"(value) : "memory"); 
         return old;
     }
 
     template <typename T>
     static T cas(volatile T & value, T compare, T replacement) {
-        ASMV("lock cmpxchgl %2, %3\n" 
-             : "=a"(compare) 
-             : "a"(compare), "r"(replacement), "m"(value)
-             : "memory");
+        ASMV("lock cmpxchgl %2, %3\n" : "=a"(compare) : "a"(compare), "r"(replacement), "m"(value) : "memory");
         return compare;
    }
 
@@ -372,6 +361,8 @@ public:
     static Reg16 htons(Reg16 v)	{ return swap16(v); }
     static Reg32 ntohl(Reg32 v)	{ return htonl(v); }
     static Reg16 ntohs(Reg16 v)	{ return htons(v); }
+
+    static void switch_context(Context * volatile * o, Context * volatile n);
 
     // The int left on the stack between thread's arguments and its context
     // is due to the fact that the thread's function believes it's a normal
@@ -386,8 +377,7 @@ public:
     }
 
     template<typename T1>
-    static Context * init_stack(Log_Addr stack, unsigned int size, void (* exit)(),
-                                int (* entry)(T1 a1), T1 a1) {
+    static Context * init_stack(Log_Addr stack, unsigned int size, void (* exit)(), int (* entry)(T1 a1), T1 a1) {
         Log_Addr sp = stack + size;
         sp -= sizeof(T1); *static_cast<T1 *>(sp) = a1;
         sp -= sizeof(int); *static_cast<int *>(sp) = Log_Addr(exit);
@@ -396,8 +386,7 @@ public:
     }
 
     template<typename T1, typename T2>
-    static Context * init_stack(Log_Addr stack, unsigned int size, void (* exit)(),
-                                int (* entry)(T1 a1, T2 a2), T1 a1, T2 a2) {
+    static Context * init_stack(Log_Addr stack, unsigned int size, void (* exit)(), int (* entry)(T1 a1, T2 a2), T1 a1, T2 a2) {
         Log_Addr sp = stack + size;
         sp -= sizeof(T2); *static_cast<T2 *>(sp) = a2;
         sp -= sizeof(T1); *static_cast<T1 *>(sp) = a1;
@@ -407,8 +396,7 @@ public:
     }
 
     template<typename T1, typename T2, typename T3>
-    static Context * init_stack(Log_Addr stack, unsigned int size, void (* exit)(),
-                                int (* entry)(T1 a1, T2 a2, T3 a3), T1 a1, T2 a2, T3 a3) {
+    static Context * init_stack(Log_Addr stack, unsigned int size, void (* exit)(), int (* entry)(T1 a1, T2 a2, T3 a3), T1 a1, T2 a2, T3 a3) {
         Log_Addr sp = stack + size;
         sp -= sizeof(T3); *static_cast<T3 *>(sp) = a3;
         sp -= sizeof(T2); *static_cast<T2 *>(sp) = a2;
@@ -419,8 +407,7 @@ public:
     }
 
     template<typename T1, typename T2, typename T3, typename T4>
-    static Context * init_stack(Log_Addr stack, unsigned int size, void (* exit)(),
-                                int (* entry)(T1 a1, T2 a2, T3 a3, T4 a4), T1 a1, T2 a2, T3 a3, T4 a4) {
+    static Context * init_stack(Log_Addr stack, unsigned int size, void (* exit)(), int (* entry)(T1 a1, T2 a2, T3 a3, T4 a4), T1 a1, T2 a2, T3 a3, T4 a4) {
         Log_Addr sp = stack + size;
         sp -= sizeof(T4); *static_cast<T4 *>(sp) = a4;
         sp -= sizeof(T3); *static_cast<T3 *>(sp) = a3;
