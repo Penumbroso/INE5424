@@ -8,7 +8,6 @@ __BEGIN_SYS
 class PC_Common;
 template <> struct Traits<PC_Common>: public Traits<void>
 {
-    static const bool debugged = Traits<void>::debugged;
 };
 
 template <> struct Traits<PC>: public Traits<PC_Common>
@@ -51,6 +50,7 @@ template <> struct Traits<PC_PCI>: public Traits<PC_Common>
 
 template <> struct Traits<PC_IC>: public Traits<PC_Common>
 {
+    static const bool debugged = hysterically_debugged;
 };
 
 template <> struct Traits<PC_Timer>: public Traits<PC_Common>
@@ -90,6 +90,34 @@ template <> struct Traits<PC_Display>: public Traits<PC_Common>
     static const int LINES = 25;
     static const int TAB_SIZE = 8;
     static const unsigned int FRAME_BUFFER_ADDRESS = 0xb8000;
+};
+
+template <> struct Traits<PC_Ethernet>: public Traits<PC_Common>
+{
+    static const bool enabled = (Traits<Build>::NODES > 1);
+
+    typedef LIST<PCNet32> NICS;
+};
+
+template <> struct Traits<PCNet32>: public Traits<PC_Ethernet>
+{
+    static const unsigned int UNITS = NICS::Count<PCNet32>::Result;
+    static const unsigned int SEND_BUFFERS = 64; // per unit
+    static const unsigned int RECEIVE_BUFFERS = 64; // per unit
+};
+
+template <> struct Traits<E100>: public Traits<PC_Ethernet>
+{
+    static const unsigned int UNITS = NICS::Count<E100>::Result;
+    static const unsigned int SEND_BUFFERS = 4; // per unit
+    static const unsigned int RECEIVE_BUFFERS = 16; // per unit
+};
+
+template <> struct Traits<C905>: public Traits<PC_Ethernet>
+{
+    static const unsigned int UNITS = NICS::Count<C905>::Result;
+    static const unsigned int SEND_BUFFERS = 4; // per unit
+    static const unsigned int RECEIVE_BUFFERS = 16; // per unit
 };
 
 template <> struct Traits<PC_Scratchpad>: public Traits<PC_Common>

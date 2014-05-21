@@ -22,6 +22,7 @@ LUTILNAME	:= util
 
 # Supported software architectures
 MODE_LIBRARY	:= library
+MODE_BUILTIN    := builtin
 
 # Supported hardware architectures
 ARCH_IA32       := ia32
@@ -54,6 +55,8 @@ TRAITS		= $(APP)/$(APPLICATION)_traits.h
 MODE		= $(MODE_$(call GETTK,MODE,$(TRAITS)))
 ARCH		= $(ARCH_$(call GETTK,ARCH,$(TRAITS)))
 MACH		= $(MACH_$(call GETTK,MACH,$(TRAITS)))
+CPUS		= $(call GETTK,CPUS,$(TRAITS))
+NODES		= $(call GETTK,NODES,$(TRAITS))
 LIBARCH		= $(LIB)/lib$(LARCHNAME)_$(ARCH).a
 LIBMACH		= $(LIB)/lib$(LMACHNAME)_$(ARCH).a
 LIBSYS		= $(LIB)/lib$(LSYSNAME)_$(ARCH).a
@@ -92,7 +95,7 @@ $(MACH_PC)_DATA_NAME	:= .ctors
 ifeq ($(GDB),1)
 $(MACH_PC)_EMULATOR	= qemu-system-i386 -s -S -m $(MEM_SIZE) -nographic -no-reboot -net nic,model=pcnet -net user -fda
 else
-$(MACH_PC)_EMULATOR	= qemu-system-i386 -m $(MEM_SIZE) -nographic -no-reboot -net nic,model=pcnet -net user -fda
+$(MACH_PC)_EMULATOR	= qemu-system-i386 -smp $(CPUS) -m $(MEM_SIZE) -nographic -no-reboot -fda
 endif
 ifeq ($(MODE), library)
 $(MACH_PC)_DEBUGGER	= $(TERM) gdb -ex "target remote:1234" -ex "set confirm off" -ex "add-symbol-file pc_setup $(SETUP_ADDR)"
@@ -153,7 +156,7 @@ CCLIB		= `$(CC) $(MACH_CC_FLAGS) -print-file-name=`
 CPP			= $(COMP_PREFIX)gcc -E
 CPPFLAGS	= $(MACH_CC_FLAGS) -I$(INCLUDE)
 
-CXX			= $(COMP_PREFIX)g++ -c --no-exceptions --no-rtti --no-use-cxa-atexit
+CXX			= $(COMP_PREFIX)g++ -c --no-exceptions --no-rtti --no-use-cxa-atexit -std=c++0x
 CXXFLAGS	= $(MACH_CC_FLAGS) -O2 -nostdinc -Wall -Werror -fdata-sections -ffunction-sections -I$(INCLUDE)
 
 LD			= $(COMP_PREFIX)ld

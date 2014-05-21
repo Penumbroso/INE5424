@@ -10,8 +10,8 @@ __BEGIN_SYS
 
 class Address_Space: private MMU::Directory
 {
-    friend class System;
     friend class Init_System;
+    friend class Task;
 
 private:
     typedef CPU::Phy_Addr Phy_Addr;
@@ -34,12 +34,6 @@ public:
     Phy_Addr physical(Log_Addr address);
 
     static Address_Space * self();
-
-private:
-    static void init();
-
-private:
-    static Address_Space * _master;
 };
 
 __END_SYS

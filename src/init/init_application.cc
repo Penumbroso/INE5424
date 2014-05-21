@@ -13,18 +13,22 @@ class Init_Application
 {
 private:
     static const unsigned int HEAP_SIZE = Traits<Application>::HEAP_SIZE;
+    static const unsigned int STACK_SIZE = Traits<Application>::STACK_SIZE;
 
 public:
     Init_Application() {
         db<Init>(TRC) << "Init_Application()" << endl;
 
+        // Only the boot CPU runs INIT_APPLICATION
+        Machine::smp_barrier();
+        if(Machine::cpu_id() != 0)
+            return;
+
         // Initialize Application's heap
         db<Init>(INF) << "Initializing application's heap: " << endl;
-        if(Traits<System>::multiheap) {
-            Application::_heap_segment = new (&Application::_preheap[0]) Segment(HEAP_SIZE);
-            Application::_heap = new (&Application::_preheap[sizeof(Segment)]) Heap(Address_Space::self()->attach(*Application::_heap_segment),
-                                      Application::_heap_segment->size());
-        } else
+        if(Traits<System>::multiheap) // Heap in data segment
+            Application::_heap = new (&Application::_preheap[0]) Heap(reinterpret_cast<void *>(System::info()->lm.app_heap), HEAP_SIZE);
+        else
             for(unsigned int frames = MMU::allocable(); frames; frames = MMU::allocable())
                 System::_heap->free(MMU::alloc(frames), frames * sizeof(MMU::Page));
         db<Init>(INF) << "done!" << endl;

@@ -16,7 +16,7 @@ struct Traits
 
 template <> struct Traits<Build>
 {
-    enum {LIBRARY};
+    enum {LIBRARY, BUILTIN};
     static const unsigned int MODE = LIBRARY;
 
     enum {IA32};
@@ -112,6 +112,11 @@ template <> struct Traits<System>: public Traits<void>
 
 
 // Abstractions
+template <> struct Traits<Task>: public Traits<void>
+{
+    static const bool enabled = Traits<System>::multitask;
+};
+
 template <> struct Traits<Thread>: public Traits<void>
 {
     static const bool smp = Traits<System>::multicore;
@@ -120,6 +125,11 @@ template <> struct Traits<Thread>: public Traits<void>
     static const unsigned int QUANTUM = 10000; // us
 
     static const bool trace_idle = hysterically_debugged;
+};
+
+template <> struct Traits<Scheduler<Thread> >: public Traits<void>
+{
+    static const bool debugged = hysterically_debugged;
 };
 
 template <> struct Traits<Address_Space>: public Traits<void>

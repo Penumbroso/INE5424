@@ -17,7 +17,7 @@ struct Traits
 template <> struct Traits<Build>
 {
     enum {LIBRARY, BUILTIN};
-    static const unsigned int MODE = LIBRARY;
+    static const unsigned int MODE = BUILTIN;
 
     enum {IA32};
     static const unsigned int ARCH = IA32;
@@ -100,8 +100,7 @@ template <> struct Traits<System>: public Traits<void>
     static const bool multicore = (Traits<Build>::CPUS > 1) && multithread;
     static const bool multiheap = (mode != Traits<Build>::LIBRARY) || Traits<Scratchpad>::enabled;
 
-    enum {FOREVER = 0, SECOND = 1, MINUTE = 60, HOUR = 3600, DAY = 86400,
-          WEEK = 604800, MONTH = 2592000, YEAR = 31536000};
+    enum {FOREVER = 0, SECOND = 1, MINUTE = 60, HOUR = 3600, DAY = 86400, WEEK = 604800, MONTH = 2592000, YEAR = 31536000};
     static const unsigned long LIFE_SPAN = 1 * HOUR; // in seconds
 
     static const bool reboot = true;
@@ -127,9 +126,14 @@ template <> struct Traits<Thread>: public Traits<void>
     static const bool trace_idle = hysterically_debugged;
 };
 
-template <> struct Traits<Scheduler<Thread> >: public Traits<void>
+template<> struct Traits<Scheduler<Thread> >: public Traits<void>
 {
     static const bool debugged = hysterically_debugged;
+};
+
+template<> struct Traits<Periodic_Thread>: public Traits<void>
+{
+    static const bool simulate_capacity = false;
 };
 
 template <> struct Traits<Address_Space>: public Traits<void>

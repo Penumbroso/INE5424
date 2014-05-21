@@ -13,6 +13,8 @@ public:
 
         db<Init>(TRC) << "Init_First()" << endl;
 
+        Machine::smp_barrier();
+
         // Initialize the Thread abstraction,
         // thus creating the first application thread
         db<Init>(INF) << "INIT ends here!" << endl;

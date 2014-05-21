@@ -15,6 +15,11 @@ __BEGIN_SYS
 class Alarm
 {
     friend class System;
+    friend class Alarm_Chronometer;
+    friend class Periodic_Thread;
+    friend class RT_Thread;
+    friend class Scheduling_Criteria::FCFS;
+    friend class Scheduling_Criteria::EDF;
 
 private:
     typedef TSC::Hertz Hertz;
@@ -74,6 +79,23 @@ public:
 
 private:
     Microsecond _time;
+
+};
+
+
+// The following Scheduling Criteria depend on Alarm, which is not yet available at scheduler.h
+namespace Scheduling_Criteria {
+    inline FCFS::FCFS(int p)
+    : Priority((p == IDLE) ? IDLE : Alarm::_elapsed) {}
+
+
+    inline EDF::EDF(const Microsecond & d, const Microsecond & p, const Microsecond & c, int cpu)
+    : RT_Common(Alarm::ticks(d), Alarm::ticks(d), p, c) {}
+
+    inline void EDF::update() {
+        if((_priority > PERIODIC) && (_priority < APERIODIC))
+            _priority = Alarm::_elapsed + _deadline;
+    }
 };
 
 __END_SYS

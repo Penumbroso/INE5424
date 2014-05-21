@@ -17,6 +17,8 @@ namespace Scheduling_Criteria
     // Priority (static and dynamic)
     class Priority
     {
+        friend class EPOS::RT_Thread;
+
     public:
         enum {
             MAIN   = 0,
@@ -27,12 +29,16 @@ namespace Scheduling_Criteria
         };
 
         static const bool timed = false;
+        static const bool dynamic = false;
         static const bool preemptive = true;
 
     public:
         Priority(int p = NORMAL): _priority(p) {}
 
         operator const volatile int() const volatile { return _priority; }
+
+        void update() {}
+        unsigned int queue() const { return 0; }
 
     protected:
         volatile int _priority;
@@ -49,6 +55,7 @@ namespace Scheduling_Criteria
         };
 
         static const bool timed = true;
+        static const bool dynamic = false;
         static const bool preemptive = true;
 
     public:
@@ -66,17 +73,208 @@ namespace Scheduling_Criteria
         };
 
         static const bool timed = false;
+        static const bool dynamic = false;
         static const bool preemptive = false;
 
     public:
-        FCFS(int p = NORMAL): Priority((p == IDLE) ? IDLE : TSC::time_stamp()) {}
+        FCFS(int p = NORMAL); // Defined at Alarm
     };
+
+
+    // Multicore Algorithms
+    class Variable_Queue
+    {
+    public:
+        enum {ANY = -1};
+
+    protected:
+        Variable_Queue(unsigned int queue): _queue(queue) {};
+
+    public:
+        const volatile unsigned int & queue() const volatile { return _queue; }
+
+    protected:
+        volatile unsigned int _queue;
+        static volatile unsigned int _next_queue;
+    };
+
+    // CPU Affinity
+    class CPU_Affinity: public Priority, public Variable_Queue
+    {
+    public:
+        static const bool timed = false;
+        static const bool dynamic = false;
+        static const bool preemptive = true;
+
+        static const unsigned int QUEUES = Traits<Machine>::CPUS;
+
+    public:
+        CPU_Affinity(int p = NORMAL, int cpu = ANY)
+        : Priority(p), Variable_Queue(((_priority == IDLE) || (_priority == MAIN)) ?
+                                      Machine::cpu_id() : (cpu != ANY) ? cpu : ++_next_queue %= Machine::n_cpus()) {}
+
+        using Variable_Queue::queue;
+
+        static unsigned int current_queue() { return Machine::cpu_id(); }
+    };
+
+
+    // Real-time Algorithms
+    class RT_Common: public Priority
+    {
+    protected:
+        typedef RTC::Microsecond Microsecond;
+
+    public:
+        enum {
+            PERIODIC    = HIGH,
+            APERIODIC   = NORMAL
+        };
+
+        // Constructor helpers
+        enum {
+            SAME        = 0,
+            NOW         = 0,
+            UNKNOWN     = 0,
+            INFINITE    = RTC::INFINITE,
+            ANY         = Variable_Queue::ANY
+        };
+
+    protected:
+        RT_Common(int p): Priority(p), _deadline(0), _period(0), _capacity(0) {} // Aperiodic
+        RT_Common(int i, const Microsecond & d, const Microsecond & p, const Microsecond & c)
+        : Priority(i), _deadline(d), _period(p), _capacity(c) {}
+
+    public:
+        Microsecond _deadline;
+        Microsecond _period;
+        Microsecond _capacity;
+    };
+
+    // Rate Monotonic
+    class RM:public RT_Common
+    {
+    public:
+        static const bool timed = false;
+        static const bool dynamic = false;
+        static const bool preemptive = true;
+
+    public:
+        RM(int p = APERIODIC): RT_Common(p) {}
+        RM(const Microsecond & d, const Microsecond & p = SAME, const Microsecond & c = UNKNOWN, int cpu = ANY)
+        : RT_Common(p ? p : d, d, p, c) {}
+    };
+
+     // Deadline Monotonic
+     class DM: public RT_Common
+     {
+     public:
+         static const bool timed = false;
+         static const bool dynamic = false;
+         static const bool preemptive = true;
+
+     public:
+         DM(int p = APERIODIC): RT_Common(p) {}
+         DM(const Microsecond & d, const Microsecond & p = SAME, const Microsecond & c = UNKNOWN, int cpu = ANY)
+         : RT_Common(d, d, p, c) {}
+     };
+
+      // Earliest Deadline First
+      class EDF: public RT_Common
+      {
+      public:
+          static const bool timed = false;
+          static const bool dynamic = true;
+          static const bool preemptive = true;
+
+      public:
+          EDF(int p = APERIODIC): RT_Common(p) {}
+          EDF(const Microsecond & d, const Microsecond & p = SAME, const Microsecond & c = UNKNOWN, int cpu = ANY); // Defined at Alarm
+
+          void update(); // Defined at Alarm
+      };
+      
+      // Global Earliest Deadline First (multicore)
+      class GEDF: public EDF
+      {
+      public:
+          static const unsigned int HEADS = Traits<Machine>::CPUS;
+
+      public:
+          GEDF(int p = APERIODIC): EDF(p) {}
+          GEDF(const Microsecond & d, const Microsecond & p = SAME, const Microsecond & c = UNKNOWN, int cpu = ANY)
+          : EDF(d, p, c, cpu) {}
+
+          static unsigned int queue() { return current_head(); }
+          static unsigned int current_head() { return Machine::cpu_id(); }
+      };
+
+      // Partitioned Earliest Deadline First (multicore)
+      class PEDF: public EDF, public Variable_Queue
+      {
+          enum { ANY = Variable_Queue::ANY };
+
+      public:
+          static const unsigned int QUEUES = Traits<Machine>::CPUS;
+
+      public:
+          PEDF(int p = APERIODIC)
+          : EDF(p), Variable_Queue(((_priority == IDLE) || (_priority == MAIN)) ? Machine::cpu_id() : 0) {}
+
+          PEDF(const Microsecond & d, const Microsecond & p = SAME, const Microsecond & c = UNKNOWN, int cpu = ANY)
+          : EDF(d, p, c, cpu), Variable_Queue((cpu != ANY) ? cpu : ++_next_queue %= Machine::n_cpus()) {}
+
+          using Variable_Queue::queue;
+
+          static unsigned int current_queue() { return Machine::cpu_id(); }
+      };
+
+      // Clustered Earliest Deadline First (multicore)
+      class CEDF: public EDF, public Variable_Queue
+      {
+          enum { ANY = Variable_Queue::ANY };
+
+      public:
+          // QUEUES x HEADS must be equal to Traits<Machine>::CPUS
+          static const unsigned int HEADS = 2;
+          static const unsigned int QUEUES = Traits<Machine>::CPUS / HEADS;
+
+      public:
+          CEDF(int p = APERIODIC)
+          : EDF(p), Variable_Queue(((_priority == IDLE) || (_priority == MAIN)) ? current_queue() : 0) {} // Aperiodic
+
+          CEDF(const Microsecond & d, const Microsecond & p = SAME, const Microsecond & c = UNKNOWN, int cpu = ANY)
+          : EDF(d, p, c, cpu), Variable_Queue((cpu != ANY) ? cpu / HEADS : ++_next_queue %= Machine::n_cpus() / HEADS) {}
+
+          using Variable_Queue::queue;
+
+          static unsigned int current_queue() { return Machine::cpu_id() / HEADS; }
+          static unsigned int current_head() { return Machine::cpu_id() % HEADS; }
+      };
 }
 
 
 // Scheduling_Queue
 template <typename T, typename R = typename T::Criterion>
 class Scheduling_Queue: public Scheduling_List<T> {};
+
+template <typename T>
+class Scheduling_Queue<T, Scheduling_Criteria::CPU_Affinity>:
+public Scheduling_Multilist<T> {};
+
+template <typename T>
+class Scheduling_Queue<T, Scheduling_Criteria::GEDF>:
+public Multihead_Scheduling_List<T> {};
+
+template <typename T>
+class Scheduling_Queue<T, Scheduling_Criteria::PEDF>:
+public Scheduling_Multilist<T> {};
+
+
+template <typename T>
+class Scheduling_Queue<T, Scheduling_Criteria::CEDF>:
+public Multihead_Scheduling_Multilist<T> {};
+
 
 // Scheduler
 // Objects subject to scheduling by Scheduler must declare a type "Criterion"

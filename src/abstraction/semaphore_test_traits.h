@@ -16,7 +16,7 @@ struct Traits
 
 template <> struct Traits<Build>
 {
-    enum {LIBRARY};
+    enum {LIBRARY, BUILTIN};
     static const unsigned int MODE = LIBRARY;
 
     enum {IA32};
@@ -25,7 +25,7 @@ template <> struct Traits<Build>
     enum {PC};
     static const unsigned int MACH = PC;
 
-    static const unsigned int CPUS = 1;
+    static const unsigned int CPUS = 4;
     static const unsigned int NODES = 1; // > 1 => NETWORKING
 };
 
@@ -100,8 +100,7 @@ template <> struct Traits<System>: public Traits<void>
     static const bool multicore = (Traits<Build>::CPUS > 1) && multithread;
     static const bool multiheap = (mode != Traits<Build>::LIBRARY) || Traits<Scratchpad>::enabled;
 
-    enum {FOREVER = 0, SECOND = 1, MINUTE = 60, HOUR = 3600, DAY = 86400,
-          WEEK = 604800, MONTH = 2592000, YEAR = 31536000};
+    enum {FOREVER = 0, SECOND = 1, MINUTE = 60, HOUR = 3600, DAY = 86400, WEEK = 604800, MONTH = 2592000, YEAR = 31536000};
     static const unsigned long LIFE_SPAN = 1 * HOUR; // in seconds
 
     static const bool reboot = true;
@@ -112,14 +111,29 @@ template <> struct Traits<System>: public Traits<void>
 
 
 // Abstractions
+template <> struct Traits<Task>: public Traits<void>
+{
+    static const bool enabled = Traits<System>::multitask;
+};
+
 template <> struct Traits<Thread>: public Traits<void>
 {
     static const bool smp = Traits<System>::multicore;
 
-    typedef Scheduling_Criteria::RR Criterion;
+    typedef Scheduling_Criteria::CPU_Affinity Criterion;
     static const unsigned int QUANTUM = 10000; // us
 
     static const bool trace_idle = hysterically_debugged;
+};
+
+template<> struct Traits<Scheduler<Thread> >: public Traits<void>
+{
+    static const bool debugged = hysterically_debugged;
+};
+
+template<> struct Traits<Periodic_Thread>: public Traits<void>
+{
+    static const bool simulate_capacity = false;
 };
 
 template <> struct Traits<Address_Space>: public Traits<void>

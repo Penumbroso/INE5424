@@ -97,7 +97,7 @@ template <> struct Traits<System>: public Traits<void>
     static const unsigned int mode = Traits<Build>::MODE;
     static const bool multithread = true;
     static const bool multitask = (mode != Traits<Build>::LIBRARY);
-    static const bool multicore = (Traits<Build>::CPUS > 1) && multithread;
+    static const bool multicore = multithread && (Traits<Build>::CPUS > 1);
     static const bool multiheap = (mode != Traits<Build>::LIBRARY) || Traits<Scratchpad>::enabled;
 
     enum {FOREVER = 0, SECOND = 1, MINUTE = 60, HOUR = 3600, DAY = 86400,
@@ -121,7 +121,7 @@ template <> struct Traits<Thread>: public Traits<void>
 {
     static const bool smp = Traits<System>::multicore;
 
-    typedef Scheduling_Criteria::RR Criterion;
+    typedef Scheduling_Criteria::DM Criterion;
     static const unsigned int QUANTUM = 10000; // us
 
     static const bool trace_idle = hysterically_debugged;
@@ -130,6 +130,11 @@ template <> struct Traits<Thread>: public Traits<void>
 template <> struct Traits<Scheduler<Thread> >: public Traits<void>
 {
     static const bool debugged = hysterically_debugged;
+};
+
+template <> struct Traits<Periodic_Thread>: public Traits<void>
+{
+    static const bool simulate_capacity = false;
 };
 
 template <> struct Traits<Address_Space>: public Traits<void>

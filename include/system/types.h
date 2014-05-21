@@ -92,9 +92,18 @@ class PC_UART;
 class Serial_Display;
 class PC_Display;
 
+// Hardware Mediators - NIC
+class PC_Ethernet;
+class PCNet32;
+class C905;
+class E100;
+
 // Abstractions	- Process
 class Thread;
 class Active;
+class Periodic_Thread;
+class RT_Thread;
+class Task;
 
 // Abstractions - Scheduler
 template <typename> class Scheduler;
@@ -103,6 +112,13 @@ namespace Scheduling_Criteria
     class Priority;
     class FCFS;
     class RR;
+    class RM;
+    class DM;
+    class EDF;
+    class CPU_Affinity;
+    class GEDF;
+    class PEDF;
+    class CEDF;
 };
 
 // Abstractions	- Memory
@@ -142,8 +158,10 @@ enum
     SCRATCHPAD_ID,
     UART_ID,
     DISPLAY_ID,
+    NIC_ID,
 
     THREAD_ID,
+    TASK_ID,
     ACTIVE_ID,
 
     ADDRESS_SPACE_ID,
@@ -156,6 +174,8 @@ enum
     CLOCK_ID,
     ALARM_ID,
     CHRONOMETER_ID,
+
+    ETHERNET_ID,
 
     UNKNOWN_TYPE_ID,
     LAST_TYPE_ID = UNKNOWN_TYPE_ID - 1
@@ -175,10 +195,11 @@ template<> struct Type<PC_UART> { static const Type_Id ID = UART_ID; };
 template<> struct Type<PC_RTC> { static const Type_Id ID = RTC_ID; };
 template<> struct Type<PC_PCI> { static const Type_Id ID = PCI_ID; };
 template<> struct Type<PC_Display> { static const Type_Id ID = DISPLAY_ID; };
-template<> struct Type<PC_Scratchpad> { static const Type_Id ID = SCRATCHPAD_ID; };
+template<> struct Type<PC_Ethernet> { static const Type_Id ID = ETHERNET_ID; };
 
 template<> struct Type<Thread> { static const Type_Id ID = THREAD_ID; };
 template<> struct Type<Active> { static const Type_Id ID = ACTIVE_ID; };
+template<> struct Type<Task> { static const Type_Id ID = TASK_ID; };
 template<> struct Type<Address_Space> { static const Type_Id ID = ADDRESS_SPACE_ID; };
 template<> struct Type<Segment> { static const Type_Id ID = SEGMENT_ID; };
 
