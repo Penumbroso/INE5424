@@ -9,10 +9,8 @@ __BEGIN_SYS
 // Class attributes
 volatile unsigned int Thread::_thread_count;
 Scheduler_Timer * Thread::_timer;
+Scheduler<Thread> Thread::_scheduler;
 
-Thread* volatile Thread::_running;
-Thread::Queue Thread::_ready;
-Thread::Queue Thread::_suspended;
 
 // This_Thread class attributes
 bool This_Thread::_not_booting;
@@ -31,16 +29,14 @@ void Thread::common_constructor(Log_Addr entry, unsigned int stack_size)
 
     _thread_count++;
 
-    switch(_state) {
-        case RUNNING: break;
-        case SUSPENDED: _suspended.insert(&_link); break;
-        default: _ready.insert(&_link);
-    }
+    _scheduler.insert(this);
+    if((_state != READY) && (_state != RUNNING))
+        _scheduler.suspend(this);
 
-    unlock();
-
-    if(preemptive)
+    if(preemptive && (_state == READY) && (_link.rank() != IDLE))
         reschedule();
+    else
+        unlock();
 }
 
 
@@ -51,7 +47,7 @@ Thread::~Thread()
     db<Thread>(TRC) << "~Thread(this=" << this
                     << ",state=" << _state
                     << ",priority=" << _link.rank()
-                    << ",stack={b=" << _stack
+                    << ",stack={b=" << reinterpret_cast<void*>(_stack)
                     << ",context={b=" << _context
                     << "," << *_context << "})" << endl;
 
@@ -63,20 +59,22 @@ Thread::~Thread()
         exit(-1);
         break;
     case READY:
-        _ready.remove(this);
         _thread_count--;
         break;
     case SUSPENDED:
-        _suspended.remove(this);
+        _scheduler.resume(this);
         _thread_count--;
         break;
     case WAITING:
         _waiting->remove(this);
+        _scheduler.resume(this);
         _thread_count--;
         break;
     case FINISHING: // Already called exit()
         break;
     }
+
+    _scheduler.remove(this);
 
     if(_joining)
         _joining->resume();
@@ -87,17 +85,17 @@ Thread::~Thread()
 }
 
 
-void Thread::priority(const Priority & p)
+void Thread::priority(const Priority & c)
 {
     lock();
 
-    db<Thread>(TRC) << "Thread::priority(this=" << this << ",prio=" << p << ")" << endl;
+    db<Thread>(TRC) << "Thread::priority(this=" << this << ",prio=" << c << ")" << endl;
 
-    _link.rank(p);
+    _link.rank(Criterion(c));
 
     if(_state != RUNNING) {
-        _ready.remove(this);
-        _ready.insert(&_link);
+        _scheduler.remove(this);
+        _scheduler.insert(this);
     }
 
     if(preemptive)
@@ -119,7 +117,7 @@ int Thread::join()
 
     if(_state != FINISHING) {
         _joining = running();
-        _joining->suspend();
+        _joining->suspend(true);
     } else
         unlock();
 
@@ -133,40 +131,33 @@ void Thread::pass()
 
     db<Thread>(TRC) << "Thread::pass(this=" << this << ")" << endl;
 
-    Thread * prev = _running;
-    prev->_state = READY;
-    _ready.insert(&prev->_link);
+    Thread * prev = running();
+    Thread * next = _scheduler.choose(this);
 
-    _ready.remove(this);
-    _state = RUNNING;
-    _running = this;
-
-    dispatch(prev, this);
-
-    unlock();
+    if(next)
+        dispatch(prev, next, false);
+    else {
+        db<Thread>(WRN) << "Thread::pass => thread (" << this << ") not ready!" << endl;
+        unlock();
+    }
 }
 
 
-void Thread::suspend()
+void Thread::suspend(bool locked)
 {
-    lock();
+    if(!locked)
+        lock();
 
     db<Thread>(TRC) << "Thread::suspend(this=" << this << ")" << endl;
 
-    if(_running != this)
-        _ready.remove(this);
+    Thread * prev = running();
 
+    _scheduler.suspend(this);
     _state = SUSPENDED;
-    _suspended.insert(&_link);
 
-    if(_running == this) {
-        _running = _ready.remove()->object();
-        _running->_state = RUNNING;
+    Thread * next = running();
 
-        dispatch(this, _running);
-    }
-
-    unlock();
+    dispatch(prev, next);
 }
 
 
@@ -176,11 +167,17 @@ void Thread::resume()
 
     db<Thread>(TRC) << "Thread::resume(this=" << this << ")" << endl;
 
-   _suspended.remove(this);
-   _state = READY;
-   _ready.insert(&_link);
+    if(_state == SUSPENDED) {
+        _state = READY;
+        _scheduler.resume(this);
+        
+        if(preemptive)
+            reschedule();
+    } else {
+        db<Thread>(WRN) << "Resume called for unsuspended object!" << endl;
 
-   unlock();
+        unlock();
+    }
 }
 
 
@@ -189,18 +186,12 @@ void Thread::yield()
 {
     lock();
 
-    db<Thread>(TRC) << "Thread::yield(running=" << _running << ")" << endl;
+    db<Thread>(TRC) << "Thread::yield(running=" << running() << ")" << endl;
 
-    Thread * prev = _running;
-    prev->_state = READY;
-    _ready.insert(&prev->_link);
+    Thread * prev = running();
+    Thread * next = _scheduler.choose_another();
 
-    _running = _ready.remove()->object();
-    _running->_state = RUNNING;
-
-    dispatch(prev, _running);
-
-    unlock();
+    dispatch(prev, next);
 }
 
 
@@ -208,27 +199,22 @@ void Thread::exit(int status)
 {
     lock();
 
-    db<Thread>(TRC) << "Thread::wakeup_all(running=" << running() << ")" << endl;
+    db<Thread>(TRC) << "Thread::exit(running=" << running() <<",status=" << status << ")" << endl;
 
-    Thread * prev = _running;
+    Thread * prev = running();
+    _scheduler.remove(prev);
+    *reinterpret_cast<int *>(prev->_stack) = status;
     prev->_state = FINISHING;
-   *reinterpret_cast<int *>(prev->_stack) = status;
 
     _thread_count--;
 
     if(prev->_joining) {
-        prev->_joining->resume();
+        prev->_joining->_state = READY;
+        _scheduler.resume(prev->_joining);
         prev->_joining = 0;
     }
 
-    lock();
-
-    _running = _ready.remove()->object();
-    _running->_state = RUNNING;
-
-    dispatch(prev, _running);
-
-    unlock();
+    dispatch(prev, _scheduler.choose());
 }
 
 
@@ -240,16 +226,12 @@ void Thread::sleep(Queue * q)
     assert(locked());
 
     Thread * prev = running();
+    _scheduler.suspend(prev);
     prev->_state = WAITING;
-    prev->_waiting = q;
     q->insert(&prev->_link);
+    prev->_waiting = q;
 
-    _running = _ready.remove()->object();
-    _running->_state = RUNNING;
-
-    dispatch(prev, _running);
-
-    unlock();
+    dispatch(prev, _scheduler.chosen());
 }
 
 
@@ -264,13 +246,12 @@ void Thread::wakeup(Queue * q)
         Thread * t = q->remove()->object();
         t->_state = READY;
         t->_waiting = 0;
-        _ready.insert(&t->_link);
-    }
+        _scheduler.resume(t);
 
-    unlock();
-
-    if(preemptive)
-        reschedule();
+        if(preemptive)
+            reschedule();
+    } else
+        unlock();
 }
 
 
@@ -285,19 +266,35 @@ void Thread::wakeup_all(Queue * q)
         Thread * t = q->remove()->object();
         t->_state = READY;
         t->_waiting = 0;
-        _ready.insert(&t->_link);
+        _scheduler.resume(t);
     }
-
-    unlock();
 
     if(preemptive)
         reschedule();
+    else
+        unlock();
 }
 
 
 void Thread::reschedule()
 {
-    yield();
+    db<Thread>(TRC) << "Thread::reschedule()" << endl;
+
+    // lock() must be called before entering this method
+    assert(locked());
+
+    Thread * prev = running();
+    Thread * next = _scheduler.choose();
+
+    dispatch(prev, next);
+}
+
+
+void Thread::time_slicer()
+{
+    lock();
+
+    reschedule();
 }
 
 
