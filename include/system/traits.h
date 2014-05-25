@@ -129,7 +129,7 @@ template <> struct Traits<Thread>: public Traits<void>
 
 template <> struct Traits<Scheduler<Thread> >: public Traits<void>
 {
-c};
+};
 
 template <> struct Traits<Address_Space>: public Traits<void>
 {
