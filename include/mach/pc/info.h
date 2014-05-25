@@ -117,6 +117,9 @@ public:
     };
         
 public:
+    friend Debug & operator<<(Debug & db, const System_Info<PC> & si);
+
+public:
     Boot_Map bm;
     Physical_Memory_Map pmm;
     Logical_Memory_Map lmm;

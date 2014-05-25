@@ -8,6 +8,7 @@ __BEGIN_SYS
 class PC_Common;
 template <> struct Traits<PC_Common>: public Traits<void>
 {
+    static const bool debugged = Traits<void>::debugged;
 };
 
 template <> struct Traits<PC>: public Traits<PC_Common>

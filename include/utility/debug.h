@@ -118,6 +118,7 @@ union Debug_Level
     Debug_Info inf;
     Debug_Trace trc;
 };
+
 __END_SYS
 
 #endif

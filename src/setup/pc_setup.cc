@@ -141,6 +141,8 @@ PC_Setup::PC_Setup(char * boot_image)
 
     db<Setup>(TRC) << "PC_Setup(bi=" << reinterpret_cast<void *>(bi) << ",sp=" << reinterpret_cast<void *>(CPU::sp()) << ")" << endl;
 
+    db<Setup>(INF) << "System_Info=" << *si << endl;
+
     Machine::smp_barrier(si->bm.n_cpus);
     if(cpu_id == 0) { // Boot strap CPU (BSP)
 
@@ -310,8 +312,7 @@ void PC_Setup::build_lm()
         }
 
         if(si->lm.sys_code != SYS_CODE) {
-            db<Setup>(ERR) << "OS code segment address do not match "
-        		   << "the machine's memory map!" << endl;
+            db<Setup>(ERR) << "OS code segment address does not match the machine's memory map!" << endl;
             panic();
         }
         if(si->lm.sys_code + si->lm.sys_code_size > si->lm.sys_data) {
@@ -319,12 +320,7 @@ void PC_Setup::build_lm()
             panic();
         }
         if(si->lm.sys_data != SYS_DATA) {
-            db<Setup>(ERR) << "OS code segment address do not match "
-        		   << "the machine's memory map!" << endl;
-            panic();
-        }
-        if(si->lm.sys_data + si->lm.sys_data_size > si->lm.sys_stack) {
-            db<Setup>(ERR) << "OS data segment is too large!" << endl;
+            db<Setup>(ERR) << "OS data segment address does not match the machine's memory map!" << endl;
             panic();
         }
         if(si->lm.sys_data + si->lm.sys_data_size > si->lm.sys_stack) {
@@ -812,7 +808,7 @@ void PC_Setup::call_next()
     // Check for next stage and obtain the entry point
     register Log_Addr ip;
     if(si->lm.has_ini) {
-        db<Setup>(TRC) << "Executing system global constructors ..." << endl;
+        db<Setup>(TRC) << "Executing system's global constructors ..." << endl;
         reinterpret_cast<void (*)()>((void *)si->lm.sys_entry)();
         ip = si->lm.ini_entry;
     } else if(si->lm.has_sys)
@@ -824,15 +820,17 @@ void PC_Setup::call_next()
     // Boot CPU uses a full stack, while non-boot get reduced ones
     // The 2 integers on the stacks are room for return addresses used
     // in some EPOS architectures
-    register int sp = SYS_STACK + Traits<System>::STACK_SIZE * (cpu_id + 1) - 2 * sizeof(int);
+    register Log_Addr sp = SYS_STACK + Traits<System>::STACK_SIZE * (cpu_id + 1) - 2 * sizeof(int);
 
-    db<Setup>(TRC) << "PC_Setup::call_next(ip=" << ip << ",sp=" << (void *)sp << ") => ";
+    db<Setup>(TRC) << "PC_Setup::call_next(ip=" << ip << ",sp=" << sp << ") => ";
     if(si->lm.has_ini)
         db<Setup>(TRC) << "INIT" << endl;
     else if(si->lm.has_sys)
         db<Setup>(TRC) << "SYSTEM" << endl;
     else
         db<Setup>(TRC) << "APPLICATION" << endl;
+
+    db<Setup>(INF) << "System_Info=" << *si << endl;
 
     db<Setup>(INF) << "SETUP ends here!" << endl;
 

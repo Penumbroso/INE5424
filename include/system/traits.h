@@ -129,8 +129,7 @@ template <> struct Traits<Thread>: public Traits<void>
 
 template <> struct Traits<Scheduler<Thread> >: public Traits<void>
 {
-    static const bool debugged = hysterically_debugged;
-};
+c};
 
 template <> struct Traits<Address_Space>: public Traits<void>
 {

@@ -12,18 +12,6 @@ __CTOR_END__:
 __DTOR_END__:
 	.long	0
 
-	.section	.eh_frame,"a",@progbits
-	.align 4
-	.type	__FRAME_END__, @object
-__FRAME_END__:
-	.long	0
-
-	.section	.jcr,"aw",@progbits
-	.align 4
-	.type	__JCR_END__, @object
-__JCR_END__:
-	.long	0
-
 	.text
 	.p2align 4,,15
 	.globl	__do_global_ctors_aux
@@ -35,15 +23,15 @@ __do_global_ctors_aux:
 	subl	$4, %esp
 	movl	$__CTOR_END__-4, %ebx
 	movl	__CTOR_END__-4, %eax
-	jmp	.L8
+	jmp	.L2
 	.p2align 4,,7
-.L10:
+.L1:
 	subl	$4, %ebx
 	call	*%eax
 	movl	(%ebx), %eax
-.L8:
+.L2:
 	cmpl	$-1, %eax
-	jne	.L10
+	jne	.L1
 	popl	%eax
 	popl	%ebx
 	popl	%ebp
