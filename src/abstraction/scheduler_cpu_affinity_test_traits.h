@@ -25,8 +25,8 @@ template <> struct Traits<Build>
     enum {PC};
     static const unsigned int MACH = PC;
 
-    static const unsigned int CPUS = 1;
-    static const unsigned int NODES = 2; // > 1 => NETWORKING
+    static const unsigned int CPUS = 8;
+    static const unsigned int NODES = 1; // > 1 => NETWORKING    
 };
 
 
@@ -55,8 +55,8 @@ template <> struct Traits<Heap>: public Traits<void>
 };
 
 
-// System Parts (mostly to fine control debugging)
-template <> struct Traits<Boot>: public Traits<void>
+// System Parts (mostly to fine controlling tracing)
+template<> struct Traits<Boot>: public Traits<void>
 {
 };
 
@@ -120,18 +120,18 @@ template <> struct Traits<Thread>: public Traits<void>
 {
     static const bool smp = Traits<System>::multicore;
 
-    typedef Scheduling_Criteria::RR Criterion;
+    typedef Scheduling_Criteria::CPU_Affinity Criterion;
     static const unsigned int QUANTUM = 10000; // us
 
     static const bool trace_idle = hysterically_debugged;
 };
 
-template <> struct Traits<Scheduler<Thread> >: public Traits<void>
+template<> struct Traits<Scheduler<Thread> >: public Traits<void>
 {
-    static const bool debugged = Traits<Thread>::trace_idle || hysterically_debugged;
+    static const bool debugged = hysterically_debugged;
 };
 
-template <> struct Traits<Periodic_Thread>: public Traits<void>
+template<> struct Traits<Periodic_Thread>: public Traits<void>
 {
     static const bool simulate_capacity = false;
 };
