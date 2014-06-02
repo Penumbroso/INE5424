@@ -129,6 +129,12 @@ template <> struct Traits<Thread>: public Traits<void>
 
 template <> struct Traits<Scheduler<Thread> >: public Traits<void>
 {
+    static const bool debugged = Traits<Thread>::trace_idle || hysterically_debugged;
+};
+
+template <> struct Traits<Periodic_Thread>: public Traits<void>
+{
+    static const bool simulate_capacity = false;
 };
 
 template <> struct Traits<Address_Space>: public Traits<void>

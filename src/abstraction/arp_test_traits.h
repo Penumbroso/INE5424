@@ -88,7 +88,7 @@ __BEGIN_SYS
 
 template <> struct Traits<Application>: public Traits<void>
 {
-    static const unsigned int STACK_SIZE = 256 * 1024;
+    static const unsigned int STACK_SIZE = 16 * 1024;
     static const unsigned int HEAP_SIZE = 16 * 1024 * 1024;
 };
 
@@ -154,6 +154,38 @@ template <> struct Traits<Alarm>: public Traits<void>
 template <> struct Traits<Synchronizer>: public Traits<void>
 {
     static const bool enabled = Traits<System>::multithread;
+};
+
+template<> struct Traits<IP>: public Traits<void>
+{
+    static const bool enabled = (Traits<Build>::NODES > 1);
+
+    static const bool debugged = true;
+
+    static const unsigned int RETRIES = 3;
+    static const unsigned int TIMEOUT = 10; // s
+
+    enum {STATIC, MAC, INFO, RARP, DHCP};
+
+    struct Default_Config {
+        static const unsigned int  TYPE    = DHCP;
+        static const unsigned long ADDRESS = 0;
+        static const unsigned long NETMASK = 0;
+        static const unsigned long GATEWAY = 0;
+    };
+
+    template<unsigned int UNIT>
+    struct Config: public Default_Config {};
+
+    static const unsigned int TTL  = 0x40; // Time-to-live
+};
+
+template<> struct Traits<IP>::Config<0>: public Traits<IP>::Default_Config
+{
+    static const unsigned int  TYPE      = MAC;
+    static const unsigned long ADDRESS   = 0x0a000100;   // 10.0.1.x x=MAC[5]
+    static const unsigned long NETMASK   = 0xffffff00;   // 255.255.255.0
+    static const unsigned long GATEWAY   = 0x0a000101;   // 10.0.1.1
 };
 
 __END_SYS

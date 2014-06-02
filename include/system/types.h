@@ -137,6 +137,7 @@ class Alarm;
 class Chronometer;
 
 // Abstractions - Network
+class IP;
 
 
 // System Components IDs
@@ -174,6 +175,8 @@ enum
     ALARM_ID,
     CHRONOMETER_ID,
 
+    IP_ID,
+
     UNKNOWN_TYPE_ID,
     LAST_TYPE_ID = UNKNOWN_TYPE_ID - 1
 };
@@ -200,6 +203,7 @@ template<> struct Type<Active> { static const Type_Id ID = ACTIVE_ID; };
 template<> struct Type<Task> { static const Type_Id ID = TASK_ID; };
 template<> struct Type<Address_Space> { static const Type_Id ID = ADDRESS_SPACE_ID; };
 template<> struct Type<Segment> { static const Type_Id ID = SEGMENT_ID; };
+template<> struct Type<IP> { static const Type_Id ID = IP_ID; };
 
 __END_SYS
 
