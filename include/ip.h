@@ -204,6 +204,96 @@ public:
 
     typedef Packet PDU;
 
+
+    class Router;
+
+    class Route
+    {
+        friend class Router;
+
+    private:
+        typedef Simple_List<Route> Table;
+        typedef Table::Element Element;
+
+    public:
+        Route(NIC * nic, IP * ip, ARP<NIC, IP> * arp, const Address & d, const Address & g, const Address & m, unsigned int t = 0, unsigned int w = 0)
+        : _destination(d), _gateway(g), _genmask(m), _flags(t), _metric(w), _nic(nic), _ip(ip), _arp(arp), _link(this) {}
+
+        const Address & gateway() const { return _gateway; }
+        NIC * nic() { return _nic; }
+        IP * ip() { return _ip; }
+        ARP<NIC, IP> * arp() { return _arp; }
+
+        friend Debug & operator<<(Debug & db, const Route & r) {
+            db << "{d=" << r._destination
+                << ",g=" << r._gateway
+                << ",m=" << r._genmask
+                << ",f=" << r._flags
+                << ",w=" << r._metric
+                << ",nic=" << r._nic
+                << ",ip=" << r._ip
+                << "}";
+            return db;
+        }
+
+    private:
+        Address _destination;
+        Address _gateway;
+        Address _genmask;
+        unsigned int _flags;
+        unsigned int _metric;
+        NIC * _nic;
+        IP * _ip;
+        ARP<NIC, IP> * _arp;
+
+        Element _link;
+    };
+
+
+    class Router
+    {
+    private:
+        typedef Route::Table::Element Element;
+
+    public:
+        void insert(NIC * nic, IP * ip, ARP<NIC, IP> * arp, const Address & d, const Address & g, const Address & m, unsigned int t = 0, unsigned int w = 0) {
+            Route * route = new (SYSTEM) Route(nic, ip, arp, d, g, m, t, w);
+
+            db<IP>(TRC) << "IP::Router::insert() => " << *route << endl;
+
+            _table.insert(&route->_link);
+        }
+
+        void remove(const Address & to) {
+            db<IP>(TRC) << "IP::Router::remove(to=" << to << ")" << endl;
+
+            Element * e = _table.head();
+            for(; e && ((to & e->object()->_genmask) != e->object()->_destination); e = e->next());
+            if(e) {
+                db<IP>(INF) << "IP::Router::remove: removing and deleting " << *e->object() << endl;
+
+                _table.remove(e);
+                delete e->object();
+            }
+        }
+
+        Route * search(Address to) { // Assume default (0.0.0.0) to have genmask 0.0.0.0 and be the last route in table
+            db<IP>(TRC) << "IP::Route::search(to=" << to << ")" << endl;
+
+            Element * e = _table.head();
+            for(; e && ((to & e->object()->_genmask) != e->object()->_destination); e = e->next());
+            if(e) {
+                db<IP>(INF) << "IP::Route::search: found route to " << to << " => " << *e->object() << endl;
+                return e->object();
+            } else
+                return 0;
+        }
+
+    private:
+        Route::Table _table;
+    };
+
+
 public:
     IP(NIC * nic): _nic(nic), _arp(_nic, this), _address(Traits<IP>::Config<0>::ADDRESS), _netmask(Traits<IP>::Config<0>::NETMASK),
                    _broadcast((_address & _netmask) | ~_netmask), _gateway(Traits<IP>::Config<0>::GATEWAY) {
@@ -237,6 +327,8 @@ protected:
     Address _netmask;
     Address _broadcast;
     Address _gateway;
+
+    static Router _router;
 };
 
 __END_SYS

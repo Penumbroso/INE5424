@@ -8,6 +8,7 @@ __BEGIN_SYS
 
 // Class attributes
 unsigned short IP::Header::_next_id = 0;
+IP::Router IP::_router;
 
 
 // Methods
@@ -33,27 +34,36 @@ IP::Buffer * IP::alloc(const Address & to, const Protocol & prot, unsigned int o
 {
     db<IP>(TRC) << "IP::alloc(to=" << to << ",prot=" << prot << ",on=" << once<< ",pl=" << payload << ")" << endl;
 
-    MAC_Address mac = _arp.resolve(to);
+    Route * through = _router.search(to);
+    IP * ip = through->ip();
+    NIC * nic = through->nic();
+
+    MAC_Address mac = through->arp()->resolve((through->gateway() == through->ip()->address()) ? to : through->gateway());
     if(!mac) {
          db<IP>(WRN) << "IP::alloc: destination host (" << to << ") unreachable!" << endl;
          return 0;
     }
 
-    Buffer * buf = _nic->alloc(_nic, mac, NIC::IP, once, sizeof(IP::Header), payload);
+    Buffer * pool = nic->alloc(nic, mac, NIC::IP, once, sizeof(IP::Header), payload);
 
-    Header header(_address, to, prot, 0); // length will be defined latter for each fragment
+    Header header(ip->address(), to, prot, 0); // length will be defined latter for each fragment
 
-    Packet * packet = buf->frame()->data<Packet>();
+    unsigned int offset = 0;
+    for(Buffer::Element * el = pool->link(); el; el = el->next()) {
+        Packet * packet = el->object()->frame()->data<Packet>();
 
-    // Setup header
-    memcpy(packet->header(), &header, sizeof(Header));
-    packet->flags(0);
-    packet->length(buf->size());
-    packet->offset(0);
-    packet->header()->sum();
-    db<IP>(INF) << "IP::alloc:pkt=" << packet << " => " << *packet << endl;
+        // Setup header
+        memcpy(packet->header(), &header, sizeof(Header));
+        packet->flags(el->next() ? Header::MF : 0);
+        packet->length(el->object()->size());
+        packet->offset(offset);
+        packet->header()->sum();
+        db<IP>(INF) << "IP::alloc:pkt=" << packet << " => " << *packet << endl;
 
-    return buf;
+        offset += MAX_FRAGMENT;
+    }
+
+    return pool;
 }
 
 
