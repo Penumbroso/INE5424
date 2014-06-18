@@ -5,8 +5,6 @@
 #include <address_space.h>
 #include <segment.h>
 
-extern "C" { void __epos_library_app_entry(void); }
-
 __BEGIN_SYS
 
 class Init_System
@@ -34,12 +32,6 @@ public:
         db<Init>(INF) << "Initializing the CPU: " << endl;
         CPU::init();
         db<Init>(INF) << "done!" << endl;
-
-        // If EPOS is a library then adjust the application entry point (that
-        // was set by SETUP) based on the ELF SYSTEM+APPLICATION image
-        System_Info<Machine> * si = System::info();
-        if(!si->lm.has_sys)
-            si->lmm.app_entry = reinterpret_cast<unsigned int>(&__epos_library_app_entry);
 
         // Initialize System's heap
         db<Init>(INF) << "Initializing system's heap: " << endl;

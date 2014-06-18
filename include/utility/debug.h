@@ -111,12 +111,13 @@ db(Debug_Trace l)
     return Select_Debug<((Traits<T1>::debugged || Traits<T2>::debugged) && Traits<Debug>::trace)>();
 }
 
-union Debug_Level
+
+class Assert
 {
-    Debug_Error err;
-    Debug_Warning wrn;
-    Debug_Info inf;
-    Debug_Trace trc;
+public:
+    static void fail(const char * __assertion, const char * __file, unsigned int __line, const char * __function) {
+        db<void>(ERR) << "Assertion fail: " << __assertion << ", function=" << __function << ", file=" << __file << ", line=" << __line << EPOS::endl;
+    }
 };
 
 __END_SYS

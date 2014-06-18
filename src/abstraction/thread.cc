@@ -313,7 +313,7 @@ void Thread::reschedule(unsigned int cpu)
 }
 
 
-void Thread::rescheduler(unsigned int irq)
+void Thread::rescheduler(const IC::Interrupt_Id & interrupt)
 {
     lock();
 

@@ -41,6 +41,7 @@ __BEGIN_SYS
 // manually initialized before use (at setup())
 OStream kout, kerr;
 OStream::Endl endl;
+OStream::Begl begl;
 
 // "_start" Synchronization Globals
 volatile char * Stacks;
@@ -93,7 +94,6 @@ private:
     // System_Info Imports
     typedef System_Info<PC>::Boot_Map BM;
     typedef System_Info<PC>::Physical_Memory_Map PMM;
-    typedef System_Info<PC>::Logical_Memory_Map LMM;
     typedef System_Info<PC>::Load_Map LM;
 
 public:
@@ -102,7 +102,6 @@ public:
 private:
     void build_lm();
     void build_pmm();
-    void build_lmm();
     void get_node_id();
 
     void say_hi();
@@ -134,7 +133,7 @@ PC_Setup::PC_Setup(char * boot_image)
     bi = reinterpret_cast<char *>(boot_image);
     si = reinterpret_cast<System_Info<PC> *>(bi);
 
-    Display::remap();
+    Display::init();
 
     // Multicore conditional start up
     int cpu_id = Machine::cpu_id();
@@ -158,7 +157,6 @@ PC_Setup::PC_Setup(char * boot_image)
     	// Build the memory model
         build_lm();
         build_pmm();
-        build_lmm();
 
         // Try to obtain a node id for this machine
         get_node_id();
@@ -229,6 +227,7 @@ void PC_Setup::build_lm()
 
     // Check SETUP integrity and get the size of its segments
     si->lm.stp_entry = 0;
+    si->lm.stp_segments = 0;
     si->lm.stp_code = ~0U;
     si->lm.stp_code_size = 0;
     si->lm.stp_data = ~0U;
@@ -241,6 +240,7 @@ void PC_Setup::build_lm()
         }
 
         si->lm.stp_entry = stp_elf->entry();
+        si->lm.stp_segments = stp_elf->segments();
         si->lm.stp_code = stp_elf->segment_address(0);
         si->lm.stp_code_size = stp_elf->segment_size(0);
         if(stp_elf->segments() > 1) {
@@ -269,6 +269,7 @@ void PC_Setup::build_lm()
         }
 
         si->lm.ini_entry = ini_elf->entry();
+        si->lm.ini_segments = ini_elf->segments();
         si->lm.ini_code = ini_elf->segment_address(0);
         si->lm.ini_code_size = ini_elf->segment_size(0);
         if(ini_elf->segments() > 1) {
@@ -299,6 +300,7 @@ void PC_Setup::build_lm()
         }
 
         si->lm.sys_entry = sys_elf->entry();
+        si->lm.sys_segments = sys_elf->segments();
         si->lm.sys_code = sys_elf->segment_address(0);
         si->lm.sys_code_size = sys_elf->segment_size(0);
         if(sys_elf->segments() > 1) {
@@ -312,7 +314,7 @@ void PC_Setup::build_lm()
         }
 
         if(si->lm.sys_code != SYS_CODE) {
-            db<Setup>(ERR) << "OS code segment address does not match the machine's memory map!" << endl;
+            db<Setup>(ERR) << "OS code segment address (" << si->lm.sys_code << ") does not match the machine's memory map (" << SYS_CODE << ")!" << endl;
             panic();
         }
         if(si->lm.sys_code + si->lm.sys_code_size > si->lm.sys_data) {
@@ -455,12 +457,6 @@ void PC_Setup::build_pmm()
         si->pmm.ext_base = 0;
         si->pmm.ext_top = 0;
     }	
-}
-
-//========================================================================
-void PC_Setup::build_lmm()
-{
-    si->lmm.app_entry = si->lm.app_entry;
 }
 
 //========================================================================

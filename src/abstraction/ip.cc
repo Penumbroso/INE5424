@@ -8,8 +8,10 @@ __BEGIN_SYS
 
 // Class attributes
 unsigned short IP::Header::_next_id = 0;
+IP * IP::_networks[];
 IP::Router IP::_router;
-
+IP::Reassembling IP::_reassembling;
+IP::Observed IP::_observed;
 
 // Methods
 void IP::config_by_info()
@@ -27,6 +29,7 @@ void IP::config_by_dhcp()
 
 IP::~IP()
 {
+    _nic.detach(this, NIC::IP);
 }
 
 
@@ -72,6 +75,59 @@ int IP::send(Buffer * buf)
     db<IP>(TRC) << "IP::send(buf=" << buf << ")" << endl;
 
     return buf->nic()->send(buf); // implicitly releases the pool
+}
+
+
+void IP::update(NIC::Observed * nic, int prot, Buffer * buf)
+{
+    db<IP>(TRC) << "IP::update(nic=" << nic << ",prot=" << hex << prot << dec << ",buf=" << buf << ")" << endl;
+
+    Packet * packet = buf->frame()->data<Packet>();
+    db<IP>(TRC) << "IP::update:pkt=" << packet << " => " << *packet << endl;
+
+    if((packet->to() != _address) && (packet->to() != _broadcast)) {
+        db<IP>(WRN) << "IP::update: not for me!" << endl;
+        if(packet->to() != Address(Address::BROADCAST))
+            db<IP>(WRN) << "IP::update: routing not implemented!" << endl;
+        _nic.free(buf);
+        return;
+    }
+
+    if(!packet->check()) {
+        db<IP>(WRN) << "IP::update: wrong packet header checksum!" << endl;
+        _nic.free(buf);
+        return;
+    }
+
+    buf->nic(&_nic);
+
+    if((packet->flags() & Header::MF) || (packet->offset() != 0)) { // Fragmented
+        Fragmented * frag;
+        Key key = ((packet->from() & ~_netmask) << 16) | packet->id();
+        Reassembling::Element * el = _reassembling.search_key(key);
+
+        if(el)
+            frag = el->object();
+        else {
+            frag = new (SYSTEM) Fragmented(key);
+            _reassembling.insert(frag->link());
+        }
+
+        frag->insert(buf);
+
+        if(frag->reassembled()) {
+            db<IP>(INF) << "IP::update: notifying reassembled datagram" << endl;
+            Buffer * pool = frag->pool();
+            _reassembling.remove(frag->link());
+            delete frag;
+            if(!notify(packet->protocol(), pool))
+                pool->nic()->free(pool);
+        }
+    } else {
+        db<IP>(INF) << "IP::update: notifying whole datagram" << endl;
+        if(!notify(packet->protocol(), buf))
+            buf->nic()->free(buf);
+    }
 }
 
 

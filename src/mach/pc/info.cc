@@ -46,11 +46,8 @@ Debug & operator<<(Debug & db, const System_Info<PC> & si)
        << ",free3_base=" << reinterpret_cast<void *>(si.pmm.free3_base)
        << ",free3_top=" << reinterpret_cast<void *>(si.pmm.free3_top)
        << "}"
-       << "\nLogical_Memory_Map={"
-       << "app_entry=" << reinterpret_cast<void *>(si.lmm.app_entry)
-       << "}"
        << "\nLoad_Map={"
-       << ",has_stp=" << si.lm.has_stp
+       << "has_stp=" << si.lm.has_stp
        << ",has_ini=" << si.lm.has_ini
        << ",has_sys=" << si.lm.has_sys
        << ",has_app=" << si.lm.has_app
@@ -88,7 +85,7 @@ Debug & operator<<(Debug & db, const System_Info<PC> & si)
        << "}"
        << "\nTime_Map={"
        << "cpu_clock=" << si.tm.cpu_clock
-       << "bus_clock=" << si.tm.bus_clock
+       << ",bus_clock=" << si.tm.bus_clock
        << "}"
        << "}";
 

@@ -353,11 +353,11 @@ public:
     }
 
     static void flush_tlb() {
-        ASMV("movl %cr3,%eax");
-        ASMV("movl %eax,%cr3");
+        ASM("movl %cr3,%eax");
+        ASM("movl %eax,%cr3");
     }
     static void flush_tlb(Log_Addr addr) {
-        ASMV("invlpg %0" : : "m"(addr));
+        ASM("invlpg %0" : : "m"(addr));
     }
 
 private:

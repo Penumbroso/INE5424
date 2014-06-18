@@ -42,6 +42,11 @@ template <> struct Traits<PC>: public Traits<PC_Common>
     static const unsigned int SYS       = IO_TOP;     // 4 GB - 12 MB
     static const unsigned int SYS_CODE  = 0xff700000;
     static const unsigned int SYS_DATA  = 0xff740000;
+
+    // Default Sizes and Quantities
+    static const unsigned int STACK_SIZE = 256 * 1024;
+    static const unsigned int HEAP_SIZE = MEM_TOP / 2;
+    static const unsigned int MAX_THREADS = 32;
 };
 
 template <> struct Traits<PC_PCI>: public Traits<PC_Common>
@@ -79,7 +84,15 @@ template <> struct Traits<PC_EEPROM>: public Traits<PC_Common>
 
 template <> struct Traits<PC_UART>: public Traits<PC_Common>
 {
+    static const unsigned int UNITS = 2;
+
     static const unsigned int CLOCK = 1843200; // 1.8432 MHz
+
+    static const unsigned int DEF_BAUD_RATE = 115200;
+    static const unsigned int DEF_DATA_BITS = 8;
+    static const unsigned int DEF_PARITY = 0; // none
+    static const unsigned int DEF_STOP_BITS = 1;
+
     static const unsigned int COM1 = 0x3f8; // to 0x3ff, IRQ4
     static const unsigned int COM2 = 0x2f8; // to 0x2ff, IRQ3
     static const unsigned int COM3 = 0x3e8; // to 0x3ef, no IRQ

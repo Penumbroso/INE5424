@@ -32,19 +32,19 @@ Segment::~Segment()
 }
 
 
-unsigned int Segment::size() const 
+unsigned int Segment::size() const
 {
     return Chunk::size();
 }
 
 
-Segment::Phy_Addr Segment::phy_address() const 
+Segment::Phy_Addr Segment::phy_address() const
 {
     return Chunk::phy_address();
 }
 
 
-int Segment::resize(int amount) 
+int Segment::resize(int amount)
 {
     db<Segment>(TRC) << "Segment::resize(amount=" << amount << ")" << endl;
 

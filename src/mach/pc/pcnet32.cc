@@ -164,7 +164,6 @@ int PCNet32::send(Buffer * buf)
 
         // Wait for packet to be sent and unlock the respective buffer
         while(desc->status & Tx_Desc::OWN);
-
         buf->unlock();
     }
 
@@ -176,19 +175,22 @@ void PCNet32::free(Buffer * buf)
 {
     db<PCNet32>(TRC) << "PCNet32::free(buf=" << buf << ")" << endl;
 
-    Rx_Desc * desc = buf->back<Rx_Desc>();
+    for(Buffer::Element * el = buf->link(); el; el = el->next()) {
+        buf = el->object();
+        Rx_Desc * desc = buf->back<Rx_Desc>();
 
-    _statistics.rx_packets++;
-    _statistics.rx_bytes += buf->size();
+        _statistics.rx_packets++;
+        _statistics.rx_bytes += buf->size();
 
-    // Release the buffer to the NIC
-    desc->size = Reg16(-sizeof(Frame)); // 2's comp.
-    desc->status = Rx_Desc::OWN; // Owned by NIC
+        // Release the buffer to the NIC
+        desc->size = Reg16(-sizeof(Frame)); // 2's comp.
+        desc->status = Rx_Desc::OWN; // Owned by NIC
 
-    // Release the buffer to the OS
-    buf->unlock();
+        // Release the buffer to the OS
+        buf->unlock();
 
-    db<PCNet32>(INF) << "PCNet32::free:desc=" << desc << " => " << *desc << endl;
+        db<PCNet32>(INF) << "PCNet32::free:desc=" << desc << " => " << *desc << endl;
+    }
 }
 
 
@@ -271,6 +273,9 @@ void PCNet32::reset()
 
     // Activate sending and receiving
     csr(0, CSR0_IENA | CSR0_STRT);
+
+    // Reset statistics
+    new (&_statistics) Statistics;
 }
 
 
@@ -315,7 +320,7 @@ void PCNet32::handle_int()
                     db<PCNet32>(INF) << "PCNet32::handle_int:desc[" << _rx_cur << "]=" << desc << " => " << *desc << endl;
 
                     if(!notify(frame->header()->prot(), buf)) // No one was waiting for this frame, so let it free for receive()
-                        buf->unlock();
+                        free(buf);
                 }
             }
  	}
@@ -348,7 +353,7 @@ void PCNet32::handle_int()
 }
 
 
-void PCNet32::int_handler(unsigned int interrupt)
+void PCNet32::int_handler(const IC::Interrupt_Id & interrupt)
 {
     PCNet32 * dev = get_by_interrupt(interrupt);
 

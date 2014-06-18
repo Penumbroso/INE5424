@@ -3,67 +3,20 @@
 #ifndef __ip_h
 #define __ip_h
 
+#include <utility/bitmap.h>
 #include <nic.h>
 #include <system.h>
 #include <arp.h>
 
 __BEGIN_SYS
 
-class IP
+class IP: private NIC::Observer
 {
-public:
-    // Zero-copy Buffers
-    typedef NIC::Buffer Buffer;
-
-    template<unsigned int SIZE, unsigned int UNIT_SIZE>
-    class Bitmap
-    {
-    public:
-        Bitmap(): _size(SIZE / UNIT_SIZE) { memset(&_map, 0, SIZE / UNIT_SIZE / 8); }
-
-        bool set(unsigned int index) {
-            if(_map[index / UNIT_SIZE])
-                return false;
-            else {
-                _map[index / UNIT_SIZE] = true;
-                return true;
-            }
-        }
-
-        bool reset(unsigned int index) {
-            if(!_map[index / UNIT_SIZE])
-                return false;
-            else {
-                _map[index / UNIT_SIZE] = false;
-                return true;
-            }
-        }
-
-        void resize(unsigned int size) {
-            if(size < SIZE)
-                _size = size / UNIT_SIZE;
-        }
-
-        bool full() const {
-            for(unsigned int i = 0; i < _size; i++)
-                if(!_map[i])
-                    return false;
-            return true;
-        }
-
-        bool empty() const {
-            for(unsigned int i = 0; i < _size; i++)
-                if(_map[i])
-                    return false;
-            return true;
-        }
-
-    private:
-        unsigned int _size;
-        bool _map[SIZE / UNIT_SIZE];
-    };
+    friend class System;
+    template <int unit> friend void call_init();
 
 public:
+    // IP Protocol Id
     static const unsigned int PROTOCOL = NIC::IP;
 
     // Addresses
@@ -80,6 +33,12 @@ public:
         RDP     = 0x1b,
         TTP     = 0x54
     };
+
+
+    // IP and NIC observer/d
+    typedef Data_Observer<NIC::Buffer> Observer;
+    typedef Data_Observed<NIC::Buffer> Observed;
+
 
     // IP Header
     class Header
@@ -205,6 +164,57 @@ public:
     typedef Packet PDU;
 
 
+private:
+    // Buffers received by the NIC, eventually linked into a list
+    typedef NIC::Buffer Buffer;
+
+    // Fragment key = f(from, id) = (from & ~_netmask) << 16 | id (fragmentation can only happen on localnet)
+    typedef unsigned long Key;
+
+    // List to hold received Buffers containing datagram fragments
+    class Fragmented;
+    typedef Simple_Hash<Fragmented, Traits<Build>::NODES, Key> Reassembling;
+
+    class Fragmented
+    {
+    private:
+        static const unsigned int MAX_SIZE = (MTU + MAX_FRAGMENT - 1) / MAX_FRAGMENT;
+        typedef Reassembling::Element Element;
+
+    public:
+        Fragmented(const Key & key): _handler(&timeout, this), _alarm(Traits<IP>::TIMEOUT, &_handler), _link(this, key) { _size = MAX_SIZE; }
+
+        void insert(Buffer * buf) {
+            Packet * packet = buf->frame()->data<Packet>();
+
+            db<IP>(TRC) << "IP::Fragmented::insert(bms=" << _size << ",buf=" << buf << ") => " << *packet << endl;
+
+            if(_bitmap.set(packet->offset() / MAX_FRAGMENT))
+                _list.insert(buf->link());
+
+            if(!(packet->flags() & Header::MF))
+                _size = (packet->offset() + MAX_FRAGMENT) / MAX_FRAGMENT;
+        }
+
+        bool reassembled() const { return _bitmap.full(_size); }
+
+        Buffer * pool() { return _list.head()->object(); }
+
+        Element * link() { return &_link; }
+
+    private:
+        static void timeout(Fragmented * frag) { delete frag; }
+
+    private:
+        unsigned int _size;
+        Bitmap<MAX_SIZE> _bitmap;
+        Buffer::List _list;
+        Functor_Handler<Fragmented> _handler;
+        Alarm _alarm;
+        Element _link;
+    };
+
+
     class Router;
 
     class Route
@@ -216,8 +226,8 @@ public:
         typedef Table::Element Element;
 
     public:
-        Route(NIC * nic, IP * ip, ARP<NIC, IP> * arp, const Address & d, const Address & g, const Address & m, unsigned int t = 0, unsigned int w = 0)
-        : _destination(d), _gateway(g), _genmask(m), _flags(t), _metric(w), _nic(nic), _ip(ip), _arp(arp), _link(this) {}
+        Route(NIC * nic, IP * ip, ARP<NIC, IP> * arp, const Address & d, const Address & g, const Address & m, unsigned int t = 0, unsigned int w = 0):
+            _destination(d), _gateway(g), _genmask(m), _flags(t), _metric(w), _nic(nic), _ip(ip), _arp(arp), _link(this) {}
 
         const Address & gateway() const { return _gateway; }
         NIC * nic() { return _nic; }
@@ -277,7 +287,9 @@ public:
             }
         }
 
-        Route * search(Address to) { // Assume default (0.0.0.0) to have genmask 0.0.0.0 and be the last route in table
+        Route * search(Address to) {
+            // Assume default (0.0.0.0) to have genmask 0.0.0.0 and be the last route in table
+            // Assume all routes to be network routes (i.g. flags "G")
             db<IP>(TRC) << "IP::Route::search(to=" << to << ")" << endl;
 
             Element * e = _table.head();
@@ -295,32 +307,69 @@ public:
 
 
 public:
-    IP(NIC * nic): _nic(nic), _arp(_nic, this), _address(Traits<IP>::Config<0>::ADDRESS), _netmask(Traits<IP>::Config<0>::NETMASK),
-                   _broadcast((_address & _netmask) | ~_netmask), _gateway(Traits<IP>::Config<0>::GATEWAY) {
-        if(Traits<IP>::Config<0>::TYPE == Traits<IP>::MAC)
-            _address[sizeof(Address) -1] = _nic->address()[sizeof(MAC_Address) - 1];
-    }
+    template<unsigned int UNIT = 0>
+    IP(unsigned int nic = UNIT);
     ~IP();
 
-    Buffer * alloc(const Address & to, const Protocol & prot, unsigned int once, unsigned int payload);
+    void reconfigure(const Address & a, const Address & m, const Address & g) {
+        _address = a;
+        _netmask = m;
+        _broadcast = (a & m) | ~m;
+        _gateway = g;
+    }
 
-    int send(Buffer * buf);
+    NIC * nic() { return &_nic; }
+    ARP<NIC, IP> * arp() { return &_arp; }
+    Router * router() { return &_router; }
 
     const Address & address() const { return _address; }
+    const Address & broadcast() const { return _broadcast; }
+    const Address & gateway() const { return _gateway; }
+    const Address & netmask() const { return _netmask; }
 
-    MAC_Address  arp(const Address & addr) { return _arp.resolve(addr); }
+    static IP * get_by_nic(unsigned int unit) {
+        if(unit >= Traits<NIC>::UNITS) {
+            db<IP>(WRN) << "IP::get_by_nic: requested unit (" << unit << ") does not exist!" << endl;
+            return 0;
+        } else
+            return _networks[unit];
+    }
+
+    static Route * route(const Address & to) { return _router.search(to); }
+
+    static Buffer * alloc(const Address & to, const Protocol & prot, unsigned int once, unsigned int payload);
+    static int send(Buffer * buf);
 
     static const unsigned int mtu() { return MTU; }
 
     static unsigned short checksum(const void * data, unsigned int size);
 
+    static void attach(Observer * obs, const Protocol & prot) { _observed.attach(obs, prot); }
+    static void detach(Observer * obs, const Protocol & prot) { _observed.detach(obs, prot); }
+    bool notify(const Protocol & prot, Buffer * buf) { return _observed.notify(prot, buf); }
+
+    friend Debug & operator<<(Debug & db, const IP & ip) {
+        db << "{a=" << ip._address
+           << ",m=" << ip._netmask
+           << ",b=" << ip._broadcast
+           << ",g=" << ip._gateway
+           << ",nic=" << &ip._nic
+           << "}";
+        return db;
+    }
+
 private:
+    void config_by_mac() { _address[sizeof(Address) -1] = _nic.address()[sizeof(MAC_Address) - 1]; }
     void config_by_info();
     void config_by_rarp();
     void config_by_dhcp();
 
+    void update(NIC::Observed * nic, int prot, Buffer * buf);
+
+    static void init(unsigned int unit);
+
 protected:
-    NIC * _nic;
+    NIC _nic;
     ARP<NIC, IP> _arp;
 
     Address _address;
@@ -328,7 +377,10 @@ protected:
     Address _broadcast;
     Address _gateway;
 
+    static IP * _networks[Traits<NIC>::UNITS];
     static Router _router;
+    static Reassembling _reassembling;
+    static Observed _observed; // shared by all IP instances, so the default for binding on a port is for all IPs
 };
 
 __END_SYS
