@@ -3,6 +3,7 @@
 #include <utility/string.h>
 #include <arp.h>
 #include <ip.h>
+#include <udp.h>
 
 __BEGIN_SYS
 

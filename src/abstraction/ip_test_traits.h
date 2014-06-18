@@ -200,6 +200,11 @@ template<> struct Traits<IP>::Config<0>: public Traits<IP>::Default_Config
     static const unsigned long GATEWAY   = 0x0a000101;   // 10.0.1.1
 };
 
+template<> struct Traits<UDP>: public Traits<Network>
+{
+    static const bool checksum = false;
+};
+
 __END_SYS
 
 #endif

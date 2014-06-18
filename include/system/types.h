@@ -137,7 +137,14 @@ class Alarm;
 class Chronometer;
 
 // Abstractions - Network
+template<typename NIC, typename Network, unsigned int HTYPE = 1>
+class ARP;
+class Network;
 class IP;
+class ICMP;
+class UDP;
+class TCP;
+class DHCP;
 
 
 // System Components IDs
