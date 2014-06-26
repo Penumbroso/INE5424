@@ -76,6 +76,8 @@ int PCNet32::receive(Address * src, Protocol * prot, void * data, unsigned int s
     Frame * frame = buf->frame();
     *src = frame->src();
     *prot = frame->prot();
+
+    // For the upper layers, size will represent the size of frame->data<T>()
     buf->size((desc->misc & 0x00000fff) - sizeof(Header) - sizeof(CRC));
 
     // Copy the data
@@ -312,6 +314,7 @@ void PCNet32::handle_int()
                     Rx_Desc * desc = &_rx_ring[_rx_cur];
                     Frame * frame = buf->frame();
 
+                    // For the upper layers, size will represent the size of frame->data<T>()
                     buf->size((desc->misc & 0x00000fff) - sizeof(Header) - sizeof(CRC));
 
                     db<PCNet32>(TRC) << "PCNet32::int:receive(s=" << frame->src() << ",p=" << hex << frame->header()->prot() << dec
@@ -319,8 +322,11 @@ void PCNet32::handle_int()
 
                     db<PCNet32>(INF) << "PCNet32::handle_int:desc[" << _rx_cur << "]=" << desc << " => " << *desc << endl;
 
+                    IC::disable(IC::irq2int(_irq));
                     if(!notify(frame->header()->prot(), buf)) // No one was waiting for this frame, so let it free for receive()
                         free(buf);
+                    // TODO: this serialization is much too restrictive. It was done this way for students to play with
+                    IC::enable(IC::irq2int(_irq));
                 }
             }
  	}

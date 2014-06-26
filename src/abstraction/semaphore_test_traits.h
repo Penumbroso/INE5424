@@ -25,7 +25,7 @@ template <> struct Traits<Build>
     enum {PC};
     static const unsigned int MACH = PC;
 
-    static const unsigned int CPUS = 4;
+    static const unsigned int CPUS = 1;
     static const unsigned int NODES = 1; // > 1 => NETWORKING
 };
 
@@ -120,7 +120,7 @@ template <> struct Traits<Thread>: public Traits<void>
 {
     static const bool smp = Traits<System>::multicore;
 
-    typedef Scheduling_Criteria::CPU_Affinity Criterion;
+    typedef Scheduling_Criteria::RR Criterion;
     static const unsigned int QUANTUM = 10000; // us
 
     static const bool trace_idle = hysterically_debugged;
@@ -156,38 +156,9 @@ template <> struct Traits<Synchronizer>: public Traits<void>
     static const bool enabled = Traits<System>::multithread;
 };
 
-template<> struct Traits<IP>: public Traits<void>
-{
-    static const bool enabled = (Traits<Build>::NODES > 1);
-
-    static const bool debugged = true;
-
-    static const unsigned int RETRIES = 3;
-    static const unsigned int TIMEOUT = 10; // s
-
-    enum {STATIC, MAC, INFO, RARP, DHCP};
-
-    struct Default_Config {
-        static const unsigned int  TYPE    = DHCP;
-        static const unsigned long ADDRESS = 0;
-        static const unsigned long NETMASK = 0;
-        static const unsigned long GATEWAY = 0;
-    };
-
-    template<unsigned int UNIT>
-    struct Config: public Default_Config {};
-
-    static const unsigned int TTL  = 0x40; // Time-to-live
-};
-
-template<> struct Traits<IP>::Config<0>: public Traits<IP>::Default_Config
-{
-    static const unsigned int  TYPE      = MAC;
-    static const unsigned long ADDRESS   = 0x0a000100;   // 10.0.1.x x=MAC[5]
-    static const unsigned long NETMASK   = 0xffffff00;   // 255.255.255.0
-    static const unsigned long GATEWAY   = 0x0a000101;   // 10.0.1.1
-};
-
 __END_SYS
 
+#include "network_traits.h"
+
 #endif
+

@@ -87,7 +87,7 @@ public:
         unsigned short checksum() const { return ntohs(_checksum); }
 
         void sum() { _checksum = 0; _checksum = htons(IP::checksum(reinterpret_cast<unsigned char *>(this), _ihl * 4)); }
-        bool check() { return !IP::checksum(reinterpret_cast<unsigned char *>(this), _ihl * 4); }
+        bool check() { return (IP::checksum(reinterpret_cast<unsigned char *>(this), _ihl * 4) != 0xffff); }
 
         const Address & from() const { return _from; }
         void from(const Address & from){ _from = from; }
@@ -141,11 +141,6 @@ public:
         Packet() {}
         Packet(const Address & from, const Address & to, const Protocol & prot, unsigned int size):
             Header(from, to, prot, size + sizeof(Header)) {}
-        Packet(const Address & from, const Address & to, const Protocol & prot, const void * data, unsigned int size):
-            Header(from, to, prot, size + sizeof(Header)) {
-            header()->sum();
-            memcpy(_data, data, size > sizeof(Data) ? sizeof(Data) : size);
-        }
 
         Header * header() { return this; }
 
@@ -182,7 +177,7 @@ private:
         typedef Reassembling::Element Element;
 
     public:
-        Fragmented(const Key & key): _handler(&timeout, this), _alarm(Traits<IP>::TIMEOUT, &_handler), _link(this, key) { _size = MAX_SIZE; }
+        Fragmented(const Key & key): _size(MAX_SIZE), _handler(&timeout, this), _alarm(Traits<IP>::TIMEOUT * 1000000, &_handler), _link(this, key) {}
 
         void insert(Buffer * buf) {
             Packet * packet = buf->frame()->data<Packet>();
@@ -203,7 +198,10 @@ private:
         Element * link() { return &_link; }
 
     private:
-        static void timeout(Fragmented * frag) { delete frag; }
+        static void timeout(Fragmented * frag) {
+            frag->pool()->nic()->free(frag->pool());
+            delete frag;
+        }
 
     private:
         unsigned int _size;

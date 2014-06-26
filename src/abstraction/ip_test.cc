@@ -11,7 +11,7 @@ OStream cout;
 
 int udp_test()
 {
-    char data[20000];
+    char data[1000];
     Link<UDP> * comm;
 
     IP * ip = IP::get_by_nic(0);
@@ -77,7 +77,7 @@ int udp_test()
             if(received == sizeof(data))
                 cout << "  Data: " << data << endl;
             else
-                cout << "  Data was not correctly received. It was " << sizeof(data) << " bytes long, but only " << received << "bytes were received!"<< endl;
+                cout << "  Data was not correctly received. It was " << sizeof(data) << " bytes long, but " << received << " bytes were received!"<< endl;
         }
     }
 

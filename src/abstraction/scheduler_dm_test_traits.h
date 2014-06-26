@@ -159,4 +159,7 @@ template <> struct Traits<Synchronizer>: public Traits<void>
 
 __END_SYS
 
+#include "network_traits.h"
+
 #endif
+

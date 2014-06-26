@@ -84,10 +84,10 @@ void IP::update(NIC::Observed * nic, int prot, Buffer * buf)
     db<IP>(TRC) << "IP::update(nic=" << nic << ",prot=" << hex << prot << dec << ",buf=" << buf << ")" << endl;
 
     Packet * packet = buf->frame()->data<Packet>();
-    db<IP>(TRC) << "IP::update:pkt=" << packet << " => " << *packet << endl;
+    db<IP>(INF) << "IP::update:pkt=" << packet << " => " << *packet << endl;
 
     if((packet->to() != _address) && (packet->to() != _broadcast)) {
-        db<IP>(WRN) << "IP::update: not for me!" << endl;
+        db<IP>(INF) << "IP::update: datagram was not for me!" << endl;
         if(packet->to() != Address(Address::BROADCAST))
             db<IP>(WRN) << "IP::update: routing not implemented!" << endl;
         _nic.free(buf);
@@ -102,18 +102,20 @@ void IP::update(NIC::Observed * nic, int prot, Buffer * buf)
 
     buf->nic(&_nic);
 
+    // The Ethernet Frame in Buffer might have been padded, so we need to adjust it to the datagram length
+    buf->size(packet->length());
+
     if((packet->flags() & Header::MF) || (packet->offset() != 0)) { // Fragmented
-        Fragmented * frag;
         Key key = ((packet->from() & ~_netmask) << 16) | packet->id();
         Reassembling::Element * el = _reassembling.search_key(key);
 
+        Fragmented * frag;
         if(el)
             frag = el->object();
         else {
-            frag = new (SYSTEM) Fragmented(key);
+            frag = new (SYSTEM) Fragmented(key); // the Alarm created within Fragmented will reenable interrupts
             _reassembling.insert(frag->link());
         }
-
         frag->insert(buf);
 
         if(frag->reassembled()) {
@@ -121,6 +123,7 @@ void IP::update(NIC::Observed * nic, int prot, Buffer * buf)
             Buffer * pool = frag->pool();
             _reassembling.remove(frag->link());
             delete frag;
+            // TODO: reorder pool
             if(!notify(packet->protocol(), pool))
                 pool->nic()->free(pool);
         }
