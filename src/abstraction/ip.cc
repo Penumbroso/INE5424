@@ -4,6 +4,7 @@
 #include <arp.h>
 #include <ip.h>
 #include <udp.h>
+#include <dhcp.h>
 
 __BEGIN_SYS
 
@@ -25,6 +26,17 @@ void IP::config_by_info()
 
 void IP::config_by_dhcp()
 {
+    db<IP>(TRC) << "IP::config_by_dhcp()" << endl;
+
+    _address = Address::BROADCAST;
+    _broadcast = Address::BROADCAST;
+    _arp.insert(Address::BROADCAST, _nic.broadcast());
+    _router.insert(&_nic, this, &_arp, Address::NULL, Address::BROADCAST, Address::NULL);
+    DHCP::Client(_nic.address(), this);
+    _router.remove(Address::BROADCAST);
+    _arp.remove(Address::BROADCAST);
+
+    db<IP>(TRC) << "IP::config_by_dhcp() => " << *this << endl;
 }
 
 

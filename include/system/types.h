@@ -46,6 +46,7 @@ class Debug;
 class Lists;
 class Spin;
 class Heap;
+class Random;
 
 // System parts
 class Build;
@@ -183,6 +184,10 @@ enum
     CHRONOMETER_ID,
 
     IP_ID,
+    ICMP_ID,
+    UDP_ID,
+    TCP_ID,
+    DHCP_ID,
 
     UNKNOWN_TYPE_ID,
     LAST_TYPE_ID = UNKNOWN_TYPE_ID - 1
@@ -211,6 +216,10 @@ template<> struct Type<Task> { static const Type_Id ID = TASK_ID; };
 template<> struct Type<Address_Space> { static const Type_Id ID = ADDRESS_SPACE_ID; };
 template<> struct Type<Segment> { static const Type_Id ID = SEGMENT_ID; };
 template<> struct Type<IP> { static const Type_Id ID = IP_ID; };
+template<> struct Type<ICMP> { static const Type_Id ID = ICMP_ID; };
+template<> struct Type<UDP> { static const Type_Id ID = UDP_ID; };
+template<> struct Type<TCP> { static const Type_Id ID = TCP_ID; };
+template<> struct Type<DHCP> { static const Type_Id ID = DHCP_ID; };
 
 __END_SYS
 
