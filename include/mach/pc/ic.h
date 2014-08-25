@@ -461,28 +461,28 @@ public:
     }
 
     static void int_vector(Interrupt_Id i, Interrupt_Handler h) {
-        db<IC>(TRC) << "IC::int_vector(int=" << i << ",h=" << reinterpret_cast<void *>(h) <<")" << endl;
+        db<IC>(INF) << "IC::int_vector(int=" << i << ",h=" << reinterpret_cast<void *>(h) <<")" << endl;
         if(i < INTS)
             _int_vector[i] = h;
     }
 
     static void enable() {
-        db<IC>(TRC) << "IC::enable()" << endl;
+        db<IC>(INF) << "IC::enable()" << endl;
         Base::enable();
     }
 
     static void enable(int i) {
-        db<IC>(TRC) << "IC::enable(int=" << i << ")" << endl;
+        db<IC>(INF) << "IC::enable(int=" << i << ")" << endl;
         Base::enable(i);
     }
 
     static void disable() {
-        db<IC>(TRC) << "IC::disable()" << endl;
+        db<IC>(INF) << "IC::disable()" << endl;
         Base::disable();
     }
 
     static void disable(int i) {
-        db<IC>(TRC) << "IC::disable(int=" << i << ")" << endl;
+        db<IC>(INF) << "IC::disable(int=" << i << ")" << endl;
         Base::disable(i);
     }
 
@@ -499,10 +499,8 @@ private:
             if((i != INT_TIMER) || Traits<IC>::hysterically_debugged)
                 db<IC>(TRC) << "IC::dispatch(i=" << i << ")" << endl;
             _int_vector[i](i);
-        } else {
-            if(i != INT_LAST_HARD)
-                db<IC>(TRC) << "IC::spurious interrupt (" << i << ")" << endl;
-        }
+        } else
+            db<IC>(TRC) << "IC::spurious interrupt (" << i << ")" << endl;
     }
 
     static void entry();

@@ -1,4 +1,3 @@
-// EPOS PC Machine Metainfo and Configuration
 #ifndef __pc_traits_h
 #define __pc_traits_h
 
@@ -23,7 +22,7 @@ template <> struct Traits<PC>: public Traits<PC_Common>
 
     // Physical Memory
     static const unsigned int MEM_BASE  = 0x00000000;
-    static const unsigned int MEM_TOP   = 0x10000000; // 256 MB (MAX for 32-bit is 0x70000000 / 1792 MB)
+    static const unsigned int MEM_TOP   = 0x10000000; // 1792 MB (MAX for 32-bit is 0x70000000 / 1792 MB)
 
     // Logical Memory Map
     static const unsigned int BOOT      = 0x00007c00;
@@ -52,7 +51,6 @@ template <> struct Traits<PC_PCI>: public Traits<PC_Common>
 
 template <> struct Traits<PC_IC>: public Traits<PC_Common>
 {
-    static const bool debugged = hysterically_debugged;
 };
 
 template <> struct Traits<PC_Timer>: public Traits<PC_Common>
@@ -92,42 +90,6 @@ template <> struct Traits<PC_Display>: public Traits<PC_Common>
     static const int LINES = 25;
     static const int TAB_SIZE = 8;
     static const unsigned int FRAME_BUFFER_ADDRESS = 0xb8000;
-};
-
-template <> struct Traits<PC_Ethernet>: public Traits<PC_Common>
-{
-    static const bool enabled = (Traits<Build>::NODES > 1);
-
-    typedef LIST<PCNet32> NICS;
-    static const unsigned int UNITS = NICS::Length;
-};
-
-template <> struct Traits<PCNet32>: public Traits<PC_Ethernet>
-{
-    static const unsigned int UNITS = NICS::Count<PCNet32>::Result;
-    static const unsigned int SEND_BUFFERS = 64; // per unit
-    static const unsigned int RECEIVE_BUFFERS = 64; // per unit
-};
-
-template <> struct Traits<E100>: public Traits<PC_Ethernet>
-{
-    static const unsigned int UNITS = NICS::Count<E100>::Result;
-    static const unsigned int SEND_BUFFERS = 64; // per unit
-    static const unsigned int RECEIVE_BUFFERS = 64; // per unit
-};
-
-template <> struct Traits<C905>: public Traits<PC_Ethernet>
-{
-    static const unsigned int UNITS = NICS::Count<C905>::Result;
-    static const unsigned int SEND_BUFFERS = 64; // per unit
-    static const unsigned int RECEIVE_BUFFERS = 64; // per unit
-};
-
-template <> struct Traits<PC_Scratchpad>: public Traits<PC_Common>
-{
-    static const bool enabled = false;
-    static const unsigned int ADDRESS = Traits<PC_Display>::FRAME_BUFFER_ADDRESS;
-    static const unsigned int SIZE = Traits<PC_Display>::LINES * Traits<PC_Display>::COLUMNS;
 };
 
 __END_SYS

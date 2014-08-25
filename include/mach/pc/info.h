@@ -70,8 +70,7 @@ public:
     };
 
     // Load Map (built by SETUP)
-    struct Load_Map
-    {
+    struct Load_Map {
         bool  has_stp;
         bool  has_ini;
         bool  has_sys;
@@ -110,8 +109,7 @@ public:
     };
 
     // Time Map (built by SETUP)
-    struct Time_Map
-    {
+    struct Time_Map {
         unsigned int cpu_clock;
         unsigned int bus_clock;
     };

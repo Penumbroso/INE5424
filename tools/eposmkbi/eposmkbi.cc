@@ -50,8 +50,6 @@ bool parse_config(FILE * cfg_file, Configuration * cfg);
 void strtolower (char *dst,const char* src);
 bool add_machine_secrets(int fd_img, unsigned int i_size, char * mach);
 
-bool file_exist(char *file);
-
 int put_buf(int fd_out, void *buf, int size);
 int put_file(int fd_out, char *file);
 int pad(int fd_out, int size);
@@ -77,7 +75,8 @@ int main(int argc, char **argv)
     sprintf(file, "%s/%s", argv[1], CFG_FILE);
     FILE * cfg_file = fopen(file, "rb");
     if(!cfg_file) { 
-   	fprintf(stderr, "Error: can't read configuration file \"%s\"!\n", file);
+   	fprintf(stderr, "Error: can't read configuration file \"%s\"!\n",
+        	file);
         return 1;    
     } 
     if(!parse_config(cfg_file, &CONFIG)) { 
@@ -108,7 +107,8 @@ int main(int argc, char **argv)
     // Show configuration
     printf("  EPOS mode: %s\n", CONFIG.mode);
     printf("  Machine: %s\n", CONFIG.mach);
-    printf("  Processor: %s (%d bits, %s-endian)\n", CONFIG.arch, CONFIG.word_size, CONFIG.endianess ? "little" : "big");
+    printf("  Processor: %s (%d bits, %s endian)\n", CONFIG.arch,
+           CONFIG.word_size, CONFIG.endianess ? "little" : "big");
     printf("  Memory: %d KBytes\n", (CONFIG.mem_top - CONFIG.mem_base) / 1024);
     printf("  Boot Length: %d - %d (min - max) KBytes\n", CONFIG.boot_length_min, CONFIG.boot_length_max);
     if(CONFIG.node_id == -1)
@@ -121,21 +121,18 @@ int main(int argc, char **argv)
     printf("\n  Creating EPOS bootable image in \"%s\":\n", argv[2]); 
      
     // Add BOOT
-    if(CONFIG.boot_length_max > 0) {
-        sprintf(file, "%s/img/%s_boot", argv[1], CONFIG.mach);
-        printf("    Adding boot strap \"%s\":", file);
-        image_size += put_file(fd_img, file);
-        if(image_size > CONFIG.boot_length_max) {
-            printf(" failed!\n");
-            fprintf(stderr, "Boot strap \"%s\" is too large! (%d bytes)\n", file, image_size);
-            return 1;
-        } else {
-            while((image_size % CONFIG.boot_length_min != 0))
-                image_size += pad(fd_img, 1);
-        }
+    sprintf(file, "%s/img/%s_boot", argv[1], CONFIG.mach);
+    printf("    Adding boot strap \"%s\":", file);
+    image_size += put_file(fd_img, file);
+    if(image_size > CONFIG.boot_length_max) {
+        printf(" failed!\n");
+        fprintf(stderr, "Boot strap \"%s\" is too large! (%d bytes)\n", file, image_size);
+        return 1;
+    } else {
+        while((image_size % CONFIG.boot_length_min != 0))
+            image_size += pad(fd_img, 1);
     }
     unsigned int boot_size = image_size; 
-
     
     // Reserve space for System_Info if necessary
     System_Info si;
@@ -154,14 +151,12 @@ int main(int argc, char **argv)
     // Node ID
     si.bm.node_id = CONFIG.node_id;
     
+
     // Add SETUP
+    si.bm.setup_offset = image_size - boot_size;
     sprintf(file, "%s/img/%s_setup", argv[1], CONFIG.mach);
-    if(file_exist(file)) {
-        si.bm.setup_offset = image_size - boot_size;
-        printf("    Adding setup \"%s\":", file);
-        image_size += put_file(fd_img, file);
-    } else
-        si.bm.setup_offset = -1;
+    printf("    Adding setup \"%s\":", file);
+    image_size += put_file(fd_img, file);
 
     // Add INIT and OS (for mode != library only)
     if(!strcmp(CONFIG.mode, "library")) {
@@ -181,7 +176,7 @@ int main(int argc, char **argv)
         image_size += put_file(fd_img, file);
     }
 
-    // Add LOADER (if multiple applications) or the single application otherwise
+    // Add LOADER (if multiple applications) or the single application
     si.bm.application_offset = image_size - boot_size;
     if(argc == 4) { // Add Single APP
         printf("    Adding application \"%s\":", argv[3]);
@@ -210,9 +205,8 @@ int main(int argc, char **argv)
     si.bm.mem_top  = CONFIG.mem_top;
     si.bm.img_size  = image_size - boot_size; // Boot not included
 
-    // Add System_Info
     if(need_si) {
-        printf("    Adding system info:");
+        // Add System_Info
         if(lseek(fd_img, boot_size, SEEK_SET) < 0) {
             fprintf(stderr, "Error: can't seek the boot image!\n");
             return 1;
@@ -224,10 +218,9 @@ int main(int argc, char **argv)
         case 64: if(!add_boot_map<long long>(fd_img, &si)) return 1; break;
         default: return 1;
         }
-        printf(" done.\n");
     }
       
-    // Adding ARCH specificities
+    //Adding ARCH particularities
     printf("\n  Adding specific boot features of \"%s\":", CONFIG.mach);
     if(!(add_machine_secrets(fd_img, image_size, CONFIG.mach))) {
         fprintf(stderr, "Error: specific features error!\n");
@@ -253,104 +246,88 @@ bool parse_config(FILE * cfg_file, Configuration * cfg)
     // EPOS Mode
     fgets(line, 256, cfg_file);
     token = strtok(line, "=");
-    if(strcmp(token, "MODE") || !(token = strtok(NULL, "\n"))) {
-        fprintf(stderr, "Error: no valid MODE in configuration!\n");
-        return false;
-    }
+    if(strcmp(token, "MODE")) return false;
+    token = strtok(NULL, "\n");
     strtolower(cfg->mode, token);						
     // Machine
     fgets(line, 256, cfg_file);
     token = strtok(line, "=");
-    if(strcmp(token, "MACH") || !(token = strtok(NULL, "\n"))) {
-        fprintf(stderr, "Error: no valid MACH in configuration!\n");
-        return false;
-    }
+    if(strcmp(token, "MACH")) return false;
+    token = strtok(NULL, "\n");		
     strtolower(cfg->mach, token);	
 
     // Arch
     fgets(line, 256, cfg_file);
     token = strtok(line, "=");
-    if(strcmp(token, "ARCH") || !(token = strtok(NULL, "\n"))) {
-        fprintf(stderr, "Error: no valid ARCH in configuration!\n");
-        return false;
-    }
+    if(strcmp(token, "ARCH")) return false;
+    token = strtok(NULL, "\n");
     strtolower(cfg->arch, token);
 
     // Clock
     fgets(line, 256, cfg_file);
     token = strtok(line, "=");
-    if(strcmp(token, "CLOCK") || !(token = strtok(NULL, "\n"))) {
-        fprintf(stderr, "Error: no valid CLOCK in configuration!\n");
-        return false;
-    }
+    if(strcmp(token, "CLOCK")) return false;
+    token = strtok(NULL, "\n");
     cfg->clock = atoi(token);	
 
     // Word Size
     fgets(line, 256, cfg_file);
     token = strtok(line, "=");
-    if(strcmp(token, "WORD_SIZE") || !(token = strtok(NULL, "\n"))) {
-        fprintf(stderr, "Error: no valid WORD_SIZE in configuration!\n");
-        return false;
-    }
+    if(strcmp(token, "WORD_SIZE")) return false;
+    token = strtok(NULL, "\n");
     cfg->word_size = atoi(token);
 
     // Endianess
     fgets(line, 256, cfg_file);
     token = strtok(line, "=");
-    if(strcmp(token, "ENDIANESS") || !(token = strtok(NULL, "\n"))) {
-        fprintf(stderr, "Error: no valid ENDIANESS in configuration!\n");
-        return false;
-    }
+    if(strcmp(token, "ENDIANESS")) return false;
+    token = strtok(NULL, "\n");
     cfg->endianess = !strcmp(token, "little");
 
     // Memory Base
     fgets(line, 256, cfg_file);
     token = strtok(line, "=");
-    if(strcmp(token, "MEM_BASE") || !(token = strtok(NULL, "\n"))) {
-        fprintf(stderr, "Error: no valid MEM_BASE in configuration!\n");
-        return false;
-    }
+    if(strcmp(token, "MEM_BASE")) return false;
+    token = strtok(NULL, "\n");
     cfg->mem_base = strtol(token, 0, 16);
 
     // Memory Top
     fgets(line, 256, cfg_file);
     token = strtok(line, "=");
-    if(strcmp(token, "MEM_TOP") || !(token = strtok(NULL, "\n"))) {
-        fprintf(stderr, "Error: no valid MEM_TOP in configuration!\n");
-        return false;
-    }
+    if(strcmp(token, "MEM_TOP")) return false;
+    token = strtok(NULL, "\n");
     cfg->mem_top=strtol(token, 0, 16);
 
     // Boot Lenght Min
     fgets(line, 256, cfg_file);
     token = strtok(line, "=");
-    if(!strcmp(token, "BOOT_LENGTH_MIN") && (token = strtok(NULL, "\n")))
-        cfg->boot_length_min=atoi(token);
-    else
-        cfg->boot_length_min=0;
+    if(strcmp(token, "BOOT_LENGTH_MIN")) return false;
+    token = strtok(NULL, "\n");
+    cfg->boot_length_min=atoi(token);
 
     // Boot Lenght Max
     fgets(line, 256, cfg_file);
     token = strtok(line, "=");
-    if(!strcmp(token, "BOOT_LENGTH_MAX") && (token = strtok(NULL, "\n")))
-        cfg->boot_length_max=atoi(token);
-    else
-        cfg->boot_length_max=0;
+    if(strcmp(token, "BOOT_LENGTH_MAX")) return false;
+    token = strtok(NULL, "\n");
+    cfg->boot_length_max=atoi(token);
 
     // Node Id
     fgets(line, 256, cfg_file);
     token = strtok(line, "=");
-    if(!strcmp(token, "NODE_ID") && (token = strtok(NULL, "\n")))
+    if(!strcmp(token, "NODE_ID")) {
+        token = strtok(NULL, "\n");
         cfg->node_id = atoi(token);
-    else
+    } else
         cfg->node_id = -1; // get from net
 
     // Number of Nodes in SAN
     fgets(line, 256, cfg_file);
     token = strtok(line, "=");
-    if(!strcmp(token, "N_NODES") && (token = strtok(NULL, "\n")))
+    if(!strcmp(token, "N_NODES")) {
+        token = strtok(NULL, "\n");
         cfg->n_nodes = atoi(token);
-    else
+    } else
         cfg->n_nodes = -1; // dynamic
 
     return true;
@@ -437,24 +414,6 @@ bool add_machine_secrets(int fd, unsigned int i_size, char * mach)
         }		
         put_buf(fd, key_string, (strlen(key_string)+1));		
     }
-
-    return true;
-}
-
-//=============================================================================
-// FILE_EXIST
-//=============================================================================
-bool file_exist(char *file)
-{
-    int fd_in;
-    struct stat stat;
-
-    fd_in = open(file, O_RDONLY);
-    if(fd_in < 0)
-        return false;
-
-    if(fstat(fd_in, &stat) < 0)
-        return false;
 
     return true;
 }

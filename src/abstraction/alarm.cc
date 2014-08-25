@@ -1,5 +1,6 @@
 // EPOS Alarm Abstraction Implementation
 
+#include <system/kmalloc.h>
 #include <semaphore.h>
 #include <alarm.h>
 
@@ -49,15 +50,17 @@ void Alarm::delay(const Microsecond & time)
 {
     db<Alarm>(TRC) << "Alarm::delay(time=" << time << ")" << endl;
 
-    Semaphore semaphore(0);
-    Semaphore_Handler handler(&semaphore);
-    Alarm alarm(time, &handler, 1); // if time < tick trigger v()
-    semaphore.p();
+	Tick t = _elapsed + ticks(time);
+
+	while(_elapsed < t);
 }
 
 
 void Alarm::handler()
 {
+    static Tick next_tick;
+    static Handler * next_handler;
+
     lock();
 
     _elapsed++;
@@ -71,32 +74,26 @@ void Alarm::handler()
         display.position(lin, col);
     }
 
-    Alarm * alarm = 0;
-
-    if(!_request.empty()) {
-        while(_request.head()->promote() <= 0) { // rank can be negative whenever
-                                                 // multiple handlers get created
-                                                 // for the same time tick
-
+    if(next_tick)
+        next_tick--;
+    if(!next_tick) {
+        if(next_handler) {
+            db<Alarm>(TRC) << "Alarm::handler(h=" << reinterpret_cast<void *>(next_handler) << ")" << endl;
+            (*next_handler)();
+        }
+        if(_request.empty())
+            next_handler = 0;
+        else {
             Queue::Element * e = _request.remove();
-            alarm = e->object();
-
-            if(alarm->_times != INFINITE)
+            Alarm * alarm = e->object();
+            next_tick = alarm->_ticks;
+            next_handler = alarm->_handler;
+            if(alarm->_times != -1)
                 alarm->_times--;
             if(alarm->_times) {
                 e->rank(alarm->_ticks);
                 _request.insert(e);
             }
-
-            unlock();
-
-            if(alarm) {
-            	db<Alarm>(TRC) << "Alarm::handler(this=" << alarm << ",e=" << _elapsed << ",h="
-                               << reinterpret_cast<void*>(alarm->handler) << ")" << endl;
-            	(*alarm->_handler)();
-            }
-
-            lock();
         }
     }
 

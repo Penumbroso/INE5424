@@ -37,12 +37,14 @@ public:
     };
 
 public:
-    NS16550AF(IO_Port p): _port(p) {}
-    NS16550AF(IO_Port p, unsigned int div, unsigned int dbits, unsigned int par, unsigned int sbits): _port(p) {
+    NS16550AF(IO_Port p) : _port(p) {}
+    NS16550AF(IO_Port p, unsigned int div, unsigned int dbits,
+              unsigned int par, unsigned int sbits) : _port(p) {
         config(div, dbits, par, sbits);
     }
 
-    void config(unsigned int div, unsigned int dbits, unsigned int par, unsigned int sbits) {
+    void config(unsigned int div, unsigned int dbits, 
+        	unsigned int par, unsigned int sbits) {
         // Disable all interrupts
         reg(IER, 0);
 
@@ -73,7 +75,8 @@ public:
         reg(MCR, reg(MCR) | 0x0b);
     }
         
-    void config(unsigned int * div, unsigned int * dbits, unsigned int * par, unsigned int * sbits) {
+    void config(unsigned int * div, unsigned int * dbits,
+        	unsigned int * par, unsigned int * sbits) {
         // Get clock divisor
         dlab(true); 
         *div = (reg(DLH) << 8) | reg(DLL);
@@ -103,7 +106,8 @@ public:
 
     void loopback(bool flag) { reg(MCR, reg(MCR) | (flag << 4)); }
 
-    void int_enable(bool receive = true, bool send = true, bool line = true, bool modem = true) {
+    void int_enable(bool receive = true, bool send = true,
+        	    bool line = true, bool modem = true) {
         reg(IER, receive | (send << 1) | (line << 2) | (modem << 3)); 
     }
     void int_disable() { reg(IER, 0); }
@@ -142,14 +146,17 @@ private:
     static const unsigned int CLOCK = Traits<PC_UART>::CLOCK / 16;
 
 public:
-    PC_UART(unsigned int unit = 0): NS16550AF(_ports[unit]) {}
-    PC_UART(unsigned int baud, unsigned int data_bits, unsigned int parity, unsigned int stop_bits, unsigned int unit = 0):
-        NS16550AF(_ports[unit], CLOCK / baud, data_bits, parity, stop_bits) {}
+    PC_UART(unsigned int unit = 0) : NS16550AF(_ports[unit]) {}
+    PC_UART(unsigned int baud, unsigned int data_bits, unsigned int parity,
+            unsigned int stop_bits, unsigned int unit = 0) 
+    : NS16550AF(_ports[unit], CLOCK / baud, data_bits, parity, stop_bits) {}
 
-    void config(unsigned int baud, unsigned int data_bits, unsigned int parity, unsigned int stop_bits) {
+    void config(unsigned int baud, unsigned int data_bits,
+        	unsigned int parity, unsigned int stop_bits) {
         NS16550AF::config(CLOCK / baud, data_bits, parity, stop_bits);
     }
-    void config(unsigned int * baud, unsigned int * data_bits, unsigned int * parity, unsigned int * stop_bits) {
+    void config(unsigned int * baud, unsigned int * data_bits,
+        	unsigned int * parity, unsigned int * stop_bits) {
         NS16550AF::config(*baud, *data_bits, *parity, *stop_bits);
         *baud = CLOCK / *baud;
     }

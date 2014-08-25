@@ -77,7 +77,5 @@ __END_SYS
 #include "eeprom.h"
 #include "uart.h"
 #include "display.h"
-#include "nic.h"
-#include "scratchpad.h"
 
 #endif

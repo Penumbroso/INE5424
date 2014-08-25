@@ -4,7 +4,6 @@
 #define __application_h
 
 #include <utility/heap.h>
-#include <segment.h>
 
 extern "C"
 {
@@ -19,6 +18,8 @@ class Application
     friend class Init_Application;
     friend void * ::malloc(size_t);
     friend void ::free(void *);
+    friend void ::operator delete(void *);
+    friend void ::operator delete[](void *);
 
 private:
     static void init();
