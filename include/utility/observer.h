@@ -94,14 +94,19 @@ inline bool Observed::notify()
 
 
 // Observer x Conditionally Observed
+template<typename T = int>
 class Conditional_Observer;
 
+template<typename T = int>
 class Conditionally_Observed
 {
-    friend class Conditional_Observer;
+    friend class Conditional_Observer<T>;
 
 private:
-    typedef Simple_Ordered_List<Conditional_Observer>::Element Element;
+    typedef typename Simple_Ordered_List<Conditional_Observer<T>, T>::Element Element;
+
+public:
+    typedef T Observing_Condition;
 
 protected:
     Conditionally_Observed() {
@@ -113,17 +118,21 @@ public:
         db<Observed>(TRC) << "~Observed(this=" << this << ")" << endl;
     }
 
-    virtual void attach(Conditional_Observer * o, int c);
-    virtual void detach(Conditional_Observer * o, int c);
-    virtual bool notify(int c);
+    virtual void attach(Conditional_Observer<T> * o, T c);
+    virtual void detach(Conditional_Observer<T> * o, T c);
+    virtual bool notify(T c);
 
 private: 
-    Simple_Ordered_List<Conditional_Observer> _observers;
+    Simple_Ordered_List<Conditional_Observer<T>, T> _observers;
 }; 
 
+template<typename T>
 class Conditional_Observer
 {
-    friend class Conditionally_Observed;
+    friend class Conditionally_Observed<T>;
+
+public:
+    typedef T Observing_Condition;
 
 public:
     Conditional_Observer(): _link(this) {
@@ -134,13 +143,14 @@ public:
         db<Observer>(TRC) << "~Observer(this=" << this << ")" << endl;
     }
     
-    virtual void update(Conditionally_Observed * o, int c) = 0;
+    virtual void update(Conditionally_Observed<T> * o, T c) = 0;
 
 private:
-    Conditionally_Observed::Element _link;
+    typename Conditionally_Observed<T>::Element _link;
 };
 
-inline void Conditionally_Observed::attach(Conditional_Observer * o, int c)
+template<typename T>
+inline void Conditionally_Observed<T>::attach(Conditional_Observer<T> * o, T c)
 {
     db<Observed>(TRC) << "Observed::attach(o=" << o << ",c=" << c << ")" << endl;
 
@@ -148,14 +158,16 @@ inline void Conditionally_Observed::attach(Conditional_Observer * o, int c)
     _observers.insert(&o->_link);
 }
 
-inline void Conditionally_Observed::detach(Conditional_Observer * o, int c)
+template<typename T>
+inline void Conditionally_Observed<T>::detach(Conditional_Observer<T> * o, T c)
 {
     db<Observed>(TRC) << "Observed::detach(obs=" << o << ",c=" << c << ")" << endl;
 
     _observers.remove(&o->_link);
 }
 
-inline bool Conditionally_Observed::notify(int c)
+template<typename T>
+inline bool Conditionally_Observed<T>::notify(T c)
 {
     bool notified = false;
 

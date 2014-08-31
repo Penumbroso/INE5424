@@ -13,14 +13,12 @@ Alarm::Queue Alarm::_request;
 
 
 // Methods
-Alarm::Alarm(const Microsecond & time, Handler * handler, int times)
-: _ticks(ticks(time)), _handler(handler), _times(times), _link(this, _ticks)
+Alarm::Alarm(const Microsecond & time, Handler * handler, int times):
+    _ticks(ticks(time)), _handler(handler), _times(times), _link(this, _ticks)
 {
     lock();
 
-    db<Alarm>(TRC) << "Alarm(t=" << time
-                   << ",tk=" << _ticks
-                   << ",h=" << reinterpret_cast<void *>(handler)
+    db<Alarm>(TRC) << "Alarm(t=" << time << ",tk=" << _ticks << ",h=" << reinterpret_cast<void *>(handler)
                    << ",x=" << times << ") => " << this << endl;
 
     if(_ticks) {

@@ -25,6 +25,9 @@ template <> struct Traits<Build>
     enum {PC};
     static const unsigned int MACH = PC;
 
+    enum {Legacy};
+    static const unsigned int MODEL = Legacy;
+
     static const unsigned int CPUS = 1;
     static const unsigned int NODES = 1; // > 1 => NETWORKING
 };
@@ -88,26 +91,26 @@ __BEGIN_SYS
 
 template <> struct Traits<Application>: public Traits<void>
 {
-    static const unsigned int STACK_SIZE = 16 * 1024;
-    static const unsigned int HEAP_SIZE = 16 * 1024 * 1024;
+    static const unsigned int STACK_SIZE = Traits<Machine>::STACK_SIZE;
+    static const unsigned int HEAP_SIZE = Traits<Machine>::HEAP_SIZE;
+    static const unsigned int MAX_THREADS = Traits<Machine>::MAX_THREADS;
 };
 
 template <> struct Traits<System>: public Traits<void>
 {
     static const unsigned int mode = Traits<Build>::MODE;
-    static const bool multithread = true;
+    static const bool multithread = (Traits<Application>::MAX_THREADS > 1);
     static const bool multitask = (mode != Traits<Build>::LIBRARY);
     static const bool multicore = (Traits<Build>::CPUS > 1) && multithread;
     static const bool multiheap = (mode != Traits<Build>::LIBRARY);
 
-    enum {FOREVER = 0, SECOND = 1, MINUTE = 60, HOUR = 3600, DAY = 86400,
-          WEEK = 604800, MONTH = 2592000, YEAR = 31536000};
+    enum {FOREVER = 0, SECOND = 1, MINUTE = 60, HOUR = 3600, DAY = 86400, WEEK = 604800, MONTH = 2592000, YEAR = 31536000};
     static const unsigned long LIFE_SPAN = 1 * HOUR; // in seconds
 
     static const bool reboot = true;
 
-    static const unsigned int STACK_SIZE = 4 * 1024;
-    static const unsigned int HEAP_SIZE = 128 * Traits<Application>::STACK_SIZE;
+    static const unsigned int STACK_SIZE = Traits<Machine>::STACK_SIZE;
+    static const unsigned int HEAP_SIZE = (Traits<Application>::MAX_THREADS + 1) * Traits<Application>::STACK_SIZE;
 };
 
 

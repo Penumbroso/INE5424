@@ -1,11 +1,10 @@
 // EPOS IA32 CPU Mediator Initialization
 
 #include <cpu.h>
+#include <tsc.h>
 #include <mmu.h>
 #include <system.h>
 #include <system/info.h>
-
-extern "C" { void __epos_library_app_entry(void); }
 
 __BEGIN_SYS
 

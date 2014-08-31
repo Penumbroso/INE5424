@@ -19,6 +19,7 @@ class Debug;
 class Lists;
 class Spin;
 class Heap;
+class Random;
 
 // System parts
 class Build;

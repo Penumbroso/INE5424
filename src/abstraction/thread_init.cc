@@ -5,11 +5,13 @@
 #include <thread.h>
 #include <alarm.h>
 
+extern "C" { void __epos_app_entry(); }
+
 __BEGIN_SYS
 
 void Thread::init()
 {
-    int (* entry)() = reinterpret_cast<int (*)()>(System::info()->lmm.app_entry);
+    int (* entry)() = reinterpret_cast<int (*)()>(__epos_app_entry);
 
     db<Init, Thread>(TRC) << "Thread::init(entry=" << (void *) entry << ")" << endl;
 

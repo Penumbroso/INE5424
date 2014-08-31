@@ -18,12 +18,6 @@ public:
         CPU::init();
         db<Init>(INF) << "done!" << endl;
 
-        // If EPOS is a library then adjust the application entry point (that
-        // was set by SETUP) based on the ELF SYSTEM+APPLICATION image
-        System_Info<Machine> * si = System::info();
-        if(!si->lm.has_sys)
-            si->lmm.app_entry = reinterpret_cast<unsigned int>(&__epos_library_app_entry);
-
         // Initialize System's heap
         db<Init>(INF) << "Initializing system's heap: " << endl;
 	System::_heap = new (&System::_preheap[0]) Heap(MMU::alloc(MMU::pages(Traits<System>::HEAP_SIZE)),

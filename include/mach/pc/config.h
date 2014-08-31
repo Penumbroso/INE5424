@@ -19,7 +19,6 @@
 #define __UART_H        __HEADER_MACH(uart)
 #define __DISPLAY_H     __HEADER_MACH(display)
 #define __NIC_H         __HEADER_MACH(nic)
-#define __SCRATCHPAD_H  __HEADER_MACH(scratchpad)
 
 __BEGIN_SYS
 
