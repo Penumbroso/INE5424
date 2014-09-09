@@ -65,12 +65,17 @@ int Thread::join()
 {
     lock();
 
-    db<Thread>(TRC) << "Thread::join(this=" << this << ",state=" << _state << ")" << endl;
+    db<Thread>(TRC) << "Thread::join(running=" << self() 
+                    << ",this=" << this 
+                    << ",state=" << _state 
+                    << ")" << endl;
 
-    while(_state != FINISHING)
-        yield(); // implicit unlock()
+    if( this->_state == FINISHING ) {
+        unlock();
+        return *static_cast<int *>(_stack);
+    }
 
-    unlock();
+    self()->sleep(&this->_joined); // implicit unlock
 
     return *static_cast<int *>(_stack);
 }
@@ -134,7 +139,7 @@ void Thread::resume()
 }
 
 
-// Class methods
+// Class (static) methods
 void Thread::yield()
 {
     lock();
@@ -165,6 +170,10 @@ void Thread::exit(int status)
 
     while(_ready.empty() && !_suspended.empty())
         idle(); // implicit unlock();
+
+    lock();
+
+    Thread::wakeup_all(&self()->_joined); // implicit unlock();
 
     lock();
 
