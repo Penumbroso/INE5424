@@ -168,12 +168,12 @@ void Thread::exit(int status)
 
     db<Thread>(TRC) << "Thread::wakeup_all(running=" << running() << ")" << endl;
 
-    while(_ready.empty() && !_suspended.empty())
-        idle(); // implicit unlock();
+    Thread::wakeup_all(&self()->_joined); // implicit unlock();
 
     lock();
 
-    Thread::wakeup_all(&self()->_joined); // implicit unlock();
+    while(_ready.empty() && !_suspended.empty())
+        idle(); // implicit unlock();
 
     lock();
 
