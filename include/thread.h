@@ -41,7 +41,8 @@ public:
     enum {
         HIGH = 0,
         NORMAL = 15,
-        LOW = 31
+        LOW = 31,
+        MINIMUM = static_cast<Priority>(-1)
     };
 
     // Thread Queue
@@ -142,9 +143,8 @@ protected:
         }
     }
 
-    static int idle();
-
 private:
+    static int idle();
     static void init();
 
 protected:
@@ -161,6 +161,7 @@ private:
     static Thread * volatile _running;
     static Queue _ready;
     static Queue _suspended;
+    static Thread * _idle;
 };
 
 __END_SYS

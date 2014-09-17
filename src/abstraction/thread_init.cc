@@ -9,11 +9,16 @@ extern "C" { void __epos_app_entry(); }
 
 __BEGIN_SYS
 
+Thread * Thread::_idle;
+
 void Thread::init()
 {
     int (* entry)() = reinterpret_cast<int (*)()>(__epos_app_entry);
 
     db<Init, Thread>(TRC) << "Thread::init(entry=" << reinterpret_cast<void *>(entry) << ")" << endl;
+
+    db<Init, Thread>(TRC) << "Creating idle thread" << endl;
+    _idle = new (kmalloc(sizeof(Thread))) Thread(Thread::idle, State::READY, MINIMUM);
 
     _running = new (kmalloc(sizeof(Thread))) Thread(entry, RUNNING, NORMAL);
 

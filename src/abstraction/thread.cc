@@ -119,8 +119,7 @@ void Thread::suspend()
     _suspended.insert(&_link);
 
     if(_running == this) {
-        while(_ready.empty())
-            idle();
+        assert(!_ready.empty());
 
         _running = _ready.remove()->object();
         _running->_state = RUNNING;
@@ -153,17 +152,17 @@ void Thread::yield()
 
     db<Thread>(TRC) << "Thread::yield(running=" << _running << ")" << endl;
 
-    if(!_ready.empty()) {
-        Thread * prev = _running;
-        prev->_state = READY;
-        _ready.insert(&prev->_link);
+    
+    assert(!_ready.empty());
 
-        _running = _ready.remove()->object();
-        _running->_state = RUNNING;
+    Thread * prev = _running;
+    prev->_state = READY;
+    _ready.insert(&prev->_link);
 
-        dispatch(prev, _running);
-    } else
-        idle();
+    _running = _ready.remove()->object();
+    _running->_state = RUNNING;
+
+    dispatch(prev, _running);
 
     unlock();
 }
@@ -171,6 +170,7 @@ void Thread::yield()
 
 void Thread::exit(int status)
 {
+    assert(!_ready.empty());
     lock();
 
     db<Thread>(TRC) << "Thread::exit(running=" << running() << ")" << endl;
@@ -186,22 +186,17 @@ void Thread::exit(int status)
 
     lock();
 
-    if(_ready.empty()) {
-        if(!_suspended.empty()) {
-            while(_ready.empty())
-                idle(); // implicit unlock();
-            lock();
-        } else { // _ready.empty() && _suspended.empty()
-            db<Thread>(WRN) << "The last thread in the system has exited!\n";
-            if(reboot) {
-                db<Thread>(WRN) << "Rebooting the machine ...\n";
-                Machine::reboot();
-            } else {
-                db<Thread>(WRN) << "Halting the CPU ...\n";
-                CPU::halt();
-            }
+    if(_ready.size() == 1 && _suspended.empty()) { // Only idle thread is ready, no thread is suspended
+        db<Thread>(WRN) << "The last thread in the system has exited!\n";
+        if(reboot) {
+            db<Thread>(WRN) << "Rebooting the machine ...\n";
+            Machine::reboot();
+        } else {
+            db<Thread>(WRN) << "Halting the CPU ...\n";
+            CPU::halt();
         }
-    } else {
+    }
+    else {
         _running = _ready.remove()->object();
         _running->_state = RUNNING;
 
@@ -219,8 +214,7 @@ void Thread::sleep(Queue * q)
     // lock() must be called before entering this method
     assert(locked());
 
-    while(_ready.empty())
-        idle();
+    assert(!_ready.empty());
 
     Thread * prev = running();
     prev->_state = WAITING;
@@ -292,14 +286,16 @@ void Thread::implicit_exit()
 
 int Thread::idle()
 {
-    db<Thread>(TRC) << "Thread::idle()" << endl;
+    while( true ) {
+        db<Thread>(TRC) << "Thread::idle()" << endl;
 
-    db<Thread>(INF) << "There are no runnable threads at the moment!" << endl;
-    db<Thread>(INF) << "Halting the CPU ..." << endl;
+        db<Thread>(INF) << "There are no runnable threads at the moment!" << endl;
+        db<Thread>(INF) << "Halting the CPU ..." << endl;
 
-    CPU::int_enable();
-    CPU::halt();
-
+        CPU::int_enable();
+        CPU::halt();
+        yield();
+    }
     return 0;
 }
 
