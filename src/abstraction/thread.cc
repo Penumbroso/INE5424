@@ -8,6 +8,7 @@
 __BEGIN_SYS
 
 // Class attributes
+volatile unsigned int Thread::_thread_count;
 Scheduler_Timer * Thread::_timer;
 
 Thread* volatile Thread::_running;
@@ -29,13 +30,20 @@ void Thread::common_constructor(Log_Addr entry, unsigned int stack_size)
                     << "},context={b=" << _context
                     << "," << *_context << "}) => " << this << endl;
 
+    _thread_count++;
+
     switch(_state) {
         case RUNNING: break;
+        case READY: _ready.insert(&_link); break;
         case SUSPENDED: _suspended.insert(&_link); break;
-        default: _ready.insert(&_link);
+        case WAITING: break;
+        case FINISHING: break;
     }
 
-    unlock();
+    if(preemptive && (_state == READY) && (_link.rank() != IDLE))
+        reschedule();
+    else
+        unlock();
 }
 
 
@@ -43,11 +51,15 @@ Thread::~Thread()
 {
     lock();
 
-    db<Thread>(TRC) << "~Thread(this=" << this 
-		    << ",state=" << _state
-		    << ",stack={b=" << _stack
-		    << ",context={b=" << _context
-		    << "," << *_context << "})\n";
+    db<Thread>(TRC) << "~Thread(this=" << this
+                    << ",state=" << _state
+                    << ",priority=" << _link.rank()
+                    << ",stack={b=" << _stack
+                    << ",context={b=" << _context
+                    << "," << *_context << "})" << endl;
+
+    if(_state != FINISHING)
+        _thread_count--;
 
     _ready.remove(this);
     _suspended.remove(this);
@@ -119,9 +131,6 @@ void Thread::suspend()
     _suspended.insert(&_link);
 
     if(_running == this) {
-        while(_ready.empty())
-            idle();
-
         _running = _ready.remove()->object();
         _running->_state = RUNNING;
 
@@ -153,17 +162,14 @@ void Thread::yield()
 
     db<Thread>(TRC) << "Thread::yield(running=" << _running << ")" << endl;
 
-    if(!_ready.empty()) {
-        Thread * prev = _running;
-        prev->_state = READY;
-        _ready.insert(&prev->_link);
+    Thread * prev = _running;
+    prev->_state = READY;
+    _ready.insert(&prev->_link);
 
-        _running = _ready.remove()->object();
-        _running->_state = RUNNING;
+    _running = _ready.remove()->object();
+    _running->_state = RUNNING;
 
-        dispatch(prev, _running);
-    } else
-        idle();
+    dispatch(prev, _running);
 
     unlock();
 }
@@ -173,11 +179,13 @@ void Thread::exit(int status)
 {
     lock();
 
-    db<Thread>(TRC) << "Thread::exit(running=" << running() << ")" << endl;
+    db<Thread>(TRC) << "Thread::wakeup_all(running=" << running() << ")" << endl;
 
     Thread * prev = _running;
     prev->_state = FINISHING;
     *static_cast<int *>(prev->_stack) = status;
+
+    _thread_count--;
 
     if(prev->_joining) {
         prev->_joining->resume();
@@ -186,27 +194,10 @@ void Thread::exit(int status)
 
     lock();
 
-    if(_ready.empty()) {
-        if(!_suspended.empty()) {
-            while(_ready.empty())
-                idle(); // implicit unlock();
-            lock();
-        } else { // _ready.empty() && _suspended.empty()
-            db<Thread>(WRN) << "The last thread in the system has exited!\n";
-            if(reboot) {
-                db<Thread>(WRN) << "Rebooting the machine ...\n";
-                Machine::reboot();
-            } else {
-                db<Thread>(WRN) << "Halting the CPU ...\n";
-                CPU::halt();
-            }
-        }
-    } else {
-        _running = _ready.remove()->object();
-        _running->_state = RUNNING;
+    _running = _ready.remove()->object();
+    _running->_state = RUNNING;
 
-        dispatch(prev, _running);
-    }
+    dispatch(prev, _running);
 
     unlock();
 }
@@ -218,9 +209,6 @@ void Thread::sleep(Queue * q)
 
     // lock() must be called before entering this method
     assert(locked());
-
-    while(_ready.empty())
-        idle();
 
     Thread * prev = running();
     prev->_state = WAITING;
@@ -259,7 +247,7 @@ void Thread::wakeup(Queue * q)
 
 void Thread::wakeup_all(Queue * q)
 {
-    db<Thread>(TRC) << "Thread::wakeup_all(running=" << running() << ",q=" << q << ")\n";
+    db<Thread>(TRC) << "Thread::wakeup_all(running=" << running() << ",q=" << q << ")" << endl;
 
     // lock() must be called before entering this method
     assert(locked());
@@ -292,13 +280,25 @@ void Thread::implicit_exit()
 
 int Thread::idle()
 {
-    db<Thread>(TRC) << "Thread::idle()" << endl;
+    while(true) {
+        if(Traits<Thread>::trace_idle)
+            db<Thread>(TRC) << "Thread::idle(this=" << running() << ")" << endl;
 
-    db<Thread>(INF) << "There are no runnable threads at the moment!" << endl;
-    db<Thread>(INF) << "Halting the CPU ..." << endl;
-
-    CPU::int_enable();
-    CPU::halt();
+        if(_thread_count <= 1) { // Only idle is left
+            CPU::int_disable();
+            db<Thread>(WRN) << "The last thread has exited!" << endl;
+            if(reboot) {
+                db<Thread>(WRN) << "Rebooting the machine ..." << endl;
+                Machine::reboot();
+            } else {
+                db<Thread>(WRN) << "Halting the machine ..." << endl;
+                CPU::halt();
+            }
+        } else {
+            CPU::int_enable();
+            CPU::halt();
+        }
+    }
 
     return 0;
 }
