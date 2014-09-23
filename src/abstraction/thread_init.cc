@@ -13,7 +13,7 @@ void Thread::init()
 {
     int (* entry)() = reinterpret_cast<int (*)()>(__epos_app_entry);
 
-    db<Init, Thread>(TRC) << "Thread::init(entry=" << (void *) entry << ")" << endl;
+    db<Init, Thread>(TRC) << "Thread::init(entry=" << reinterpret_cast<void *>(entry) << ")" << endl;
 
     _running = new (kmalloc(sizeof(Thread))) Thread(entry, RUNNING, NORMAL);
 

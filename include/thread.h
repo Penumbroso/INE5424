@@ -49,8 +49,8 @@ public:
 
 public:
     Thread(int (* entry)(), 
-           const State & state = READY, const Priority & priority = NORMAL, unsigned int stack_size = STACK_SIZE)
-    : _state(state), _link(this, priority)
+           const State & state = READY, const Priority & priority = NORMAL, unsigned int stack_size = STACK_SIZE):
+           _state(state), _waiting(0), _joining(0), _link(this, priority)
     {
         lock();
 
@@ -62,8 +62,8 @@ public:
 
     template<typename T1>
     Thread(int (* entry)(T1 a1), T1 a1,
-           const State & state = READY, const Priority & priority = NORMAL, unsigned int stack_size = STACK_SIZE)
-    : _state(state), _link(this, priority)
+           const State & state = READY, const Priority & priority = NORMAL, unsigned int stack_size = STACK_SIZE):
+           _state(state), _waiting(0), _joining(0), _link(this, priority)
     {
         lock();
 
@@ -75,8 +75,8 @@ public:
 
     template<typename T1, typename T2>
     Thread(int (* entry)(T1 a1, T2 a2), T1 a1, T2 a2,
-           const State & state = READY, const Priority & priority = NORMAL, unsigned int stack_size = STACK_SIZE)
-    : _state(state), _link(this, priority)
+           const State & state = READY, const Priority & priority = NORMAL, unsigned int stack_size = STACK_SIZE):
+           _state(state), _waiting(0), _joining(0), _link(this, priority)
     {
         lock();
 
@@ -88,8 +88,8 @@ public:
 
     template<typename T1, typename T2, typename T3>
     Thread(int (* entry)(T1 a1, T2 a2, T3 a3), T1 a1, T2 a2, T3 a3,
-           const State & state = READY, const Priority & priority = NORMAL, unsigned int stack_size = STACK_SIZE)
-    : _state(state), _link(this, priority)
+           const State & state = READY, const Priority & priority = NORMAL, unsigned int stack_size = STACK_SIZE):
+           _state(state), _waiting(0), _joining(0), _link(this, priority)
     {
         lock();
 
@@ -122,6 +122,11 @@ protected:
 
     static void lock() { CPU::int_disable(); }
     static void unlock() { CPU::int_enable(); }
+    static bool locked() { return CPU::int_enabled(); }
+
+    static void sleep(Queue * q);
+    static void wakeup(Queue * q);
+    static void wakeup_all(Queue * q);
 
     static void reschedule();
 
@@ -146,6 +151,8 @@ protected:
     Log_Addr _stack;
     Context * volatile _context;
     volatile State _state;
+    Queue * _waiting;
+    Thread * volatile _joining;
     Queue::Element _link;
 
     static Scheduler_Timer * _timer;
