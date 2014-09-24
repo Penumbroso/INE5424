@@ -11,7 +11,6 @@ __BEGIN_SYS
 
 struct Handler {
     virtual void operator()() = 0;
-    virtual Handler * clone() = 0;
     virtual ~Handler() {}
 };
 
@@ -22,10 +21,6 @@ namespace detail {
         HandlerFunction( Callable& f ) : f( f ) {}
         virtual void operator()() {
             f();
-        }
-        HandlerFunction * clone() {
-            return this;
-            //return new HandlerFunction( *this ); FIXME
         }
     };
 }
