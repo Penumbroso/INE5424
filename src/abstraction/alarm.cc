@@ -13,24 +13,6 @@ Alarm::Queue Alarm::_request;
 
 
 // Methods
-Alarm::Alarm(const Microsecond & time, Handler * handler, int times):
-    _ticks(ticks(time)), _handler(handler), _times(times), _link(this, _ticks)
-{
-    lock();
-
-    db<Alarm>(TRC) << "Alarm(t=" << time << ",tk=" << _ticks << ",h=" << reinterpret_cast<void *>(handler)
-                   << ",x=" << times << ") => " << this << endl;
-
-    if(_ticks) {
-        _request.insert(&_link);
-        unlock();
-    } else {
-        unlock();
-        (*handler)();
-    }
-}
-
-
 Alarm::~Alarm()
 {
     lock();
@@ -40,17 +22,27 @@ Alarm::~Alarm()
     _request.remove(this);
 
     unlock();
+
+    delete _handler;
 }
 
+namespace detail {
+    struct lambda0 {
+        Thread * target;
+        void operator ()(){
+            target->resume();
+        }
+    };
+}
 
 // Class methods
 void Alarm::delay(const Microsecond & time)
 {
     db<Alarm>(TRC) << "Alarm::delay(time=" << time << ")" << endl;
-
-	Tick t = _elapsed + ticks(time);
-
-	while(_elapsed < t);
+    detail::lambda0 awaker;
+    awaker.target = Thread::self();
+    Alarm resumer( time, awaker );
+    Thread::self()->suspend();
 }
 
 
@@ -76,7 +68,7 @@ void Alarm::handler()
         next_tick--;
     if(!next_tick) {
         if(next_handler) {
-            db<Alarm>(TRC) << "Alarm::handler(h=" << reinterpret_cast<void *>(next_handler) << ")" << endl;
+            db<Alarm>(TRC) << "Alarm::handler(h=" << next_handler << ")" << endl;
             (*next_handler)();
         }
         if(_request.empty())

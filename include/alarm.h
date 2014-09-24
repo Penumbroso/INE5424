@@ -29,7 +29,27 @@ public:
     enum { INFINITE = RTC::INFINITE };
     
 public:
-    Alarm(const Microsecond & time, Handler * handler, int times = 1);
+    template< typename Callable >
+    Alarm(const Microsecond & time, Callable f, int times = 1 ) :
+        _ticks(ticks(time)), 
+        _handler( makeHandler(f) ),
+        _times(times), 
+        _link(this, _ticks)
+    {
+        lock();
+
+        db<Alarm>(TRC) << "Alarm(t=" << time << ",tk=" << _ticks << ",h=" << _handler
+                       << ",x=" << times << ") => " << this << endl;
+
+        if(_ticks) {
+            _request.insert(&_link);
+            unlock();
+        } else {
+            unlock();
+            (*_handler)();
+        }
+    }
+
     ~Alarm();
 
     static Hertz frequency() { return _timer->frequency(); }

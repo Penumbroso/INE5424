@@ -15,6 +15,11 @@ inline void kfree(void * ptr) {
     System::_heap->free(ptr);
 }
 
+template< typename T, typename ... Ts >
+T * knew( Ts&&...ts ) {
+    return new( kmalloc(sizeof(T)) ) T( ts... );
+}
+
 __END_SYS
 
 #endif
