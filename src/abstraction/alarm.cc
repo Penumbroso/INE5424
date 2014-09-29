@@ -26,31 +26,19 @@ Alarm::~Alarm()
     delete _handler;
 }
 
-namespace detail {
-    struct lambda0 {
-        Thread * target;
-        void operator ()(){
-            target->resume();
-        }
-    };
-}
-
 // Class methods
 void Alarm::delay(const Microsecond & time)
 {
     db<Alarm>(TRC) << "Alarm::delay(time=" << time << ")" << endl;
-    detail::lambda0 awaker;
-    awaker.target = Thread::self();
-    Alarm resumer( time, awaker );
-    Thread::self()->suspend();
+    Semaphore semaphore(0);
+    Semaphore_Handler handler(&semaphore);
+    Alarm alarm(time, handler, 1); // if time < tick trigger v()
+    semaphore.p();
 }
 
 
 void Alarm::handler()
 {
-    static Tick next_tick;
-    static Handler * next_handler;
-
     lock();
 
     _elapsed++;
@@ -64,21 +52,15 @@ void Alarm::handler()
         display.position(lin, col);
     }
 
-    if(next_tick)
-        next_tick--;
-    if(!next_tick) {
-        if(next_handler) {
-            db<Alarm>(TRC) << "Alarm::handler(h=" << next_handler << ")" << endl;
-            (*next_handler)();
-        }
-        if(_request.empty())
-            next_handler = 0;
-        else {
+    Alarm * alarm = 0;
+
+    if(!_request.empty()) {
+        // Replacing the following "if" by a "while" loop is tempting, but recovering the lock and dispatching the handler is
+        // troublesome if the Alarm gets destroyed in between, like is the case for the idle thread returning to shutdown the machine
+        if(_request.head()->promote() <= 0) { // rank can be negative whenever multiple handlers get created for the same time tick
             Queue::Element * e = _request.remove();
-            Alarm * alarm = e->object();
-            next_tick = alarm->_ticks;
-            next_handler = alarm->_handler;
-            if(alarm->_times != -1)
+            alarm = e->object();
+            if(alarm->_times != INFINITE)
                 alarm->_times--;
             if(alarm->_times) {
                 e->rank(alarm->_ticks);
@@ -88,6 +70,12 @@ void Alarm::handler()
     }
 
     unlock();
+
+    if(alarm) {
+        db<Alarm>(TRC) << "Alarm::handler(this=" << alarm << ",e=" << _elapsed << ",h="
+                       << reinterpret_cast<void*>(alarm->handler) << ")" << endl;
+        (*alarm->_handler)();
+    }
 }
 
 __END_SYS

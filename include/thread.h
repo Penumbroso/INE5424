@@ -4,6 +4,7 @@
 #define __thread_h
 
 #include <utility/queue.h>
+#include <utility/handler.h>
 #include <cpu.h>
 #include <machine.h>
 #include <system/kmalloc.h>
@@ -164,6 +165,20 @@ private:
     static Thread * volatile _running;
     static Queue _ready;
     static Queue _suspended;
+};
+
+
+// Callable that triggers a thread (see handler.h)
+class Thread_Handler
+{
+public:
+    Thread_Handler(Thread * h) : _handler(h) {}
+    ~Thread_Handler() {}
+
+    void operator()() { _handler->resume(); }
+
+private:
+    Thread * _handler;
 };
 
 __END_SYS

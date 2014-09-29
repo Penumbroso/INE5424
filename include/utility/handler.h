@@ -8,7 +8,6 @@
 
 __BEGIN_SYS
 
-
 struct Handler {
     virtual void operator()() = 0;
     virtual ~Handler() {}
