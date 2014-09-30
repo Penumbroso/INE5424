@@ -58,14 +58,28 @@ Thread::~Thread()
                     << ",context={b=" << _context
                     << "," << *_context << "})" << endl;
 
-    if(_state != FINISHING)
+    // The running thread cannot delete itself!
+    assert(_state != RUNNING);
+    
+    switch(_state) {
+    case RUNNING:  // For switch completion only: the running thread would have deleted itself! Stack wouldn't have been released!
+        exit(-1);
+        break;
+    case READY:
+        _ready.remove(this);
         _thread_count--;
-
-    _ready.remove(this);
-    _suspended.remove(this);
-
-    if(_waiting)
+        break;
+    case SUSPENDED:
+        _suspended.remove(this);
+        _thread_count--;
+        break;
+    case WAITING:
         _waiting->remove(this);
+        _thread_count--;
+        break;
+    case FINISHING: // Already called exit()
+        break;
+    }
 
     if(_joining)
         _joining->resume();
