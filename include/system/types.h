@@ -66,6 +66,10 @@ class PC_Display;
 // Abstractions	- Process
 class Thread;
 
+// Abstractions	- Memory
+class Segment;
+class Address_Space;
+
 // Abstractions	- Synchronization
 class Synchronizer;
 class Mutex;
