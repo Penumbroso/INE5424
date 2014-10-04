@@ -20,7 +20,5 @@ src/boot/pc_boot.s
 src/setup/pc_setup
 
 # Programs
-app/producer_consumer
-app/philosophers_dinner
-app/join_test
-app/join_test2
+app/[a-z]*
+!app/makefile
