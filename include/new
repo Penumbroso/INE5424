@@ -1,0 +1,72 @@
+// Application-level dynamic memory utility declarations
+
+#ifndef __new_h
+#define __new_h
+
+#include <application.h> // EPOS::Heap is already defined here
+#include <utility/debug.h>
+
+// Overloaded operator new
+inline void * operator new(size_t bytes, EPOS::Heap * heap) {
+    using namespace EPOS;
+    db<Application>(TRC) << "operator new(bytes=" << bytes << ",heap=" <<
+            static_cast<void*>(heap) << ") => \n";
+
+    void * ptr = heap->alloc(bytes + sizeof(EPOS::Heap*));
+    *static_cast<EPOS::Heap**>(ptr) = heap;
+    ptr = static_cast<void*>(static_cast<char*>(ptr) + sizeof(EPOS::Heap*));
+
+    db<Application>(TRC) << " => " << ptr << "\n";
+
+    return ptr;
+}
+
+inline void * operator new[](size_t bytes, EPOS::Heap * heap) {
+    using namespace EPOS;
+    db<Application>(TRC) << "operator new(bytes=" << bytes << ",heap=" <<
+            static_cast<void*>(heap) << ") => \n";
+
+    void * ptr = heap->alloc(bytes + sizeof(EPOS::Heap*));
+    *static_cast<EPOS::Heap**>(ptr) = heap;
+    ptr = static_cast<void*>(static_cast<char*>(ptr) + sizeof(EPOS::Heap*));
+
+    db<Application>(TRC) << " => " << ptr << "\n";
+
+    return ptr;
+}
+
+// Default operator new
+inline void * operator new(size_t bytes) {
+    using namespace EPOS;
+    db<Application>(TRC) << "operator new(bytes=" << bytes << ") => \n";
+    void * ptr = operator new(bytes, USER);
+    db<Application>(TRC) << " => " << ptr << "\n";
+    return ptr;
+}
+
+inline void * operator new[](size_t bytes) {
+    using namespace EPOS;
+    db<Application>(TRC) << "operator new[](bytes=" << bytes << ") => \n";
+    void * ptr = operator new[](bytes, USER);
+    db<Application>(TRC) << " => " << ptr << "\n";
+    return ptr;
+}
+
+// operator delete
+inline void operator delete(void * object) {
+    using namespace EPOS;
+    db<Application>(TRC) << "operator delete(ptr=" << object << ")\n";
+    object = static_cast<void*>(static_cast<char*>(object) - sizeof(EPOS::Heap*));
+    EPOS::Heap * heap = *static_cast<EPOS::Heap**>(object);
+    heap->free(object);
+}
+
+inline void operator delete[](void * object) {
+    using namespace EPOS;
+    db<Application>(TRC) << "operator delete(ptr=" << object << ")\n";
+    object = static_cast<void*>(static_cast<char*>(object) - sizeof(EPOS::Heap*));
+    EPOS::Heap * heap = *static_cast<EPOS::Heap**>(object);
+    heap->free(object);
+}
+
+#endif

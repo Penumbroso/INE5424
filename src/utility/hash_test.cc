@@ -2,7 +2,7 @@
 // EPOS Hash Utility Test Program
 
 #include <utility/ostream.h>
-#include <utility/malloc.h>
+#include <new.h>
 #include <utility/hash.h>
 
 using namespace EPOS;

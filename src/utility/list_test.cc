@@ -1,7 +1,7 @@
 // EPOS List Utility Test Program
 
 #include <utility/ostream.h>
-#include <utility/malloc.h>
+#include <new.h>
 #include <utility/list.h>
 
 using namespace EPOS;

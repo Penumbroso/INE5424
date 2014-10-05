@@ -2,7 +2,7 @@
 
 #include <utility/ostream.h>
 #include <utility/string.h>
-#include <utility/malloc.h>
+#include <new>
 
 using namespace EPOS;
 

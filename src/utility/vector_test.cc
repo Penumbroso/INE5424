@@ -1,7 +1,7 @@
 // EPOS Vector Utility Test Program
 
 #include <utility/ostream.h>
-#include <utility/malloc.h>
+#include <new.h>
 #include <utility/vector.h>
 
 using namespace EPOS;

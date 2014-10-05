@@ -29,6 +29,6 @@ Init_Application init_application;
 
 // Initialize heap pointers, to make "new (APPLICATION) Type()" work
 Heap * const Init_Application::_heap = Application::_heap;
-Heap * const APPLICATION = Init_Application::_heap;
+Heap * const USER = Init_Application::_heap;
 
 __END_SYS

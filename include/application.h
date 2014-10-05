@@ -29,10 +29,11 @@ private:
     static Heap * _heap;
 };
 
-extern Heap * const APPLICATION;
+extern Heap * const USER;
 
 __END_SYS
 
-#include <utility/malloc.h>
+// Header new must be included here because it needs to know about USER.
+#include <new>
 
 #endif
