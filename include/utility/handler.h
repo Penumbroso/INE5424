@@ -4,7 +4,7 @@
 #define __handler_h
 
 #include <system/config.h>
-#include <system/kmalloc.h>
+#include <new>
 
 __BEGIN_SYS
 
@@ -26,7 +26,7 @@ namespace detail {
 
 template< typename Callable >
 Handler * makeHandler( Callable c ) {
-    return knew<detail::HandlerFunction<Callable>>( c );
+    return new (SYSTEM) detail::HandlerFunction<Callable>( c );
 }
 
 __END_SYS

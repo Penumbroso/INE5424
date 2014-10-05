@@ -4,6 +4,7 @@
 #define __new_h
 
 #include <application.h> // EPOS::Heap is already defined here
+#include <system.h>
 #include <utility/debug.h>
 
 // Overloaded operator new

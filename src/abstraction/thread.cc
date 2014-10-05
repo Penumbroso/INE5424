@@ -1,6 +1,5 @@
 // EPOS Thread Abstraction Implementation
 
-#include <system/kmalloc.h>
 #include <machine.h>
 #include <thread.h>
 #include <alarm.h>
@@ -86,7 +85,7 @@ Thread::~Thread()
 
     unlock();
 
-    kfree(_stack);
+    ::operator delete (_stack);
 }
 
 

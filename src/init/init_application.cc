@@ -7,6 +7,8 @@
 
 __BEGIN_SYS
 
+Heap * const USER = 0;
+
 class Init_Application
 {
 public:
@@ -17,18 +19,14 @@ public:
 	db<Init>(INF) << "Initializing application's heap" << endl;
 	Application::_heap = new (&Application::_preheap[0]) Heap(MMU::alloc(MMU::pages(Traits<Application>::HEAP_SIZE)),
                                                                   Traits<Application>::HEAP_SIZE);
+    const_cast<Heap*&>(USER) = Application::_heap;
 
 	db<Init>(INF) << "done!" << endl;
     }
-    static Heap * const _heap;
 };
 
 // Global object "init_application"  must be linked to the application (not 
 // to the system) and there constructed at first.
 Init_Application init_application;
-
-// Initialize heap pointers, to make "new (APPLICATION) Type()" work
-Heap * const Init_Application::_heap = Application::_heap;
-Heap * const USER = Init_Application::_heap;
 
 __END_SYS

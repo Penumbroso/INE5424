@@ -7,6 +7,8 @@ extern "C" { void __epos_library_app_entry(void); }
 
 __BEGIN_SYS
 
+Heap * const SYSTEM = 0;
+
 class Init_System
 {
 public:
@@ -20,8 +22,9 @@ public:
 
         // Initialize System's heap
         db<Init>(INF) << "Initializing system's heap: " << endl;
-	System::_heap = new (&System::_preheap[0]) Heap(MMU::alloc(MMU::pages(Traits<System>::HEAP_SIZE)),
+        System::_heap = new (&System::_preheap[0]) Heap(MMU::alloc(MMU::pages(Traits<System>::HEAP_SIZE)),
                                                         Traits<System>::HEAP_SIZE);
+        const_cast<Heap*&>(SYSTEM) = System::_heap;
         db<Init>(INF) << "done!" << endl;
 
         // Initialize the machine
@@ -41,9 +44,5 @@ public:
 
 // Global object "init_system" must be constructed first.
 Init_System init_system;
-
-// Initialize heap pointers, to make "new (SYSTEM) Type()" work
-Heap * const Init_System::_heap = System::_heap;
-Heap * const SYSTEM = Init_System::_heap;
 
 __END_SYS

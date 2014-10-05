@@ -17,8 +17,6 @@ class System
 {
     friend class Init_System;
     friend class Init_Application;
-    friend void * kmalloc(size_t);
-    friend void kfree(void *);
 
 public:
     static System_Info<Machine> * const info() { return _si; }

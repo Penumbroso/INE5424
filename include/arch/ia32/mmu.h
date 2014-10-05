@@ -334,7 +334,7 @@ public:
         db<IA32_MMU>(TRC) << "IA32_MMU::free(frame=" << frame << ",n=" << n << ")" << endl;
 
         if(frame && n) {
-            List::Element * e = new (phy2log(frame)) List::Element(frame, n);
+            List::Element * e = new ((void*)phy2log(frame)) List::Element(frame, n);
             List::Element * m1, * m2;
             _free.insert_merging(e, &m1, &m2);
         }

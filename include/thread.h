@@ -7,7 +7,7 @@
 #include <utility/handler.h>
 #include <cpu.h>
 #include <machine.h>
-#include <system/kmalloc.h>
+#include <new>
 
 __BEGIN_SYS
 
@@ -57,7 +57,7 @@ public:
     {
         lock();
 
-        _stack = kmalloc(stack_size);
+        _stack = operator new(stack_size, SYSTEM);
         _context = CPU::init_stack(_stack, stack_size, &implicit_exit, entry);
 
         common_constructor(entry, stack_size); // implicit unlock
@@ -70,7 +70,7 @@ public:
     {
         lock();
 
-        _stack = kmalloc(stack_size);
+        _stack = operator new(stack_size, SYSTEM);
         _context = CPU::init_stack(_stack, stack_size, &implicit_exit, entry, a1);
 
         common_constructor(entry, stack_size); // implicit unlock()
@@ -83,7 +83,7 @@ public:
     {
         lock();
 
-        _stack = kmalloc(stack_size);
+        _stack = operator new(stack_size, SYSTEM);
         _context = CPU::init_stack(_stack, stack_size, &implicit_exit, entry, a1, a2);
 
         common_constructor(entry, stack_size); // implicit unlock()
@@ -96,7 +96,7 @@ public:
     {
         lock();
 
-        _stack = kmalloc(stack_size);
+        _stack = operator new(stack_size, SYSTEM);
         _context = CPU::init_stack(_stack, stack_size, &implicit_exit, entry, a1, a2, a3);
 
         common_constructor(entry, stack_size); // implicit unlock()
