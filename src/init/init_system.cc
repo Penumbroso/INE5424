@@ -36,9 +36,14 @@ public:
 
         // Initialization continues at init_first
     }
+    static Heap * const _heap;
 };
 
 // Global object "init_system" must be constructed first.
 Init_System init_system;
+
+// Initialize heap pointers, to make "new (SYSTEM) Type()" work
+Heap * const Init_System::_heap = System::_heap;
+Heap * const SYSTEM = Init_System::_heap;
 
 __END_SYS

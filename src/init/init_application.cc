@@ -20,10 +20,15 @@ public:
 
 	db<Init>(INF) << "done!" << endl;
     }
+    static Heap * const _heap;
 };
 
 // Global object "init_application"  must be linked to the application (not 
 // to the system) and there constructed at first.
 Init_Application init_application;
+
+// Initialize heap pointers, to make "new (APPLICATION) Type()" work
+Heap * const Init_Application::_heap = Application::_heap;
+Heap * const APPLICATION = Init_Application::_heap;
 
 __END_SYS

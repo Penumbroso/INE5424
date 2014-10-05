@@ -29,6 +29,8 @@ private:
     static Heap * _heap;
 };
 
+extern Heap * const APPLICATION;
+
 __END_SYS
 
 #include <utility/malloc.h>

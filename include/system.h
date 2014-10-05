@@ -32,6 +32,8 @@ private:
     static Heap * _heap;
 };
 
+extern Heap * const SYSTEM;
+
 __END_SYS
 
 #endif

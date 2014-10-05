@@ -27,16 +27,80 @@ extern "C"
 }
 
 // C++ dynamic memory allocators and deallocators
-inline void * operator new(size_t bytes) {
-    return malloc(bytes);
+/*inline void * operator new(size_t bytes) {
+    void * ptr = malloc(bytes);
+    db<Application>(TRC) << "operator new(bytes=" << bytes << ") => " << ptr << "\n";
+    return ptr;
 }
 
 inline void * operator new[](size_t bytes) {
-    return malloc(bytes);
+    void * ptr = malloc(bytes);
+    db<Application>(TRC) << "operator new[](bytes=" << bytes << ") => " << ptr << "\n";
+    return ptr;
 }
 
-// Delete cannot be declared inline due to virtual destructors
-void operator delete(void * ptr);
-void operator delete[](void * ptr);
+inline void operator delete(void * ptr) {
+    db<Application>(TRC) << "operator delete(ptr=" << ptr << ")\n";
+    free(ptr);
+}
+inline void operator delete[](void * ptr) {
+    db<Application>(TRC) << "operator delete(ptr=" << ptr << ")\n";
+    free(ptr);
+}*/
+
+inline void * operator new(size_t bytes, Heap * heap) {
+    db<Application>(TRC) << "operator new(bytes=" << bytes << ",heap=" <<
+            static_cast<void*>(heap) << ") => \n";
+
+    void * ptr = heap->alloc(bytes + sizeof(Heap*));
+    *static_cast<Heap**>(ptr) = heap;
+    ptr = static_cast<void*>(static_cast<char*>(ptr) + sizeof(Heap*));
+
+    db<Application>(TRC) << " => " << ptr << "\n";
+
+    return ptr;
+}
+
+inline void * operator new[](size_t bytes, Heap * heap) {
+    db<Application>(TRC) << "operator new(bytes=" << bytes << ",heap=" <<
+            static_cast<void*>(heap) << ") => \n";
+
+    void * ptr = heap->alloc(bytes + sizeof(Heap*));
+    *static_cast<Heap**>(ptr) = heap;
+    ptr = static_cast<void*>(static_cast<char*>(ptr) + sizeof(Heap*));
+
+    db<Application>(TRC) << " => " << ptr << "\n";
+
+    return ptr;
+}
+
+inline void * operator new(size_t bytes) {
+    db<Application>(TRC) << "operator new(bytes=" << bytes << ") => \n";
+    void * ptr = operator new(bytes, APPLICATION);
+    db<Application>(TRC) << " => " << ptr << "\n";
+    return ptr;
+}
+
+inline void * operator new[](size_t bytes) {
+    db<Application>(TRC) << "operator new[](bytes=" << bytes << ") => \n";
+    void * ptr = operator new[](bytes, APPLICATION);
+    db<Application>(TRC) << " => " << ptr << "\n";
+    return ptr;
+}
+
+// C++ dynamic memory deallocators
+inline void operator delete(void * object) {
+    db<Application>(TRC) << "operator delete(ptr=" << object << ")\n";
+    object = static_cast<void*>(static_cast<char*>(object) - sizeof(Heap*));
+    Heap * heap = *static_cast<Heap**>(object);
+    heap->free(object);
+}
+
+inline void operator delete[](void * object) {
+    db<Application>(TRC) << "operator delete(ptr=" << object << ")\n";
+    object = static_cast<void*>(static_cast<char*>(object) - sizeof(Heap*));
+    Heap * heap = *static_cast<Heap**>(object);
+    heap->free(object);
+}
 
 #endif
