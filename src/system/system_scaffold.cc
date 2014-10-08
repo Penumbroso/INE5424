@@ -14,7 +14,7 @@ extern "C" {
     }
 
     void _exit(int s) {
-        EPOS::Thread::exit(s); for(;;);
+        EPOS::Thread::exit(s);
     }
 
     void _print(const char * s) {
@@ -49,6 +49,7 @@ OStream kerr;
 // System class attributes
 System_Info<Machine> * System::_si = reinterpret_cast<System_Info<Machine> *>(Memory_Map<Machine>::SYS_INFO);
 char System::_preheap[];
+Segment * System::_heap_segment;
 Heap * System::_heap;
 
 __END_SYS
