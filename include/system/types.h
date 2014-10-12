@@ -5,8 +5,35 @@ typedef __SIZE_TYPE__ size_t;
 #ifndef __types_h
 #define __types_h
 
+__BEGIN_SYS
+
+// Memory allocators
+enum System_Allocator
+{
+    SYSTEM
+};
+
+enum Scratchpad_Allocator
+{
+    SCRATCHPAD
+};
+
+__END_SYS
+
+extern "C"
+{
+    void * malloc(size_t);
+    void free(void *);
+}
+
 inline void * operator new(size_t s, void * a) { return a; }
 inline void * operator new[](size_t s, void * a) { return a; }
+
+void * operator new(size_t, const EPOS::System_Allocator &);
+void * operator new[](size_t, const EPOS::System_Allocator &);
+
+void * operator new(size_t, const EPOS::Scratchpad_Allocator &);
+void * operator new[](size_t, const EPOS::Scratchpad_Allocator &);
 
 __BEGIN_SYS
 
@@ -56,6 +83,9 @@ class PC_RTC;
 // Hardware Mediators - EEPROM
 class PC_EEPROM;
 
+// Hardware Mediators - Scratchpad
+class PC_Scratchpad;
+
 // Hardware Mediators - UART
 class PC_UART;
 
@@ -81,9 +111,6 @@ class Clock;
 class Alarm;
 class Chronometer;
 
-// Abstractions - Network
-class Ethernet;
-
 
 // System Components IDs
 // The order in this enumeration defines many things in the system (e.g. init)
@@ -100,10 +127,14 @@ enum
     TIMER_ID,
     RTC_ID,
     EEPROM_ID,
+    SCRATCHPAD_ID,
     UART_ID,
     DISPLAY_ID,
 
     THREAD_ID,
+
+    ADDRESS_SPACE_ID,
+    SEGMENT_ID,
 
     MUTEX_ID,
     SEMAPHORE_ID,
@@ -131,8 +162,11 @@ template<> struct Type<PC_UART> { static const Type_Id ID = UART_ID; };
 template<> struct Type<PC_RTC> { static const Type_Id ID = RTC_ID; };
 template<> struct Type<PC_PCI> { static const Type_Id ID = PCI_ID; };
 template<> struct Type<PC_Display> { static const Type_Id ID = DISPLAY_ID; };
+template<> struct Type<PC_Scratchpad> { static const Type_Id ID = SCRATCHPAD_ID; };
 
 template<> struct Type<Thread> { static const Type_Id ID = THREAD_ID; };
+template<> struct Type<Segment> { static const Type_Id ID = SEGMENT_ID; };
+template<> struct Type<Address_Space> { static const Type_Id ID = ADDRESS_SPACE_ID; };
 
 __END_SYS
 
