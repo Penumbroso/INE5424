@@ -22,8 +22,7 @@ public:
         db<Init>(INF) << "Initializing application's heap: " << endl;
         if(Traits<System>::multiheap) {
             Application::_heap_segment = new (&Application::_preheap[0]) Segment(HEAP_SIZE);
-            Application::_heap = new (&Application::_preheap[sizeof(Segment)]) Heap(Address_Space::self()->attach(*Application::_heap_segment),
-                                      Application::_heap_segment->size());
+            Application::_heap = new (&Application::_preheap[sizeof(Segment)]) Heap(Address_Space(MMU::current()).attach(*Application::_heap_segment), Application::_heap_segment->size());
         } else
             for(unsigned int frames = MMU::allocable(); frames; frames = MMU::allocable())
                 System::_heap->free(MMU::alloc(frames), frames * sizeof(MMU::Page));
