@@ -16,10 +16,10 @@ private:
     typedef CPU::Phy_Addr Phy_Addr;
     typedef CPU::Log_Addr Log_Addr;
 
-    using MMU::Directory::activate;
     using MMU::Directory::pd;
 
 public:
+    using MMU::Directory::activate;
     Address_Space();
     Address_Space(MMU::Page_Directory * pd);
     ~Address_Space();
