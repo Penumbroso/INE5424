@@ -10,24 +10,36 @@ __BEGIN_SYS
 
 void Thread::init()
 {
-    int (* entry)() = reinterpret_cast<int (*)()>(__epos_app_entry);
+    // If EPOS is a library, then adjust the application entry point to __epos_app_entry,
+    // which will directly call main(). In this case, _init will have already been called,
+    // before Init_Application, to construct main()'s global objects.
+    int (* entry)();
+    if(Traits<Build>::MODE == Traits<Build>::LIBRARY)
+        entry = reinterpret_cast<int (*)()>(__epos_app_entry);
+    else
+        entry = reinterpret_cast<int (*)()>(System::info()->lm.app_entry);
 
     db<Init, Thread>(TRC) << "Thread::init(entry=" << reinterpret_cast<void *>(entry) << ")" << endl;
 
+    // The installation of the scheduler timer handler must precede the
+    // creation of threads, since the constructor can induce a reschedule
+    // and this in turn can call timer->reset()
+    // Letting reschedule() happen during thread creation is harmless, since
+    // MAIN is created first and dispatch won't replace it nor by itself
+    // neither by IDLE (that has a lower priority)
+    if(Criterion::timed)
+        _timer = new (SYSTEM) Scheduler_Timer(QUANTUM, time_slicer);
+
     // Create the application's main thread
     // This must precede idle, thus avoiding implicit rescheduling
-    // For preemptive scheduling, reschedule() is called, but it will preserve MAIN as the RUNNING thread
-    _running = new (SYSTEM) Thread(entry, RUNNING, MAIN);
+    Thread * first = new (SYSTEM) Thread(entry, RUNNING, MAIN);
     new (SYSTEM) Thread(&idle, READY, IDLE);
 
-    if(preemptive)
-        _timer = new (SYSTEM) Scheduler_Timer(QUANTUM, reschedule);
-
-    db<Init, Thread>(INF) << "Dispatching the first thread: " << _running << endl;
+    db<Init, Thread>(INF) << "Dispatching the first thread: " << first << endl;
 
     This_Thread::not_booting();
 
-    _running->_context->load();
+    first->_context->load();
 }
 
 __END_SYS
