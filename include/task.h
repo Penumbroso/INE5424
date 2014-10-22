@@ -10,60 +10,60 @@
 
 __BEGIN_SYS
 
-class Task
-{
-private:
-    typedef CPU::Log_Addr Log_Addr;
-    typedef CPU::Context Context;
-    typedef class Queue<Thread> Queue;
-
-    static const unsigned int STACK_SIZE = 
-        Traits<Application>::STACK_SIZE;
-
+class Task {
 public:
-    Task(const Segment & c, const Segment & d) : _code(c), _data(d) {
-        db<Task>(TRC) << "Task()\n";
-        _as.attach(c); 
-        _as.attach(d); 
-    }
+    // Public type definitions
+    typedef CPU::Log_Addr Log_Addr;
 
-    ~Task() {
-        db<Task>(TRC) << "~Task()\n";
-        while(!_threads.empty())
-            free(_threads.remove()->object());
-    }
 
-    Address_Space * address_space() { return &_as; }
-    const Segment & code_segment() const { return _code; }
-    const Segment & data_segment() const { return _data; }
+    // Constructor/destructor
 
+    /* Constructs a task with the given code and data segments. */
+    Task(const Segment & code, const Segment & data);
+    ~Task();
+
+    // Getters
+    const Address_Space * address_space() const { return _as;   }
+          Address_Space * address_space()       { return _as;   }
+    const Segment       * code_segment()  const { return _code_segment; }
+    const Segment       * data_segment()  const { return _data_segment; }
+          Log_Addr        code()                { return _code_address; }
+          Log_Addr        data()                { return _data_address; }
+
+    // Instance methods
     Thread * create_thread(int (* entry)(), 
         const Thread::State & state = Thread::READY,
         const Thread::Criterion & criterion = Thread::NORMAL,
-        unsigned int stack_size = STACK_SIZE)
-    {
-        _as.activate();
-        Thread * t = new (SYSTEM) Thread(entry, state, criterion);
-        Queue::Element * e = new (SYSTEM) Queue::Element(t);
-        _threads.insert(e);
-        return t;
-    }
+        unsigned int stack_size = STACK_SIZE);
 
-    void destroy_thread(Thread * t) {
-        Queue::Element * e = _threads.remove(t);
-        if(e)
-            delete e->object();
-    }
+    void destroy_thread(Thread * t);
 
-    static Task * volatile & self() { return _running; }
+    // Class methods
+    static Task * volatile self() { return _running; }
+
+    static void init();
 
 private:
-    Address_Space _as;
-    const Segment & _code;
-    const Segment & _data;
+    // Type definitions
+    typedef CPU::Context Context;
+    typedef class Queue<Thread> Queue;
+
+    // Constant definitions
+    static const unsigned int STACK_SIZE = Traits<Application>::STACK_SIZE;
+
+    // Instance atributes
+    Address_Space * _as;
+    const Segment * _code_segment;
+    const Segment * _data_segment;
+    Log_Addr _code_address;
+    Log_Addr _data_address; // These will contain the address of the segments
     Queue _threads;
 
+    // Class attributes
     static Task * volatile _running;
+
+    // Constructor used in initialization
+    Task(Address_Space *, const Segment *, const Segment *, Log_Addr, Log_Addr);
 };
 
 __END_SYS

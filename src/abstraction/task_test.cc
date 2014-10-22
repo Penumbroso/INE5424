@@ -9,10 +9,6 @@ using namespace EPOS;
 
 const int iterations = 10;
 
-#define REALLY_TO_STRING( str ) #str
-#define TO_STRING( str ) REALLY_TO_STRING(str)
-#define __LINE_STR__ "(line " TO_STRING(__LINE__) ")"
-
 int func_a(void);
 int func_b(void);
 
@@ -32,38 +28,38 @@ int main()
 
     Task * task0 = Task::self();
     Address_Space * as0 = task0->address_space();
-    cout << "My address space's page directory is located at " << as0 << " " __LINE_STR__ "\n";
+    cout << "My address space's page directory is located at " << as0 << "\n";
 
-    const Segment * cs0 = &task0->code_segment();
-    CPU::Log_Addr code0 = cs0;
+    const Segment * cs0 = task0->code_segment();
+    CPU::Log_Addr code0 = task0->code();
     cout << "My code segment is located at "
          << static_cast<void *>(code0)
-         << " and it is " << cs0->size() << " bytes long " __LINE_STR__ "\n";
+         << " and it is " << cs0->size() << " bytes long" << "\n";
 
-    const Segment * ds0 = &task0->data_segment();
-    CPU::Log_Addr data0 = ds0;
+    const Segment * ds0 = task0->data_segment();
+    CPU::Log_Addr data0 = task0->data();
     cout << "My data segment is located at "
          << static_cast<void *>(data0)
-         << " and it is " << ds0->size() << " bytes long " __LINE_STR__ "\n";
+         << " and it is " << ds0->size() << " bytes long" << "\n";
 
-    cout << "Creating and attaching segments: " __LINE_STR__ "\n";
+    cout << "Creating and attaching segments:\n";
     Segment cs1(cs0->size());
     CPU::Log_Addr code1 = as0->attach(cs1);
-    cout << "  code => " << code1 << " done! " __LINE_STR__ << endl;
+    cout << "  code => " << code1 << " done!" << endl;
     Segment ds1(ds0->size());
     CPU::Log_Addr data1 = as0->attach(ds1);
-    cout << "  data => " << data1 << " done! " __LINE_STR__  << endl;
+    cout << "  data => " << data1 << " done!" << endl;
 
-    cout << "Copying segments: " __LINE_STR__ ;
+    cout << "Copying segments:";
     memcpy(code1, code0, cs1.size());
-    cout << " code => done! " __LINE_STR__  << endl;
+    cout << " code => done!" << endl;
     memcpy(data1, data0, ds1.size());
-    cout << " data => done! " __LINE_STR__  << endl;
+    cout << " data => done!" << endl;
 
-    cout << "Detaching segments: " __LINE_STR__ ;
+    cout << "Detaching segments:";
     as0->detach(cs1);
     as0->detach(ds1);
-    cout << " done! " __LINE_STR__  << endl;
+    cout << " done!" << endl;
 
     Task * task1 = new (SYSTEM) Task(cs1, ds1);
     a = task1->create_thread(&func_a);
@@ -71,7 +67,7 @@ int main()
 
     m->suspend();
 
-    cout << "Both threads are now done and have suspended themselves. I'll now wait for 1 second and then wake them up so they can exit ... " __LINE_STR__ "\n";
+    cout << "Both threads are now done and have suspended themselves. I'll now wait for 1 second and then wake them up so they can exit ...\n";
 
     Alarm::delay(1000000);
 
@@ -82,13 +78,13 @@ int main()
     int status_b = b->join();
 
     cout << "Thread A exited with status " << status_a 
-         << " and thread B exited with status " << status_b << " " __LINE_STR__ "\n";
+         << " and thread B exited with status " << status_b << "\n";
 
     delete a;
     delete b;
     delete task1;
 
-    cout << "I'm also done, bye! " __LINE_STR__ << endl;
+    cout << "I'm also done, bye!" << endl;
 
     return 0;
 }
@@ -98,7 +94,7 @@ int func_a(void)
     for(int i = iterations; i > 0; i--) {
         for(int i = 0; i < 79; i++)
             cout << "a";
-        cout << " " __LINE_STR__ "\n";
+        cout << "\n";
         Thread::yield();
     }
 
@@ -112,7 +108,7 @@ int func_b(void)
     for(int i = iterations; i > 0; i--) {
         for(int i = 0; i < 79; i++)
             cout << "b";
-        cout << " " __LINE_STR__ "\n";
+        cout << "\n";
         Thread::yield();
     }
 
