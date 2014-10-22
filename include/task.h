@@ -39,7 +39,7 @@ public:
     void destroy_thread(Thread * t);
 
     // Class methods
-    static Task * volatile self() { return _running; }
+    static Task * volatile self() { return _main_task; }
 
     static void init();
 
@@ -60,7 +60,7 @@ private:
     Queue _threads;
 
     // Class attributes
-    static Task * volatile _running;
+    static Task * volatile _main_task;
 
     // Constructor used in initialization
     Task(Address_Space *, const Segment *, const Segment *, Log_Addr, Log_Addr);

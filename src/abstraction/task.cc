@@ -3,7 +3,7 @@
 
 __BEGIN_SYS
 
-Task * volatile Task::_running;
+Task * volatile Task::_main_task;
 
 
 // Constructor/destructor
