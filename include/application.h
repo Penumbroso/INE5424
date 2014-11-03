@@ -24,8 +24,7 @@ private:
     static void init();
 
 private:
-    static char _preheap[(Traits<System>::multiheap ? sizeof(Segment) : 0) + sizeof(Heap)];
-    static Segment * _heap_segment;
+    static char _preheap[sizeof(Heap)];
     static Heap * _heap;
 };
 
