@@ -1,11 +1,10 @@
 // EPOS Address_Space Abstraction Implementation
 
+#include <thread.h>
+#include <task.h>
 #include <address_space.h>
 
 __BEGIN_SYS
-
-// Class attributes
-Address_Space * Address_Space::_master;
 
 // Methods
 Address_Space::Address_Space(MMU::Page_Directory * pd) : MMU::Directory(pd)

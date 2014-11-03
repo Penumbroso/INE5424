@@ -11,7 +11,6 @@ OStream cerr;
 
 // Application class attributes
 char Application::_preheap[];
-Segment * Application::_heap_segment;
 Heap * Application::_heap;
 
 __END_SYS
