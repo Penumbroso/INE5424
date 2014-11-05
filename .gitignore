@@ -18,6 +18,8 @@ src/arch/ia32/ia32_crt0.s
 src/boot/pc_boot
 src/boot/pc_boot.s
 src/setup/pc_setup
+src/init/pc_init
+src/system/pc_system
 
 # Programs
 app/[a-z]*
