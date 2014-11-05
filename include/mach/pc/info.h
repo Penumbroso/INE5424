@@ -43,8 +43,8 @@ public:
         PAddr mem_top;          // Memory top address
         PAddr io_base;          // I/O Memory base address
         PAddr io_top;           // I/O Memory top address
- 	PAddr ext_base;         // Boot Image EXTRA segment base address
- 	PAddr ext_top;          // Boot Image EXTRA segment top address
+        PAddr ext_base;         // Boot Image EXTRA segment base address
+        PAddr ext_top;          // Boot Image EXTRA segment top address
         PAddr idt;              // IDT
         PAddr gdt;              // GDT
         PAddr sys_pt;           // System Page Table

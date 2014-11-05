@@ -10,16 +10,16 @@ __BEGIN_SYS
 
 class Address_Space: private MMU::Directory
 {
-    friend class System;
+    friend class Task;
 
 private:
     typedef CPU::Phy_Addr Phy_Addr;
     typedef CPU::Log_Addr Log_Addr;
 
+    using MMU::Directory::activate;
     using MMU::Directory::pd;
 
 public:
-    using MMU::Directory::activate;
     Address_Space();
     Address_Space(MMU::Page_Directory * pd);
     ~Address_Space();
@@ -29,12 +29,6 @@ public:
     void detach(const Segment & seg);
 
     Phy_Addr physical(Log_Addr address);
-
-private:
-    static void init();
-
-private:
-    static Address_Space * _master;
 };
 
 __END_SYS

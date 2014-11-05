@@ -1,69 +1,67 @@
 // EPOS Task Abstraction Declarations
 
+#include <thread.h>
+
 #ifndef __task_h
 #define __task_h
 
 #include <utility/malloc.h>
 #include <address_space.h>
 #include <segment.h>
-#include <thread.h>
+
 
 __BEGIN_SYS
-
-class Task {
-public:
-    // Public type definitions
+class Task
+{
+    // Type used in public methods
     typedef CPU::Log_Addr Log_Addr;
 
-
-    // Constructor/destructor
-
+public:
     /* Constructs a task with the given code and data segments. */
-    Task(const Segment & code, const Segment & data);
+    Task(const Segment & cs, const Segment & ds);
     ~Task();
 
     // Getters
-    const Address_Space * address_space() const { return _as;   }
-          Address_Space * address_space()       { return _as;   }
-    const Segment       * code_segment()  const { return _code_segment; }
-    const Segment       * data_segment()  const { return _data_segment; }
-          Log_Addr        code()                { return _code_address; }
-          Log_Addr        data()                { return _data_address; }
-
-    // Instance methods
-    Thread * create_thread(int (* entry)(), 
-        const Thread::State & state = Thread::READY,
-        const Thread::Criterion & criterion = Thread::NORMAL,
-        unsigned int stack_size = STACK_SIZE);
-
-    void destroy_thread(Thread * t);
+          Address_Space * address_space() const { return _as;   }
+    const Segment *       code_segment()  const { return _cs;   }
+    const Segment *       data_segment()  const { return _ds;   }
+          Log_Addr        code()          const { return _code; }
+          Log_Addr        data()          const { return _data; }
 
     // Class methods
-    static Task * volatile self() { return _main_task; }
-
+    static const Task * self() { return multitask ? Thread::self()->task() : _master; }
     static void init();
 
+protected:
+    // Constructor used in initialization
+    Task(Address_Space * as, const Segment * cs, const Segment * ds, Log_Addr code, Log_Addr data)
+    : _as(as), _cs(cs), _ds(ds), _code(code), _data(data) {}
+
 private:
-    // Type definitions
+    friend class System;
+    friend class Thread;
+
+    // Type definitions (rememder Log_Addr is already defined)
+    typedef CPU::Phy_Addr Phy_Addr;
     typedef CPU::Context Context;
     typedef class Queue<Thread> Queue;
 
-    // Constant definitions
-    static const unsigned int STACK_SIZE = Traits<Application>::STACK_SIZE;
-
     // Instance atributes
-    Address_Space * _as;
-    const Segment * _code_segment;
-    const Segment * _data_segment;
-    Log_Addr _code_address;
-    Log_Addr _data_address; // These will contain the address of the segments
+    Address_Space * _as; // Address Space
+    const Segment * _cs; // Code Segment
+    const Segment * _ds; // Data Segment
+    Log_Addr _code; // Address of the code segment
+    Log_Addr _data; // Address of the data segment
     Queue _threads;
 
-    // Class attributes
-    static Task * volatile _main_task;
+    // Class attribute
+    static Task * _master;
 
-    // Constructor used in initialization
-    Task(Address_Space *, const Segment *, const Segment *, Log_Addr, Log_Addr);
+    // Traits alias
+    static const bool multitask = Traits<System>::multitask;
+
+    // Private instance method
+    void activate() const { _as->activate(); }
 };
 
 __END_SYS

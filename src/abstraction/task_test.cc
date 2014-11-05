@@ -26,7 +26,7 @@ int main()
 
     cout << "I'll try to clone myself:\n";
 
-    Task * task0 = Task::self();
+    const Task * task0 = Task::self();
     Address_Space * as0 = task0->address_space();
     cout << "My address space's page directory is located at " << as0 << "\n";
 
@@ -62,7 +62,7 @@ int main()
     cout << " done!" << endl;
 
     Task * task1 = new (SYSTEM) Task(cs1, ds1);
-    a = task1->create_thread(&func_a);
+    a = new (SYSTEM) Thread(*task1, &func_a);
     b = new (SYSTEM) Thread(&func_b);
 
     m->suspend();
