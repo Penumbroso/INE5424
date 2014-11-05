@@ -19,6 +19,7 @@ int main() {
 
     std::tuple<> null_tuple; // must compile
 
+    // Tuple and std::get
     std::tuple< int, char, double > tuple( 1, 'C', 3.5 );
     dynamic_assert( std::get<0>(tuple) == 1 );
     dynamic_assert( std::get<1>(tuple) == 'C' );
@@ -34,6 +35,7 @@ int main() {
     static_assert( std::is_same< char &,   decltype(std::get<1>(tuple)) >::value );
     static_assert( std::is_same< double &, decltype(std::get<2>(tuple)) >::value );
 
+    // const tuple and std::get
     const std::tuple< int, char, double > & ctuple = tuple;
 
     dynamic_assert( std::get<0>(ctuple) == 2 );
@@ -44,6 +46,7 @@ int main() {
     static_assert( std::is_same< const char &,   decltype(std::get<1>(ctuple)) >::value );
     static_assert( std::is_same< const double &, decltype(std::get<2>(ctuple)) >::value );
 
+    // Equality operator
     std::tuple< int, char, double > other( tuple );
     dynamic_assert( tuple == other );
     dynamic_assert( !(tuple != other) );
@@ -51,6 +54,7 @@ int main() {
     dynamic_assert( tuple != other );
     dynamic_assert( !(tuple == other) );
 
+    // std::make_tuple
     static_assert( std::is_same<
             decltype( tuple ),
             decltype( std::make_tuple( 2, '1', 2.5 ) )
@@ -62,5 +66,25 @@ int main() {
     tuple = std::make_tuple( 2, '4', 2.5 );
     dynamic_assert( tuple != other );
     dynamic_assert( !(tuple == other) );
+
+    // nested tuples
+    std::tuple< std::tuple< std::tuple<>, int > > nested_tuple( 
+            std::tuple< std::tuple<>, int>(std::tuple<>(), 2)
+        );
+
+    static_assert( std::is_same<
+            std::tuple< std::tuple<>, int > &,
+            decltype( std::get<0>(nested_tuple) )
+        >::value );
+    static_assert( std::is_same<
+            std::tuple<> &,
+            decltype( std::get<0>( std::get<0>(nested_tuple) ) )
+        >::value );
+    static_assert( std::is_same<
+            int &,
+            decltype( std::get<1>( std::get<0>(nested_tuple) ) )
+        >::value);
+    dynamic_assert( std::get<1>(std::get<0>(nested_tuple)) == 2 );
+
     return 0;
 }
