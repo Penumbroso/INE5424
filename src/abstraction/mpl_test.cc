@@ -3,7 +3,7 @@
 
 #define static_assert( ... ) static_assert( __VA_ARGS__ , #__VA_ARGS__ ) // ugly
 
-using namespace mpl;
+using namespace std;
 
 int main() {
     static_assert( is_same<int, int>::value );

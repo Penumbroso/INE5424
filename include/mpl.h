@@ -9,14 +9,14 @@
  *
  * The naming conventions was chosen to resemble Boost.MPL.
  *
- * All metafunctions are in namespace mpl, outside namespace EPOS;
+ * All metafunctions are in namespace std, outside namespace EPOS;
  * this was done so the library could be reused with little or
  * no code change.
  */
 #ifndef __mpl_h
 #define __mpl_h
 
-namespace mpl {
+namespace std {
 
 /* True if both types are the same, false if they are different.
  * This template is sensible to cv-qualifications. */
@@ -44,6 +44,6 @@ struct type_at_index< N, Head, Tail... > {
     typedef typename type_at_index<N-1, Tail...>::type type;
 };
 
-} // namespace mpl
+} // namespace std
 
 #endif // __mpl_h
