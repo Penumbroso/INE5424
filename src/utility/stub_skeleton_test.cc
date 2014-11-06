@@ -2,6 +2,7 @@
 #include <system/types.h>
 #include <utility/tuple.h>
 #include <utility/ostream.h>
+#include <utility/stub_skeleton.h>
 
 #define TO_STRING( X ) REALLY_TO_STRING( X )
 #define REALLY_TO_STRING( X ) #X
@@ -30,6 +31,23 @@ void g( void * ptr ) {
     get<1>( *tup ) = get<0>( *tup ) + 'A';
 }
 
+namespace EPOS {
+struct S {
+    int i;
+    void f() {
+        i = 5;
+    }
+    int f( int j ) {
+        int k = i;
+        i = j;
+        return k;
+    }
+    int f( char ) const {
+        return i;
+    }
+};
+}
+
 int main() {
     // syscall test
     int local_int = 2;
@@ -50,4 +68,17 @@ int main() {
     get<0>( tup ) = 2;
     syscall( g, (void *) &tup );
     dynamic_assert( get<1>(tup) == 'C' );
+
+    S s;
+    s.i = 9;
+    tuple< tuple<char>, S *, int > data1;
+    get<0>(data1) = tuple<char>('2');
+    get<1>(data1) = & s;
+    syscall( Skeleton<S>::method< static_cast< int (S::*)( char ) const >(f) >::call, (void*) &data1 );
+    dynamic_assert( s.i == 9 );
+    dynamic_assert( get<2>(data1) == 9 );
+    s.i = 4;
+    syscall( Skeleton<S>::method< static_cast< int (S::*)( char ) const >(f) >::call, (void*) &data1 );
+    dynamic_assert( s.i == 4 );
+    dynamic_assert( get<2>(data1) == 4 );
 }
