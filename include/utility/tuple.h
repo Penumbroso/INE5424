@@ -57,6 +57,13 @@ tuple< Args... > make_tuple( const Args& ... args ) {
     return tuple<Args...>( args... );
 }
 
+/* tuple_call
+ * Call the function (or member function) with the values of the tuple. */
+template< typename R, typename ... Args >
+R tuple_call( R (*)( Args... ), tuple<Args...> );
+template< typename R, typename T, typename ... Args >
+R tuple_call( R (T::*)( Args... ), T*, tuple<Args...> );
+
 
 /* Implementation of get<N>
  * Workaround to the inexistence of partial function overloading in C++ */
@@ -87,6 +94,24 @@ typename type_at_index<N, Args...>::type       & get( tuple<Args...>       & t )
 template< int N, typename ... Args >
 typename type_at_index<N, Args...>::type const & get( tuple<Args...> const & t ) {
     return get_t<N, Args...>::get( t );
+}
+
+// Implementation of tuple_call
+template< typename R, typename ... Args, int ... Indexes >
+R tuple_call( R (*fun)( Args... ), tuple< Args... > t, integer_sequence< int, Indexes... > ) {
+    return fun( get<Indexes>(t)... );
+}
+template< typename R, typename T, typename ... Args, int ... Indexes >
+R tuple_call( R (T::*fun)( Args... ), T* obj, tuple< Args... > t, integer_sequence< int, Indexes... > ) {
+    return (obj->*fun)( get<Indexes>(t)... );
+}
+template< typename R, typename ... Args >
+R tuple_call( R (*fun)( Args... ), tuple<Args...> t ) {
+    return tuple_call( fun, t, typename index_sequence_sized< int, sizeof...(Args) >::type() );
+}
+template< typename R, typename T, typename ... Args >
+R tuple_call( R (T::* fun)( Args... ), T* obj, tuple<Args...> t ) {
+    return tuple_call( fun, obj, t, typename index_sequence_sized< int, sizeof...(Args) >::type() );
 }
 
 } // namespace EPOS

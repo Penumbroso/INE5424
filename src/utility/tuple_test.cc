@@ -16,6 +16,27 @@
 
 using namespace EPOS;
 
+double f( int i, int j ) {
+    return i + j;
+}
+long long g( int i, int j ) {
+    return i - j;
+}
+static bool h_was_called;
+void h( int, int ) {
+    h_was_called = true;
+}
+
+struct S {
+    int i() {
+        return k;
+    }
+    float j( int y ) {
+        return y + k;
+    }
+    int k;
+};
+
 int main() {
     OStream cout;
 
@@ -87,6 +108,50 @@ int main() {
             decltype( get<1>( get<0>(nested_tuple) ) )
         >::value);
     dynamic_assert( get<1>(get<0>(nested_tuple)) == 2 );
+
+    // tuple_call with functions
+    tuple< int, int > pair( 2, 1 );
+    static_assert( is_same<
+            double,
+            decltype( tuple_call( f, pair ) )
+        >::value );
+    static_assert( is_same<
+            long long,
+            decltype( tuple_call( g, pair ) )
+        >::value );
+    static_assert( is_same<
+            void,
+            decltype( tuple_call( h, pair ) )
+        >::value );
+    dynamic_assert( tuple_call( f, pair ) == 3.0 );
+    dynamic_assert( tuple_call( g, pair ) == 1 );
+    get<1>( pair ) = -get<1>( pair );
+    dynamic_assert( tuple_call( f, pair ) == 1.0 );
+    dynamic_assert( tuple_call( g, pair ) == 3 );
+    h_was_called = false;
+    dynamic_assert( !h_was_called );
+    tuple_call( h, pair );
+    dynamic_assert( h_was_called );
+
+    // tuple_call with methods
+    S s;
+    s.k = 2;
+    tuple< int > int_tuple( 7 );
+    static_assert( is_same<
+            int,
+            decltype( tuple_call( &S::i, &s, null_tuple ) )
+        >::value );
+    static_assert( is_same<
+            float,
+            decltype( tuple_call( &S::j, &s, int_tuple ) )
+        >::value );
+    dynamic_assert( tuple_call( &S::i, &s, null_tuple ) == 2 );
+    dynamic_assert( tuple_call( &S::j, &s,  int_tuple ) == 9.0f );
+    s.k = 3;
+    dynamic_assert( tuple_call( &S::i, &s, null_tuple ) == 3 );
+    dynamic_assert( tuple_call( &S::j, &s,  int_tuple ) == 10.0f );
+    get<0>(int_tuple)++;
+    dynamic_assert( tuple_call( &S::j, &s,  int_tuple ) == 11.0f );
 
     return 0;
 }

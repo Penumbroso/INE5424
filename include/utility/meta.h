@@ -50,6 +50,44 @@ struct conditional<true, True, False> {
     typedef True type;
 };
 
+/* Template class used to implement tuple_call-like functions. */
+template< typename T, T... >
+struct integer_sequence {};
+
+/* Type metafunction that returns an integer_sequence of type T
+ * whose values are 0, 1, 2, ..., N-1.
+ *
+ * In C++14, a very similar metafunction named make_integer_sequence
+ * will be avaliable in standard headers; we cannot implement it here
+ * due to the lack of template alias in this ancient compiler, so
+ * we gave a different name to avoid mental name clashes. */
+template< typename T, T N >
+struct index_sequence_sized;
+
+// Implementation of index_sequence_sized
+template< bool b, typename T, T ... Ns >
+struct boolean_index_sequence_helper;
+template< typename T, T ... Ns >
+struct index_sequence_helper;
+
+template< bool b, typename T, T N, T ... Ns >
+struct boolean_index_sequence_helper< b, T, N, Ns... > {
+    typedef integer_sequence< T, Ns... > type;
+};
+template< typename T, T N, T ... Ns >
+struct boolean_index_sequence_helper< false, T, N, Ns... > {
+    typedef typename index_sequence_helper< T, N-1, N-1, Ns... >::type type;
+};
+template< typename T, T N, T ... Ns >
+struct index_sequence_helper< T, N, Ns... > {
+    typedef typename boolean_index_sequence_helper< N==0, T, N, Ns... >::type type;
+};
+
+template< typename T, T N >
+struct index_sequence_sized {
+    typedef typename index_sequence_helper<T, N>::type type;
+};
+
 } // namespace EPOS
 
 #endif // __meta_h
