@@ -66,6 +66,8 @@ template< typename R, typename ... Args >
 R tuple_call( R (*)( Args... ), tuple<Args...> );
 template< typename R, typename T, typename ... Args >
 R tuple_call( R (T::*)( Args... ), T*, tuple<Args...> );
+template< typename R, typename T, typename ... Args >
+R tuple_call( R (T::*)( Args... ) const, const T*, tuple<Args...> );
 
 
 /* Implementation of get<N>
@@ -108,12 +110,20 @@ template< typename R, typename T, typename ... Args, int ... Indexes >
 R tuple_call( R (T::*fun)( Args... ), T* obj, tuple< Args... > t, integer_sequence< int, Indexes... > ) {
     return (obj->*fun)( get<Indexes>(t)... );
 }
+template< typename R, typename T, typename ... Args, int ... Indexes >
+R tuple_call( R (T::*fun)( Args... ) const, const T* obj, tuple< Args... > t, integer_sequence< int, Indexes... > ) {
+    return (obj->*fun)( get<Indexes>(t)... );
+}
 template< typename R, typename ... Args >
 R tuple_call( R (*fun)( Args... ), tuple<Args...> t ) {
     return tuple_call( fun, t, typename index_sequence_sized< int, sizeof...(Args) >::type() );
 }
 template< typename R, typename T, typename ... Args >
 R tuple_call( R (T::* fun)( Args... ), T* obj, tuple<Args...> t ) {
+    return tuple_call( fun, obj, t, typename index_sequence_sized< int, sizeof...(Args) >::type() );
+}
+template< typename R, typename T, typename ... Args >
+R tuple_call( R (T::* fun)( Args... ) const, const T* obj, tuple<Args...> t ) {
     return tuple_call( fun, obj, t, typename index_sequence_sized< int, sizeof...(Args) >::type() );
 }
 

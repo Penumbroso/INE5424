@@ -54,8 +54,7 @@ namespace USER {
             tuple< tuple<>, EPOS::S* > tup;
             get<0>(tup) = tuple<>(); // unnecessary; just for consistency
             get<1>(tup) = object;
-            syscall(Skeleton<EPOS::S, void>::method<
-                    static_cast< int (EPOS::S::*)() >(EPOS::S::f) >::call, (void*)&tup);
+            syscall(Skeleton<EPOS::S, void>::method< &EPOS::S::f >::call, (void*)&tup);
         }
         int f( int p1 ) {
             tuple< tuple<int>, EPOS::S*, int > tup;
@@ -101,11 +100,12 @@ int main() {
     tuple< tuple<char, double>, S *, int > data1;
     get<0>(data1) = tuple<char, double>('2', 3.5 );
     get<1>(data1) = & s;
-    syscall( Skeleton<S, int, char, double>::method< &S::f >::call, (void*) &data1 );
+    syscall( Skeleton<const EPOS::S, int, char, double>::method< &EPOS::S::f >::call, (void*) &data1 );
     dynamic_assert( s.i == 9 );
     dynamic_assert( get<2>(data1) == 9 );
-    s.i = 4;
-    syscall( Skeleton<S, int, char, double>::method< &S::f >::call, (void*) &data1 );
+    s.i = 4;//           |
+    // Note o const aqui v 
+    syscall( Skeleton<const EPOS::S, int, char, double>::method< &EPOS::S::f >::call, (void*) &data1 );
     dynamic_assert( s.i == 4 );
     dynamic_assert( get<2>(data1) == 4 );
 
@@ -115,6 +115,6 @@ int main() {
     dynamic_assert( s.i == 5 );
     dynamic_assert( ss.f( 7 ) == 5 );
     dynamic_assert( s.i == 7 );
-    dynamic_assert( ss.f( 'a', 3.5 ) == 5 );
+    dynamic_assert( ss.f( 'a', 3.5 ) == 7 );
     dynamic_assert( s.i == 7 );
 }
