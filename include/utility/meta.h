@@ -1,5 +1,4 @@
-/* mpl.h
- * Metaprogramming library.
+/* Metaprogramming library.
  *
  * All functions in this file are either value metafunctions or
  * type metafunctions; that is, consists of a struct with either
@@ -8,15 +7,11 @@
  * value of the respective function.
  *
  * The naming conventions was chosen to resemble Boost.MPL.
- *
- * All metafunctions are in namespace std, outside namespace EPOS;
- * this was done so the library could be reused with little or
- * no code change.
  */
-#ifndef __mpl_h
-#define __mpl_h
+#ifndef __meta_h
+#define __meta_h
 
-namespace std {
+namespace EPOS {
 
 /* True if both types are the same, false if they are different.
  * This template is sensible to cv-qualifications. */
@@ -44,6 +39,17 @@ struct type_at_index< N, Head, Tail... > {
     typedef typename type_at_index<N-1, Tail...>::type type;
 };
 
-} // namespace std
+/* If first parameter is true, returns the first type;
+ * otherwise, returns the second type. */
+template< bool, typename True, typename False >
+struct conditional {
+    typedef False type;
+};
+template< typename True, typename False >
+struct conditional<true, True, False> {
+    typedef True type;
+};
 
-#endif // __mpl_h
+} // namespace EPOS
+
+#endif // __meta_h

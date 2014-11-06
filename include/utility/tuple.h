@@ -4,9 +4,9 @@
  * This implementation is just complete enough to be usable by the
  * automatic stub/skeleton generator machinery.
  */
-#include <mpl.h>
+#include <utility/meta.h>
 
-namespace std {
+namespace EPOS {
 
 /* Tuple class.
  * The member access is done via std::get functions.
@@ -62,17 +62,17 @@ tuple< Args... > make_tuple( const Args& ... args ) {
  * Workaround to the inexistence of partial function overloading in C++ */
 template< int N, typename ... Args >
 struct get_t {
-    typedef typename std::type_at_index<N, Args...>::type type;
+    typedef typename type_at_index<N, Args...>::type type;
     static type & get( tuple<Args...>& t ) {
-        return std::template get<N-1>( t.tail );
+        return EPOS::template get<N-1>( t.tail );
     }
     static const type & get( const tuple<Args...>& t ) {
-        return std::template get<N-1>( t.tail );
+        return EPOS::template get<N-1>( t.tail );
     }
 };
 template< typename ... Args >
 struct get_t<0, Args...> {
-    typedef typename std::type_at_index<0, Args...>::type type;
+    typedef typename type_at_index<0, Args...>::type type;
     static type & get( tuple<Args...>& t ) {
         return t.head;
     }
@@ -89,4 +89,4 @@ typename type_at_index<N, Args...>::type const & get( tuple<Args...> const & t )
     return get_t<N, Args...>::get( t );
 }
 
-} // namespace std
+} // namespace EPOS

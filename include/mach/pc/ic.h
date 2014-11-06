@@ -437,12 +437,12 @@ private:
 };
 
 // PC_IC uses i8259A on single-processor machines and the APIC timer on MPs
-class PC_IC: private IC_Common, private IF<Traits<System>::multicore, APIC, i8259A>::Result
+class PC_IC: private IC_Common, private conditional<Traits<System>::multicore, APIC, i8259A>::type
 {
     friend class PC;
 
 private:
-    typedef IF<Traits<System>::multicore, APIC, i8259A>::Result Engine;
+    typedef conditional<Traits<System>::multicore, APIC, i8259A>::type Engine;
 
     typedef CPU::Reg32 Reg32;
     typedef CPU::Log_Addr Log_Addr;

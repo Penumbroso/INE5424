@@ -249,7 +249,7 @@ public:
     };
 
 protected:
-    typedef IF<Traits<System>::multicore, APIC_Timer, i8253>::Result Engine;
+    typedef conditional<Traits<System>::multicore, APIC_Timer, i8253>::type Engine;
     typedef Engine::Count Count;
     typedef IC::Interrupt_Id Interrupt_Id;
 

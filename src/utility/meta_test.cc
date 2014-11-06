@@ -1,9 +1,9 @@
 // Metaprogram library unit test
-#include <mpl.h>
+#include <utility/meta.h>
 
 #define static_assert( ... ) static_assert( __VA_ARGS__ , #__VA_ARGS__ ) // ugly
 
-using namespace std;
+using namespace EPOS;
 
 int main() {
     static_assert( is_same<int, int>::value );

@@ -3,7 +3,7 @@
 #ifndef __pc_config_h
 #define __pc_config_h
 
-#include <system/meta.h>
+#include <utility/meta.h>
 #include __APPLICATION_TRAITS_H
 
 #define __CPU_H         __HEADER_ARCH(cpu)
@@ -34,7 +34,7 @@ typedef PC_Timer        Timer;
 typedef PC_RTC          RTC;
 typedef PC_EEPROM       EEPROM;
 typedef PC_UART         UART;
-typedef IF<Traits<Serial_Display>::enabled, Serial_Display, PC_Display>::Result Display;
+typedef conditional<Traits<Serial_Display>::enabled, Serial_Display, PC_Display>::type Display;
 typedef PC_Scratchpad   Scratchpad;
 
 __END_SYS

@@ -40,7 +40,7 @@
 // CONFIGURATION
 //============================================================================
 #include <system/types.h>
-#include <system/meta.h>
+#include <utility/meta.h>
 #include __APPLICATION_TRAITS_H
 #include <system/info.h>
 
