@@ -37,6 +37,9 @@ void * operator new[](size_t, const EPOS::Scratchpad_Allocator &);
 
 __BEGIN_SYS
 
+// System call - must not be inline
+void syscall( void (* function )( void * ), void * parameter );
+
 // Dummy class for incomplete architectures and machines 
 template<int>
 class Dummy;
