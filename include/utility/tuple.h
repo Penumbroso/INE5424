@@ -4,6 +4,8 @@
  * This implementation is just complete enough to be usable by the
  * automatic stub/skeleton generator machinery.
  */
+#ifndef __tuple_h
+#define __tuple_h
 #include <utility/meta.h>
 
 namespace EPOS {
@@ -16,6 +18,7 @@ struct tuple {};
 
 template< typename Head, typename ... Tail >
 struct tuple< Head, Tail... > {
+    tuple() {}
     Head head;
     tuple<Tail...> tail;
 
@@ -115,3 +118,5 @@ R tuple_call( R (T::* fun)( Args... ), T* obj, tuple<Args...> t ) {
 }
 
 } // namespace EPOS
+
+#endif // __tuple_h
