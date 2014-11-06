@@ -32,7 +32,7 @@ void g( void * ptr ) {
 }
 
 namespace EPOS {
-struct S {
+struct S { // Sample system class
     int i;
     void f() {
         i = 5;
@@ -42,10 +42,37 @@ struct S {
         i = j;
         return k;
     }
-    int f( char ) const {
+    int f( char, double ) const {
         return i;
     }
 };
+}
+namespace USER {
+    struct S { // Stub class
+        EPOS::S * object;
+        void f() {
+            tuple< tuple<>, EPOS::S* > tup;
+            get<0>(tup) = tuple<>(); // unnecessary; just for consistency
+            get<1>(tup) = object;
+            syscall(Skeleton<EPOS::S, void>::method<
+                    static_cast< int (EPOS::S::*)() >(EPOS::S::f) >::call, (void*)&tup);
+        }
+        int f( int p1 ) {
+            tuple< tuple<int>, EPOS::S*, int > tup;
+            get<0>( tup ) = tuple<int>( p1 );
+            get<1>( tup ) = object;
+            syscall(Skeleton<EPOS::S, int, int>::method< &EPOS::S::f >::call, (void*) &tup);
+            return get<2>( tup );
+        }
+        int f( char p1, double p2 ) const {
+            tuple< tuple<char, double>, const EPOS::S*, int > tup;
+            get<0>( tup ) = tuple<char, double>( p1, p2 );
+            get<1>( tup ) = object;
+            syscall(Skeleton<const EPOS::S, int, char, double>::method< &EPOS::S::f >::call, (void*) &tup);
+            return get<2>( tup );
+        }
+        // TODO: implement constructor in the same lines
+    };
 }
 
 int main() {
@@ -71,14 +98,23 @@ int main() {
 
     S s;
     s.i = 9;
-    tuple< tuple<char>, S *, int > data1;
-    get<0>(data1) = tuple<char>('2');
+    tuple< tuple<char, double>, S *, int > data1;
+    get<0>(data1) = tuple<char, double>('2', 3.5 );
     get<1>(data1) = & s;
-    syscall( Skeleton<S>::method< static_cast< int (S::*)( char ) const >(f) >::call, (void*) &data1 );
+    syscall( Skeleton<S, int, char, double>::method< &S::f >::call, (void*) &data1 );
     dynamic_assert( s.i == 9 );
     dynamic_assert( get<2>(data1) == 9 );
     s.i = 4;
-    syscall( Skeleton<S>::method< static_cast< int (S::*)( char ) const >(f) >::call, (void*) &data1 );
+    syscall( Skeleton<S, int, char, double>::method< &S::f >::call, (void*) &data1 );
     dynamic_assert( s.i == 4 );
     dynamic_assert( get<2>(data1) == 4 );
+
+    USER::S ss;
+    ss.object = &s;
+    ss.f();
+    dynamic_assert( s.i == 5 );
+    dynamic_assert( ss.f( 7 ) == 5 );
+    dynamic_assert( s.i == 7 );
+    dynamic_assert( ss.f( 'a', 3.5 ) == 5 );
+    dynamic_assert( s.i == 7 );
 }
