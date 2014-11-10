@@ -48,30 +48,12 @@ struct S { // Sample system class
 };
 }
 namespace USER {
-    struct S { // Stub class
-        EPOS::S * object;
-        void f() {
-            tuple< tuple<>, EPOS::S* > tup;
-            get<0>(tup) = tuple<>(); // unnecessary; just for consistency
-            get<1>(tup) = object;
-            syscall(Skeleton<EPOS::S, void>::method< &EPOS::S::f >::call, (void*)&tup);
-        }
-        int f( int p1 ) {
-            tuple< tuple<int>, EPOS::S*, int > tup;
-            get<0>( tup ) = tuple<int>( p1 );
-            get<1>( tup ) = object;
-            syscall(Skeleton<EPOS::S, int, int>::method< &EPOS::S::f >::call, (void*) &tup);
-            return get<2>( tup );
-        }
-        int f( char p1, double p2 ) const {
-            tuple< tuple<char, double>, const EPOS::S*, int > tup;
-            get<0>( tup ) = tuple<char, double>( p1, p2 );
-            get<1>( tup ) = object;
-            syscall(Skeleton<const EPOS::S, int, char, double>::method< &EPOS::S::f >::call, (void*) &tup);
-            return get<2>( tup );
-        }
-        // TODO: implement constructor in the same lines
-    };
+#define STUB_CLASS S
+    STUB_BEGIN
+        VOID_METHOD( f )
+        METHOD_1( int, f, int, p1, )
+        METHOD_2( int, f, char, p1, double, p2, const )
+    STUB_END
 }
 
 int main() {
