@@ -65,11 +65,36 @@ struct Skeleton< const T, void, Args... > {
  * Define STUB_CLASS before starting; every stub/skeleton pair will be generated
  * with name STUB_CLASS referencing EPOS::STUB_CLASS. */
 #define STUB_BEGIN                  \
-    struct STUB_CLASS {             \
+    class STUB_CLASS {              \
         EPOS::STUB_CLASS * object;  \
     public:
 
 #define STUB_END };
+
+#define METHOD_0( ret, name, cv )                                           \
+        ret name() cv {                                                     \
+            EPOS::tuple< EPOS::tuple<>, cv EPOS::STUB_CLASS*, ret > tup;    \
+            get<1>( tup ) = this->object;                                   \
+            syscall(                                                        \
+                    Skeleton<cv EPOS::STUB_CLASS, ret>                      \
+                    ::method< &EPOS::STUB_CLASS::name >                     \
+                    ::call,                                                 \
+                    (void*) &tup                                            \
+                );                                                          \
+            return get<2>( tup );                                           \
+        }
+
+#define METHOD_0_VOID( name, cv )                                           \
+        void name() cv {                                                    \
+            EPOS::tuple< EPOS::tuple<>, cv EPOS::STUB_CLASS* > tup;         \
+            get<1>( tup ) = this->object;                                   \
+            syscall(                                                        \
+                    Skeleton<cv EPOS::STUB_CLASS, void>                     \
+                    ::method< &EPOS::STUB_CLASS::name >                     \
+                    ::call,                                                 \
+                    (void*) &tup                                            \
+                );                                                          \
+        }
 
 #define METHOD_1( ret, name, t1, p1, cv )                                   \
         ret name( t1 p1 ) cv {                                              \
@@ -83,6 +108,19 @@ struct Skeleton< const T, void, Args... > {
                     (void*) &tup                                            \
                 );                                                          \
             return get<2>( tup );                                           \
+        }
+
+#define METHOD_1_VOID( name, t1, p1, cv )                                   \
+        void name( t1 p1 ) cv {                                             \
+            EPOS::tuple< EPOS::tuple<t1>, cv EPOS::STUB_CLASS* > tup;       \
+            get<0>( tup ) = tuple<t1>( p1 );                                \
+            get<1>( tup ) = this->object;                                   \
+            syscall(                                                        \
+                    Skeleton<cv EPOS::STUB_CLASS, void, t1>                 \
+                    ::method< &EPOS::STUB_CLASS::name >                     \
+                    ::call,                                                 \
+                    (void*) &tup                                            \
+                );                                                          \
         }
 
 #define METHOD_2( ret, name, t1, p1, t2, p2, cv )                               \
@@ -99,16 +137,44 @@ struct Skeleton< const T, void, Args... > {
             return get<2>( tup );                                               \
         }
 
-#define VOID_METHOD( name )                                             \
-        void name() {                                                   \
-            EPOS::tuple< EPOS::tuple<>, EPOS::STUB_CLASS* > tup;        \
-            EPOS::get<1>(tup) = this->object;                           \
-            EPOS::syscall(                                              \
-                    Skeleton<EPOS::STUB_CLASS, void>                    \
-                    ::method< &EPOS::STUB_CLASS::name >                 \
-                    ::call,                                             \
-                (void*) &tup                                            \
-            );                                                          \
+#define METHOD_2_VOID( name, t1, p1, t2, p2, cv )                               \
+        void name( t1 p1, t2 p2 ) cv {                                          \
+            EPOS::tuple< EPOS::tuple<t1, t2>, cv EPOS::STUB_CLASS* > tup;       \
+            get<0>( tup ) = tuple<t1, t2>( p1, p2 );                            \
+            get<1>( tup ) = this->object;                                       \
+            syscall(                                                            \
+                    Skeleton<cv EPOS::STUB_CLASS, void, t1, t2>                 \
+                    ::method< &EPOS::STUB_CLASS::name >                         \
+                    ::call,                                                     \
+                    (void*) &tup                                                \
+                );                                                              \
+        }
+
+#define METHOD_3( ret, name, t1, p1, t2, p2, t3, p3, cv )                               \
+        ret name( t1 p1, t2 p2, t3 p3 ) cv {                                            \
+            EPOS::tuple< EPOS::tuple<t1, t2, t3>, cv EPOS::STUB_CLASS*, ret > tup;      \
+            get<0>( tup ) = tuple<t1, t2, t3>( p1, p2, p3 );                            \
+            get<1>( tup ) = this->object;                                               \
+            syscall(                                                                    \
+                    Skeleton<cv EPOS::STUB_CLASS, ret, t1, t2, t3>                      \
+                    ::method< &EPOS::STUB_CLASS::name >                                 \
+                    ::call,                                                             \
+                    (void*) &tup                                                        \
+                );                                                                      \
+            return get<2>( tup );                                                       \
+        }
+
+#define METHOD_3_VOID( name, t1, p1, t2, p2, t3, p3, cv )                               \
+        void name( t1 p1, t2 p2, t3 p3 ) cv {                                           \
+            EPOS::tuple< EPOS::tuple<t1, t2, t3>, cv EPOS::STUB_CLASS* > tup;           \
+            get<0>( tup ) = tuple<t1, t2, t3>( p1, p2, p3 );                            \
+            get<1>( tup ) = this->object;                                               \
+            syscall(                                                                    \
+                    Skeleton<cv EPOS::STUB_CLASS, void, t1, t2, t3>                     \
+                    ::method< &EPOS::STUB_CLASS::name >                                 \
+                    ::call,                                                             \
+                    (void*) &tup                                                        \
+                );                                                                      \
         }
 
 #endif // __stub_skeleton_h

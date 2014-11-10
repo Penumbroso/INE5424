@@ -4,6 +4,13 @@
 #include <utility/ostream.h>
 #include <utility/stub_skeleton.h>
 
+// We will do only a small modification to allow for easier testing
+#undef STUB_BEGIN
+#define STUB_BEGIN                  \
+    struct STUB_CLASS {             \
+        EPOS::STUB_CLASS * object;  \
+    public:
+
 #define TO_STRING( X ) REALLY_TO_STRING( X )
 #define REALLY_TO_STRING( X ) #X
 #define __LINE_STR__ TO_STRING( __LINE__ )
@@ -46,13 +53,24 @@ struct S { // Sample system class
         return i;
     }
 };
+struct T { // Sample system class
+    S s;
+    void h( int, double, char ) {
+        s.i++;
+    }
+};
 }
 namespace USER {
 #define STUB_CLASS S
     STUB_BEGIN
-        VOID_METHOD( f )
+        METHOD_0_VOID( f, )
         METHOD_1( int, f, int, p1, )
         METHOD_2( int, f, char, p1, double, p2, const )
+    STUB_END
+#undef STUB_CLASS
+#define STUB_CLASS T
+    STUB_BEGIN
+        METHOD_3_VOID( h, int, a, double, d, char, c, )
     STUB_END
 }
 
