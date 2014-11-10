@@ -63,14 +63,14 @@ struct T { // Sample system class
 namespace USER {
 #define STUB_CLASS S
     STUB_BEGIN
-        METHOD_0_VOID( f, )
-        METHOD_1( int, f, int, p1, )
-        METHOD_2( int, f, char, p1, double, p2, const )
+        STUB_METHOD_0_VOID( f, )
+        STUB_METHOD_1( int, f, int, p1, )
+        STUB_METHOD_2( int, f, char, p1, double, p2, const )
     STUB_END
 #undef STUB_CLASS
 #define STUB_CLASS T
     STUB_BEGIN
-        METHOD_3_VOID( h, int, a, double, d, char, c, )
+        STUB_METHOD_3_VOID( h, int, a, double, d, char, c, )
     STUB_END
 }
 

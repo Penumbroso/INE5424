@@ -71,7 +71,7 @@ struct Skeleton< const T, void, Args... > {
 
 #define STUB_END };
 
-#define METHOD_0( ret, name, cv )                                           \
+#define STUB_METHOD_0( ret, name, cv )                                      \
         ret name() cv {                                                     \
             EPOS::tuple< EPOS::tuple<>, cv EPOS::STUB_CLASS*, ret > tup;    \
             get<1>( tup ) = this->object;                                   \
@@ -84,7 +84,7 @@ struct Skeleton< const T, void, Args... > {
             return get<2>( tup );                                           \
         }
 
-#define METHOD_0_VOID( name, cv )                                           \
+#define STUB_METHOD_0_VOID( name, cv )                                      \
         void name() cv {                                                    \
             EPOS::tuple< EPOS::tuple<>, cv EPOS::STUB_CLASS* > tup;         \
             get<1>( tup ) = this->object;                                   \
@@ -96,7 +96,7 @@ struct Skeleton< const T, void, Args... > {
                 );                                                          \
         }
 
-#define METHOD_1( ret, name, t1, p1, cv )                                   \
+#define STUB_METHOD_1( ret, name, t1, p1, cv )                              \
         ret name( t1 p1 ) cv {                                              \
             EPOS::tuple< EPOS::tuple<t1>, cv EPOS::STUB_CLASS*, ret > tup;  \
             get<0>( tup ) = tuple<t1>( p1 );                                \
@@ -110,7 +110,7 @@ struct Skeleton< const T, void, Args... > {
             return get<2>( tup );                                           \
         }
 
-#define METHOD_1_VOID( name, t1, p1, cv )                                   \
+#define STUB_METHOD_1_VOID( name, t1, p1, cv )                              \
         void name( t1 p1 ) cv {                                             \
             EPOS::tuple< EPOS::tuple<t1>, cv EPOS::STUB_CLASS* > tup;       \
             get<0>( tup ) = tuple<t1>( p1 );                                \
@@ -123,7 +123,7 @@ struct Skeleton< const T, void, Args... > {
                 );                                                          \
         }
 
-#define METHOD_2( ret, name, t1, p1, t2, p2, cv )                               \
+#define STUB_METHOD_2( ret, name, t1, p1, t2, p2, cv )                          \
         ret name( t1 p1, t2 p2 ) cv {                                           \
             EPOS::tuple< EPOS::tuple<t1, t2>, cv EPOS::STUB_CLASS*, ret > tup;  \
             get<0>( tup ) = tuple<t1, t2>( p1, p2 );                            \
@@ -137,7 +137,7 @@ struct Skeleton< const T, void, Args... > {
             return get<2>( tup );                                               \
         }
 
-#define METHOD_2_VOID( name, t1, p1, t2, p2, cv )                               \
+#define STUB_METHOD_2_VOID( name, t1, p1, t2, p2, cv )                          \
         void name( t1 p1, t2 p2 ) cv {                                          \
             EPOS::tuple< EPOS::tuple<t1, t2>, cv EPOS::STUB_CLASS* > tup;       \
             get<0>( tup ) = tuple<t1, t2>( p1, p2 );                            \
@@ -150,7 +150,7 @@ struct Skeleton< const T, void, Args... > {
                 );                                                              \
         }
 
-#define METHOD_3( ret, name, t1, p1, t2, p2, t3, p3, cv )                               \
+#define STUB_METHOD_3( ret, name, t1, p1, t2, p2, t3, p3, cv )                          \
         ret name( t1 p1, t2 p2, t3 p3 ) cv {                                            \
             EPOS::tuple< EPOS::tuple<t1, t2, t3>, cv EPOS::STUB_CLASS*, ret > tup;      \
             get<0>( tup ) = tuple<t1, t2, t3>( p1, p2, p3 );                            \
@@ -164,7 +164,7 @@ struct Skeleton< const T, void, Args... > {
             return get<2>( tup );                                                       \
         }
 
-#define METHOD_3_VOID( name, t1, p1, t2, p2, t3, p3, cv )                               \
+#define STUB_METHOD_3_VOID( name, t1, p1, t2, p2, t3, p3, cv )                          \
         void name( t1 p1, t2 p2, t3 p3 ) cv {                                           \
             EPOS::tuple< EPOS::tuple<t1, t2, t3>, cv EPOS::STUB_CLASS* > tup;           \
             get<0>( tup ) = tuple<t1, t2, t3>( p1, p2, p3 );                            \
