@@ -6,9 +6,10 @@
 
 // We will do only a small modification to allow for easier testing
 #undef STUB_BEGIN
-#define STUB_BEGIN                  \
-    struct STUB_CLASS {             \
-        EPOS::STUB_CLASS * object;  \
+#define STUB_BEGIN( stub_name, skeleton_class ) \
+    struct stub_name {                          \
+        typedef skeleton_class skeleton_type;   \
+        skeleton_type * object;                 \
     public:
 
 #define TO_STRING( X ) REALLY_TO_STRING( X )
@@ -39,6 +40,7 @@ void g( void * ptr ) {
 }
 
 namespace EPOS {
+namespace Kernel {
 struct S { // Sample system class
     int i;
     void f() {
@@ -59,20 +61,21 @@ struct T { // Sample system class
         s.i++;
     }
 };
-}
-namespace USER {
-#define STUB_CLASS S
-    STUB_BEGIN
+} // namespace Kernel
+namespace User {
+    STUB_BEGIN( S, Kernel::S )
         STUB_METHOD_0_VOID( f, )
         STUB_METHOD_1( int, f, int, p1, )
         STUB_METHOD_2( int, f, char, p1, double, p2, const )
     STUB_END
-#undef STUB_CLASS
-#define STUB_CLASS T
-    STUB_BEGIN
+
+    STUB_BEGIN( T, Kernel::T )
         STUB_METHOD_3_VOID( h, int, a, double, d, char, c, )
     STUB_END
-}
+} // namespace User
+typedef User::S S;
+typedef User::T T;
+} // namespace EPOS
 
 int main() {
     // syscall test
@@ -95,21 +98,23 @@ int main() {
     syscall( g, (void *) &tup );
     dynamic_assert( get<1>(tup) == 'C' );
 
-    S s;
+    Kernel::S s;
     s.i = 9;
-    tuple< tuple<char, double>, S *, int > data1;
+    tuple< tuple<char, double>, Kernel::S *, int > data1;
     get<0>(data1) = tuple<char, double>('2', 3.5 );
     get<1>(data1) = & s;
-    syscall( Skeleton<const EPOS::S, int, char, double>::method< &EPOS::S::f >::call, (void*) &data1 );
+    syscall( Skeleton<const EPOS::Kernel::S, int, char, double>
+                ::method< &EPOS::Kernel::S::f >::call, (void*) &data1 );
     dynamic_assert( s.i == 9 );
     dynamic_assert( get<2>(data1) == 9 );
     s.i = 4;//           |
     // Note o const aqui v 
-    syscall( Skeleton<const EPOS::S, int, char, double>::method< &EPOS::S::f >::call, (void*) &data1 );
+    syscall( Skeleton<const EPOS::Kernel::S, int, char, double>
+                ::method< &EPOS::Kernel::S::f >::call, (void*) &data1 );
     dynamic_assert( s.i == 4 );
     dynamic_assert( get<2>(data1) == 4 );
 
-    USER::S ss;
+    User::S ss;
     ss.object = &s;
     ss.f();
     dynamic_assert( s.i == 5 );

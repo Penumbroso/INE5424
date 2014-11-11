@@ -62,22 +62,23 @@ struct Skeleton< const T, void, Args... > {
 } // namespace EPOS
 
 /* Macros to automate stub generation.
- * Define STUB_CLASS before starting; every stub/skeleton pair will be generated
- * with name STUB_CLASS referencing EPOS::STUB_CLASS. */
-#define STUB_BEGIN                  \
-    class STUB_CLASS {              \
-        EPOS::STUB_CLASS * object;  \
+ * skeleton is the fully-qualified name of the existing skeleton class,
+ * stub is the unqualified name of the generated stub class. */
+#define STUB_BEGIN( stub_name, skeleton_class ) \
+    class stub_name {                           \
+        typedef skeleton_class skeleton_type;   \
+        skeleton_type * object;                 \
     public:
 
 #define STUB_END };
 
 #define STUB_METHOD_0( ret, name, cv )                                      \
         ret name() cv {                                                     \
-            EPOS::tuple< EPOS::tuple<>, cv EPOS::STUB_CLASS*, ret > tup;    \
+            EPOS::tuple< EPOS::tuple<>, cv skeleton_type*, ret > tup;       \
             get<1>( tup ) = this->object;                                   \
             syscall(                                                        \
-                    Skeleton<cv EPOS::STUB_CLASS, ret>                      \
-                    ::method< &EPOS::STUB_CLASS::name >                     \
+                    Skeleton<cv skeleton_type, ret>                         \
+                    ::method< &skeleton_type::name >                        \
                     ::call,                                                 \
                     (void*) &tup                                            \
                 );                                                          \
@@ -86,11 +87,11 @@ struct Skeleton< const T, void, Args... > {
 
 #define STUB_METHOD_0_VOID( name, cv )                                      \
         void name() cv {                                                    \
-            EPOS::tuple< EPOS::tuple<>, cv EPOS::STUB_CLASS* > tup;         \
+            EPOS::tuple< EPOS::tuple<>, cv skeleton_type* > tup;            \
             get<1>( tup ) = this->object;                                   \
             syscall(                                                        \
-                    Skeleton<cv EPOS::STUB_CLASS, void>                     \
-                    ::method< &EPOS::STUB_CLASS::name >                     \
+                    Skeleton<cv skeleton_type, void>                        \
+                    ::method< &skeleton_type::name >                        \
                     ::call,                                                 \
                     (void*) &tup                                            \
                 );                                                          \
@@ -98,12 +99,12 @@ struct Skeleton< const T, void, Args... > {
 
 #define STUB_METHOD_1( ret, name, t1, p1, cv )                              \
         ret name( t1 p1 ) cv {                                              \
-            EPOS::tuple< EPOS::tuple<t1>, cv EPOS::STUB_CLASS*, ret > tup;  \
+            EPOS::tuple< EPOS::tuple<t1>, cv skeleton_type*, ret > tup;     \
             get<0>( tup ) = tuple<t1>( p1 );                                \
             get<1>( tup ) = this->object;                                   \
             syscall(                                                        \
-                    Skeleton<cv EPOS::STUB_CLASS, ret, t1>                  \
-                    ::method< &EPOS::STUB_CLASS::name >                     \
+                    Skeleton<cv skeleton_type, ret, t1>                     \
+                    ::method< &skeleton_type::name >                        \
                     ::call,                                                 \
                     (void*) &tup                                            \
                 );                                                          \
@@ -112,12 +113,12 @@ struct Skeleton< const T, void, Args... > {
 
 #define STUB_METHOD_1_VOID( name, t1, p1, cv )                              \
         void name( t1 p1 ) cv {                                             \
-            EPOS::tuple< EPOS::tuple<t1>, cv EPOS::STUB_CLASS* > tup;       \
+            EPOS::tuple< EPOS::tuple<t1>, cv skeleton_type* > tup;          \
             get<0>( tup ) = tuple<t1>( p1 );                                \
             get<1>( tup ) = this->object;                                   \
             syscall(                                                        \
-                    Skeleton<cv EPOS::STUB_CLASS, void, t1>                 \
-                    ::method< &EPOS::STUB_CLASS::name >                     \
+                    Skeleton<cv skeleton_type, void, t1>                    \
+                    ::method< &skeleton_type::name >                        \
                     ::call,                                                 \
                     (void*) &tup                                            \
                 );                                                          \
@@ -125,12 +126,12 @@ struct Skeleton< const T, void, Args... > {
 
 #define STUB_METHOD_2( ret, name, t1, p1, t2, p2, cv )                          \
         ret name( t1 p1, t2 p2 ) cv {                                           \
-            EPOS::tuple< EPOS::tuple<t1, t2>, cv EPOS::STUB_CLASS*, ret > tup;  \
+            EPOS::tuple< EPOS::tuple<t1, t2>, cv skeleton_type*, ret > tup;     \
             get<0>( tup ) = tuple<t1, t2>( p1, p2 );                            \
             get<1>( tup ) = this->object;                                       \
             syscall(                                                            \
-                    Skeleton<cv EPOS::STUB_CLASS, ret, t1, t2>                  \
-                    ::method< &EPOS::STUB_CLASS::name >                         \
+                    Skeleton<cv skeleton_type, ret, t1, t2>                     \
+                    ::method< &skeleton_type::name >                            \
                     ::call,                                                     \
                     (void*) &tup                                                \
                 );                                                              \
@@ -139,12 +140,12 @@ struct Skeleton< const T, void, Args... > {
 
 #define STUB_METHOD_2_VOID( name, t1, p1, t2, p2, cv )                          \
         void name( t1 p1, t2 p2 ) cv {                                          \
-            EPOS::tuple< EPOS::tuple<t1, t2>, cv EPOS::STUB_CLASS* > tup;       \
+            EPOS::tuple< EPOS::tuple<t1, t2>, cv skeleton_type* > tup;          \
             get<0>( tup ) = tuple<t1, t2>( p1, p2 );                            \
             get<1>( tup ) = this->object;                                       \
             syscall(                                                            \
-                    Skeleton<cv EPOS::STUB_CLASS, void, t1, t2>                 \
-                    ::method< &EPOS::STUB_CLASS::name >                         \
+                    Skeleton<cv skeleton_type, void, t1, t2>                    \
+                    ::method< &skeleton_type::name >                            \
                     ::call,                                                     \
                     (void*) &tup                                                \
                 );                                                              \
@@ -152,12 +153,12 @@ struct Skeleton< const T, void, Args... > {
 
 #define STUB_METHOD_3( ret, name, t1, p1, t2, p2, t3, p3, cv )                          \
         ret name( t1 p1, t2 p2, t3 p3 ) cv {                                            \
-            EPOS::tuple< EPOS::tuple<t1, t2, t3>, cv EPOS::STUB_CLASS*, ret > tup;      \
+            EPOS::tuple< EPOS::tuple<t1, t2, t3>, cv skeleton_type*, ret > tup;         \
             get<0>( tup ) = tuple<t1, t2, t3>( p1, p2, p3 );                            \
             get<1>( tup ) = this->object;                                               \
             syscall(                                                                    \
-                    Skeleton<cv EPOS::STUB_CLASS, ret, t1, t2, t3>                      \
-                    ::method< &EPOS::STUB_CLASS::name >                                 \
+                    Skeleton<cv skeleton_type, ret, t1, t2, t3>                         \
+                    ::method< &skeleton_type::name >                                    \
                     ::call,                                                             \
                     (void*) &tup                                                        \
                 );                                                                      \
@@ -166,12 +167,12 @@ struct Skeleton< const T, void, Args... > {
 
 #define STUB_METHOD_3_VOID( name, t1, p1, t2, p2, t3, p3, cv )                          \
         void name( t1 p1, t2 p2, t3 p3 ) cv {                                           \
-            EPOS::tuple< EPOS::tuple<t1, t2, t3>, cv EPOS::STUB_CLASS* > tup;           \
+            EPOS::tuple< EPOS::tuple<t1, t2, t3>, cv skeleton_type* > tup;              \
             get<0>( tup ) = tuple<t1, t2, t3>( p1, p2, p3 );                            \
             get<1>( tup ) = this->object;                                               \
             syscall(                                                                    \
-                    Skeleton<cv EPOS::STUB_CLASS, void, t1, t2, t3>                     \
-                    ::method< &EPOS::STUB_CLASS::name >                                 \
+                    Skeleton<cv skeleton_type, void, t1, t2, t3>                        \
+                    ::method< &skeleton_type::name >                                    \
                     ::call,                                                             \
                     (void*) &tup                                                        \
                 );                                                                      \
