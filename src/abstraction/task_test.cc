@@ -1,6 +1,6 @@
 // EPOS Task Test Program
 
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 #include <alarm.h>
 #include <thread.h>
 #include <task.h>

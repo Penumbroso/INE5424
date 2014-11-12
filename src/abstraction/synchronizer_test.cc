@@ -1,6 +1,6 @@
 // EPOS Synchronizer Abstraction Test Program
 
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 #include <thread.h>
 #include <semaphore.h>
 #include <alarm.h>

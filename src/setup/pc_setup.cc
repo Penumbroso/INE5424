@@ -5,7 +5,7 @@
 
 #include <utility/elf.h>
 #include <utility/string.h>
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 #include <utility/debug.h>
 #include <machine.h>
 

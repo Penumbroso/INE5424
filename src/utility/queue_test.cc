@@ -1,6 +1,6 @@
 // EPOS Queue Utility Test Program
 
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 #include <utility/queue.h>
 
 using namespace EPOS_Kernel;

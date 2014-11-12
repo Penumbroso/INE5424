@@ -1,6 +1,6 @@
 // EPOS Chronometer Abstraction Test Program
 
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 #include <chronometer.h>
 #include <alarm.h>
 

@@ -1,6 +1,6 @@
 // EPOS PC PCI Test Program
 
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 #include <pci.h>
 
 using namespace EPOS_Kernel;

@@ -1,7 +1,7 @@
 
 // EPOS Hash Utility Test Program
 
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 #include <utility/malloc.h>
 #include <utility/hash.h>
 

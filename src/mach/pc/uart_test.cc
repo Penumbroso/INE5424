@@ -1,6 +1,6 @@
 // EPOS PC UART Mediator Test Program
 
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 #include <uart.h>
 
 using namespace EPOS_Kernel;

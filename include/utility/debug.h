@@ -3,7 +3,7 @@
 #ifndef __debug_h
 #define __debug_h 
 
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 
 __BEGIN_SYS
 

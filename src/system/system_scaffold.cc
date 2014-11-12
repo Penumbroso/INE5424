@@ -1,6 +1,6 @@
 // EPOS System Scaffold and System Abstraction Implementation
 
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 #include <utility/heap.h>
 #include <machine.h>
 #include <display.h>

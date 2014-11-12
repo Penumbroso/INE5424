@@ -1,6 +1,6 @@
 // EPOS IA32 Test Program
 
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 #include <cpu.h>
 
 using namespace EPOS_Kernel;

@@ -1,6 +1,6 @@
 // EPOS OStream Utility Test Program
 
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 
 using namespace EPOS_Kernel;
 

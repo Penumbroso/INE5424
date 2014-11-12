@@ -21,13 +21,13 @@
 // ARCHITECTURE, MACHINE, AND APPLICATION SELECTION
 // This section is generated automatically from makedefs
 //============================================================================
-#define ARCH xxx
+#define ARCH ia32
 #define __ARCH_TRAITS_H	        __HEADER_ARCH(traits)
 
-#define MACH xxx
+#define MACH pc
 #define __MACH_TRAITS_H	        __HEADER_MACH(traits)
 
-#define APPLICATION xxx
+#define APPLICATION fork
 #define __APPLICATION_TRAITS_H  __HEADER_APPLICATION(APPLICATION)
 
 //============================================================================
@@ -47,7 +47,7 @@
 //============================================================================
 // THINGS EVERBODY NEEDS
 //============================================================================
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 #include <utility/debug.h>
 
 #endif

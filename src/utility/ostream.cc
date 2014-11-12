@@ -1,6 +1,6 @@
 // EPOS OStream Implementation
 
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 
 __BEGIN_SYS
 

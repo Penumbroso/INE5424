@@ -1,6 +1,6 @@
 // EPOS Active Object Abstraction Test Program
 
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 #include <active.h>
 
 using namespace EPOS_Kernel;

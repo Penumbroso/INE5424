@@ -1,6 +1,6 @@
 // EPOS Semaphore Abstraction Test Program
 
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 #include <thread.h>
 #include <mutex.h>
 #include <semaphore.h>

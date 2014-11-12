@@ -1,6 +1,6 @@
 // EPOS Segment Test Program
 
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 #include <address_space.h>
 #include <segment.h>
 

@@ -1,6 +1,6 @@
 // EPOS Event Handler Utility Test Program
 
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 #include <utility/handler.h>
 #include <alarm.h>
 #include <thread.h>

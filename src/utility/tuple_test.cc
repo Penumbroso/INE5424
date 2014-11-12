@@ -1,6 +1,6 @@
 // Unit test to EPOS_Kernel::tuple and EPOS_Kernel::get
 #include <utility/tuple.h>
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 
 #define TO_STRING( X ) REALLY_TO_STRING( X )
 #define REALLY_TO_STRING( X ) #X

@@ -1,7 +1,7 @@
 // Stub and Skeleton mechanism unit test.
 #include <system/types.h>
 #include <utility/tuple.h>
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 #include <utility/stub_skeleton.h>
 
 // We will do only a small modification to allow for easier testing

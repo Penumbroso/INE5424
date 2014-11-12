@@ -1,6 +1,6 @@
 // EPOS PC_RTC Test Program
 
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 #include <display.h>
 #include <rtc.h>
 

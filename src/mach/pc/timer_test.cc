@@ -1,6 +1,6 @@
 // EPOS PC_Timer Test Program
 
-#include <utility/ostream.h>
+#include <utility/ostream_kernel.h>
 #include <machine.h>
 #include <display.h>
 #include <timer.h>
