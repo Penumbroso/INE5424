@@ -7,7 +7,7 @@
  */
 #include <system/config.h>
 
-namespace EPOS {
+namespace EPOS_Kernel {
 
 void syscall( void (* function )( void * ), void * parameter ) {
     function( parameter );

@@ -1,4 +1,4 @@
-// Unit test to EPOS::tuple and EPOS::get
+// Unit test to EPOS_Kernel::tuple and EPOS_Kernel::get
 #include <utility/tuple.h>
 #include <utility/ostream.h>
 
@@ -10,11 +10,11 @@
     do {                                                            \
         if( !(__VA_ARGS__) )                                        \
             cout << "Assertion " #__VA_ARGS__                       \
-            " failed at " __FILE__ ":" __LINE_STR__ << EPOS::endl;  \
+            " failed at " __FILE__ ":" __LINE_STR__ << EPOS_Kernel::endl;  \
     } while(false)
 #define static_assert( ... ) static_assert( __VA_ARGS__ , #__VA_ARGS__ ) // ugly
 
-using namespace EPOS;
+using namespace EPOS_Kernel;
 
 double f( int i, int j ) {
     return i + j;

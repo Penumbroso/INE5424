@@ -10,8 +10,8 @@ __BEGIN_SYS
 
 class Scratchpad_Common
 {
-    friend void * ::operator new(size_t, const EPOS::Scratchpad_Allocator &);
-    friend void * ::operator new[](size_t, const EPOS::Scratchpad_Allocator &);
+    friend void * ::operator new(size_t, const EPOS_Kernel::Scratchpad_Allocator &);
+    friend void * ::operator new[](size_t, const EPOS_Kernel::Scratchpad_Allocator &);
 
 public:
     static void * alloc(unsigned int bytes) { return _heap->alloc(bytes); }
@@ -26,12 +26,12 @@ __END_SYS
 #ifdef __SCRATCHPAD_H
 #include __SCRATCHPAD_H
 
-inline void * operator new(size_t bytes, const EPOS::Scratchpad_Allocator & allocator) {
-    return EPOS::Scratchpad::_heap->alloc(bytes);
+inline void * operator new(size_t bytes, const EPOS_Kernel::Scratchpad_Allocator & allocator) {
+    return EPOS_Kernel::Scratchpad::_heap->alloc(bytes);
 }
 
-inline void * operator new[](size_t bytes, const EPOS::Scratchpad_Allocator & allocator) {
-    return EPOS::Scratchpad::_heap->alloc(bytes);
+inline void * operator new[](size_t bytes, const EPOS_Kernel::Scratchpad_Allocator & allocator) {
+    return EPOS_Kernel::Scratchpad::_heap->alloc(bytes);
 }
 
 #endif

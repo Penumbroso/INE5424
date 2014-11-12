@@ -4,7 +4,7 @@
 #include <chronometer.h>
 #include <alarm.h>
 
-using namespace EPOS;
+using namespace EPOS_Kernel;
 
 int main()
 {

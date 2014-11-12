@@ -15,8 +15,8 @@ class System
     friend void CPU::Context::load() const volatile;
     friend void * ::malloc(size_t);
     friend void ::free(void *);
-    friend void * ::operator new(size_t, const EPOS::System_Allocator &);
-    friend void * ::operator new[](size_t, const EPOS::System_Allocator &);
+    friend void * ::operator new(size_t, const EPOS_Kernel::System_Allocator &);
+    friend void * ::operator new[](size_t, const EPOS_Kernel::System_Allocator &);
     friend void ::operator delete(void *);
     friend void ::operator delete[](void *);
 
@@ -35,12 +35,12 @@ private:
 
 __END_SYS
 
-inline void * operator new(size_t bytes, const EPOS::System_Allocator & allocator) {
-    return EPOS::System::_heap->alloc(bytes);
+inline void * operator new(size_t bytes, const EPOS_Kernel::System_Allocator & allocator) {
+    return EPOS_Kernel::System::_heap->alloc(bytes);
 }
 
-inline void * operator new[](size_t bytes, const EPOS::System_Allocator & allocator) {
-    return EPOS::System::_heap->alloc(bytes);
+inline void * operator new[](size_t bytes, const EPOS_Kernel::System_Allocator & allocator) {
+    return EPOS_Kernel::System::_heap->alloc(bytes);
 }
 
 #endif

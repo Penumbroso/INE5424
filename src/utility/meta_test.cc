@@ -3,7 +3,7 @@
 
 #define static_assert( ... ) static_assert( __VA_ARGS__ , #__VA_ARGS__ ) // ugly
 
-using namespace EPOS;
+using namespace EPOS_Kernel;
 
 int main() {
     static_assert( is_same<int, int>::value );

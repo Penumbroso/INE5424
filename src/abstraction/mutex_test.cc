@@ -6,7 +6,7 @@
 #include <alarm.h>
 #include <display.h>
 
-using namespace EPOS;
+using namespace EPOS_Kernel;
 
 const int iterations = 10;
 

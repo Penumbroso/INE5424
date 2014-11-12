@@ -12,7 +12,7 @@
 
 // LIBC Heritage
 extern "C" {
-    using namespace EPOS;
+    using namespace EPOS_Kernel;
 
     void _start() __attribute__ ((section (".init")));
 
@@ -952,7 +952,7 @@ void PC_Setup::calibrate_timers()
 
 __END_SYS
 
-using namespace EPOS;
+using namespace EPOS_Kernel;
 
 extern "C" { void _start(); }
 extern "C" { void setup(char * bi); }

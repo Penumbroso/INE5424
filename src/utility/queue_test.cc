@@ -3,7 +3,7 @@
 #include <utility/ostream.h>
 #include <utility/queue.h>
 
-using namespace EPOS;
+using namespace EPOS_Kernel;
 
 struct Integer1 {
     Integer1(int _i) : i(_i), e(this) {}

@@ -20,11 +20,11 @@
     do {                                                            \
         if( !(__VA_ARGS__) )                                        \
             cout << "Assertion " #__VA_ARGS__                       \
-            " failed at " __FILE__ ":" __LINE_STR__ << EPOS::endl;  \
+            " failed at " __FILE__ ":" __LINE_STR__ << EPOS_Kernel::endl;  \
     } while(false)
 #define static_assert( ... ) static_assert( __VA_ARGS__ , #__VA_ARGS__ ) // ugly
 
-using namespace EPOS;
+using namespace EPOS_Kernel;
 OStream cout;
 
 static int f_int;
@@ -39,7 +39,7 @@ void g( void * ptr ) {
     get<1>( *tup ) = get<0>( *tup ) + 'A';
 }
 
-namespace EPOS {
+namespace EPOS_Kernel {
 namespace Kernel {
 struct S { // Sample system class
     int i;
@@ -75,7 +75,7 @@ namespace User {
 } // namespace User
 typedef User::S S;
 typedef User::T T;
-} // namespace EPOS
+} // namespace EPOS_Kernel
 
 int main() {
     // syscall test
@@ -103,14 +103,14 @@ int main() {
     tuple< tuple<char, double>, Kernel::S *, int > data1;
     get<0>(data1) = tuple<char, double>('2', 3.5 );
     get<1>(data1) = & s;
-    syscall( Skeleton<const EPOS::Kernel::S, int, char, double>
-                ::method< &EPOS::Kernel::S::f >::call, (void*) &data1 );
+    syscall( Skeleton<const EPOS_Kernel::Kernel::S, int, char, double>
+                ::method< &EPOS_Kernel::Kernel::S::f >::call, (void*) &data1 );
     dynamic_assert( s.i == 9 );
     dynamic_assert( get<2>(data1) == 9 );
     s.i = 4;//           |
     // Note o const aqui v 
-    syscall( Skeleton<const EPOS::Kernel::S, int, char, double>
-                ::method< &EPOS::Kernel::S::f >::call, (void*) &data1 );
+    syscall( Skeleton<const EPOS_Kernel::Kernel::S, int, char, double>
+                ::method< &EPOS_Kernel::Kernel::S::f >::call, (void*) &data1 );
     dynamic_assert( s.i == 4 );
     dynamic_assert( get<2>(data1) == 4 );
 

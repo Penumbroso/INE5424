@@ -8,7 +8,7 @@
 #define __tuple_h
 #include <utility/meta.h>
 
-namespace EPOS {
+namespace EPOS_Kernel {
 
 /* Tuple class.
  * The member access is done via std::get functions.
@@ -76,10 +76,10 @@ template< int N, typename ... Args >
 struct get_t {
     typedef typename type_at_index<N, Args...>::type type;
     static type & get( tuple<Args...>& t ) {
-        return EPOS::template get<N-1>( t.tail );
+        return EPOS_Kernel::template get<N-1>( t.tail );
     }
     static const type & get( const tuple<Args...>& t ) {
-        return EPOS::template get<N-1>( t.tail );
+        return EPOS_Kernel::template get<N-1>( t.tail );
     }
 };
 template< typename ... Args >
@@ -127,6 +127,6 @@ R tuple_call( R (T::* fun)( Args... ) const, const T* obj, tuple<Args...> t ) {
     return tuple_call( fun, obj, t, typename index_sequence_sized< int, sizeof...(Args) >::type() );
 }
 
-} // namespace EPOS
+} // namespace EPOS_Kernel
 
 #endif // __tuple_h

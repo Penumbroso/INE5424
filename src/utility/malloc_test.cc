@@ -4,7 +4,7 @@
 #include <utility/string.h>
 #include <utility/malloc.h>
 
-using namespace EPOS;
+using namespace EPOS_Kernel;
 
 int main()
 {

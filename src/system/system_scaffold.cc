@@ -10,19 +10,19 @@
 // LIBC Heritage
 extern "C" {
     void _panic() {
-        EPOS::Machine::panic();
+        EPOS_Kernel::Machine::panic();
     }
 
     void _exit(int s) {
-        EPOS::Thread::exit(s);
+        EPOS_Kernel::Thread::exit(s);
     }
 
     void _print(const char * s) {
-        EPOS::Display::puts(s);
+        EPOS_Kernel::Display::puts(s);
     }
 
     void __cxa_pure_virtual() {
-        EPOS::db<void>(EPOS::ERR) << "Pure Virtual method called!" << EPOS::endl;
+        EPOS_Kernel::db<void>(EPOS_Kernel::ERR) << "Pure Virtual method called!" << EPOS_Kernel::endl;
     }
 }
 

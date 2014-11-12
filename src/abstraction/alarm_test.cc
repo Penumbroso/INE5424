@@ -3,7 +3,7 @@
 #include <utility/ostream.h>
 #include <alarm.h>
 
-using namespace EPOS;
+using namespace EPOS_Kernel;
 
 const int iterations = 10;
 

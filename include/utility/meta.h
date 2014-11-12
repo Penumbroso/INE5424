@@ -11,7 +11,7 @@
 #ifndef __meta_h
 #define __meta_h
 
-namespace EPOS {
+namespace EPOS_Kernel {
 
 /* True if both types are the same, false if they are different.
  * This template is sensible to cv-qualifications. */
@@ -88,6 +88,6 @@ struct index_sequence_sized {
     typedef typename index_sequence_helper<T, N>::type type;
 };
 
-} // namespace EPOS
+} // namespace EPOS_Kernel
 
 #endif // __meta_h

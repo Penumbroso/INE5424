@@ -43,7 +43,7 @@ struct Configuration
 };
 
 // System_Info
-typedef EPOS::System_Info<EPOS::Machine> System_Info;
+typedef EPOS_Kernel::System_Info<EPOS_Kernel::Machine> System_Info;
 
 // PROTOTYPES
 bool parse_config(FILE * cfg_file, Configuration * cfg);
