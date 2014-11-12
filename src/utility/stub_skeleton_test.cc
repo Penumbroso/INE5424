@@ -6,11 +6,14 @@
 
 // We will do only a small modification to allow for easier testing
 #undef STUB_BEGIN
-#define STUB_BEGIN( stub_name, skeleton_class ) \
-    struct stub_name {                          \
-        typedef skeleton_class skeleton_type;   \
-        skeleton_type * object;                 \
-    public:
+#define STUB_BEGIN( stub_name, skeleton_class )                                       \
+    struct stub_name {                                                                \
+        typedef skeleton_class skeleton_type;                                         \
+        skeleton_type * object;                                                       \
+    public:                                                                           \
+        ~stub_name() {                                                                \
+            syscall( DestructorSkeleton<skeleton_type>::destructor, (void*) object ); \
+        }
 
 #define TO_STRING( X ) REALLY_TO_STRING( X )
 #define REALLY_TO_STRING( X ) #X
@@ -41,6 +44,8 @@ void g( void * ptr ) {
 
 namespace EPOS_Kernel {
 struct S { // Sample system class
+    S() {}
+    S( double d ) : i(d+0.5) {}
     int i;
     void f() {
         i = 5;
@@ -54,23 +59,15 @@ struct S { // Sample system class
         return i;
     }
 };
-struct T { // Sample system class
-    S s;
-    void h( int, double, char ) {
-        s.i++;
-    }
-};
 } // namespace EPOS_Kernel
 
 namespace EPOS {
     STUB_BEGIN( S, ::EPOS_Kernel::S )
+        STUB_CONSTRUCTOR_0( S )
+        STUB_CONSTRUCTOR_1( S, double, d )
         STUB_METHOD_0_VOID( f, )
         STUB_METHOD_1( int, f, int, p1, )
         STUB_METHOD_2( int, f, char, p1, double, p2, const )
-    STUB_END
-
-    STUB_BEGIN( T, ::EPOS_Kernel::T )
-        STUB_METHOD_3_VOID( h, int, a, double, d, char, c, )
     STUB_END
 } // namespace EPOS
 
@@ -112,11 +109,13 @@ int main() {
     dynamic_assert( get<2>(data1) == 4 );
 
     EPOS::S ss;
-    ss.object = &s;
     ss.f();
-    dynamic_assert( s.i == 5 );
+    dynamic_assert( ss.object->i == 5 );
     dynamic_assert( ss.f( 7 ) == 5 );
-    dynamic_assert( s.i == 7 );
+    dynamic_assert( ss.object->i == 7 );
     dynamic_assert( ss.f( 'a', 3.5 ) == 7 );
-    dynamic_assert( s.i == 7 );
+    dynamic_assert( ss.object->i == 7 );
+
+    EPOS::S st( 14 );
+    dynamic_assert( st.object->i == 14 );
 }
