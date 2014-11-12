@@ -40,7 +40,6 @@ void g( void * ptr ) {
 }
 
 namespace EPOS_Kernel {
-namespace Kernel {
 struct S { // Sample system class
     int i;
     void f() {
@@ -61,21 +60,19 @@ struct T { // Sample system class
         s.i++;
     }
 };
-} // namespace Kernel
-namespace User {
-    STUB_BEGIN( S, Kernel::S )
+} // namespace EPOS_Kernel
+
+namespace EPOS {
+    STUB_BEGIN( S, ::EPOS_Kernel::S )
         STUB_METHOD_0_VOID( f, )
         STUB_METHOD_1( int, f, int, p1, )
         STUB_METHOD_2( int, f, char, p1, double, p2, const )
     STUB_END
 
-    STUB_BEGIN( T, Kernel::T )
+    STUB_BEGIN( T, ::EPOS_Kernel::T )
         STUB_METHOD_3_VOID( h, int, a, double, d, char, c, )
     STUB_END
-} // namespace User
-typedef User::S S;
-typedef User::T T;
-} // namespace EPOS_Kernel
+} // namespace EPOS
 
 int main() {
     // syscall test
@@ -98,23 +95,23 @@ int main() {
     syscall( g, (void *) &tup );
     dynamic_assert( get<1>(tup) == 'C' );
 
-    Kernel::S s;
+    EPOS_Kernel::S s;
     s.i = 9;
-    tuple< tuple<char, double>, Kernel::S *, int > data1;
+    tuple< tuple<char, double>, EPOS_Kernel::S *, int > data1;
     get<0>(data1) = tuple<char, double>('2', 3.5 );
     get<1>(data1) = & s;
-    syscall( Skeleton<const EPOS_Kernel::Kernel::S, int, char, double>
-                ::method< &EPOS_Kernel::Kernel::S::f >::call, (void*) &data1 );
+    syscall( Skeleton<const EPOS_Kernel::S, int, char, double>
+                ::method< &EPOS_Kernel::S::f >::call, (void*) &data1 );
     dynamic_assert( s.i == 9 );
     dynamic_assert( get<2>(data1) == 9 );
     s.i = 4;//           |
     // Note o const aqui v 
-    syscall( Skeleton<const EPOS_Kernel::Kernel::S, int, char, double>
-                ::method< &EPOS_Kernel::Kernel::S::f >::call, (void*) &data1 );
+    syscall( Skeleton<const EPOS_Kernel::S, int, char, double>
+                ::method< &EPOS_Kernel::S::f >::call, (void*) &data1 );
     dynamic_assert( s.i == 4 );
     dynamic_assert( get<2>(data1) == 4 );
 
-    User::S ss;
+    EPOS::S ss;
     ss.object = &s;
     ss.f();
     dynamic_assert( s.i == 5 );
