@@ -79,60 +79,60 @@ struct DestructorSkeleton {
 /* Macros to automate stub generation.
  * skeleton is the fully-qualified name of the existing skeleton class,
  * stub is the unqualified name of the generated stub class. */
-#define STUB_BEGIN( stub_name, skeleton_class )                     \
-    class stub_name {                                               \
-        typedef skeleton_class skeleton_type;                       \
-        skeleton_type * object;                                     \
-    public:                                                         \
-        ~stub_name() {                                              \
-            syscall( EPOS_Kernel::DestructorSkeleton<skeleton_type> \
-                    ::destructor, (void*) object );                 \
+#define STUB_BEGIN( stub_name, skeleton_class )                                 \
+    class stub_name {                                                           \
+        typedef skeleton_class skeleton_type;                                   \
+        skeleton_type * object;                                                 \
+    public:                                                                     \
+        ~stub_name() {                                                          \
+            EPOS_Kernel::syscall( EPOS_Kernel::DestructorSkeleton<skeleton_type>\
+                    ::destructor, (void*) object );                             \
         }
 
 #define STUB_END };
 
-#define STUB_CONSTRUCTOR_0( stub_name )                                                 \
-    stub_name() {                                                                       \
-        EPOS_Kernel::tuple< EPOS_Kernel::tuple<>, skeleton_type* > tup;                 \
-        syscall( EPOS_Kernel::Skeleton<skeleton_type, void>::construct, (void*)&tup );  \
-        object = get<1>( tup );                                                         \
+#define STUB_CONSTRUCTOR_0( stub_name )                                                             \
+    stub_name() {                                                                                   \
+        EPOS_Kernel::tuple< EPOS_Kernel::tuple<>, skeleton_type* > tup;                             \
+        EPOS_Kernel::syscall( EPOS_Kernel::Skeleton<skeleton_type, void>::construct, (void*)&tup ); \
+        object = EPOS_Kernel::get<1>( tup );                                                        \
     }
 
-#define STUB_CONSTRUCTOR_1( stub_name, t1, p1 )                                 \
-    stub_name( t1 p1 ) {                                                        \
-        EPOS_Kernel::tuple< EPOS_Kernel::tuple<t1>, skeleton_type* > tup;       \
-        get<0>( tup ) = EPOS_Kernel::tuple<t1>( p1 );                           \
-        syscall( Skeleton<skeleton_type, void, t1>::construct, (void*)&tup );   \
-        object = get<1>( tup );                                                 \
+#define STUB_CONSTRUCTOR_1( stub_name, t1, p1 )                                                         \
+    stub_name( t1 p1 ) {                                                                                \
+        EPOS_Kernel::tuple< EPOS_Kernel::tuple<t1>, skeleton_type* > tup;                               \
+        EPOS_Kernel::get<0>( tup ) = EPOS_Kernel::tuple<t1>( p1 );                                      \
+        EPOS_Kernel::syscall( EPOS_Kernel::Skeleton<skeleton_type, void, t1>::construct, (void*)&tup ); \
+        object = EPOS_Kernel::get<1>( tup );                                                            \
     }
 
-#define STUB_CONSTRUCTOR_2( stub_name, t1, p1, t2, p2 )                         \
-    stub_name( t1 p1, t2 p2 ) {                                                 \
-        EPOS_Kernel::tuple< EPOS_Kernel::tuple<t1, t2>, skeleton_type* > tup;   \
-        get<0>( tup ) = EPOS_Kernel::tuple<t1>( p1, p2 );                       \
-        syscall( Skeleton<skeleton_type, void, t1>::construct, (void*)&tup );   \
-        object = get<1>( tup );                                                 \
+#define STUB_CONSTRUCTOR_2( stub_name, t1, p1, t2, p2 )                                                 \
+    stub_name( t1 p1, t2 p2 ) {                                                                         \
+        EPOS_Kernel::tuple< EPOS_Kernel::tuple<t1, t2>, skeleton_type* > tup;                           \
+        EPOS_Kernel::get<0>( tup ) = EPOS_Kernel::tuple<t1>( p1, p2 );                                  \
+        EPOS_Kernel::syscall( EPOS_Kernel::Skeleton<skeleton_type, void, t1>::construct, (void*)&tup ); \
+        object = EPOS_Kernel::get<1>( tup );                                                            \
     }
 
 #define STUB_METHOD_0( ret, name, cv )                                              \
         ret name() cv {                                                             \
             EPOS_Kernel::tuple< EPOS_Kernel::tuple<>, cv skeleton_type*, ret > tup; \
-            get<1>( tup ) = this->object;                                           \
-            syscall(                                                                \
-                    Skeleton<cv skeleton_type, ret>                                 \
+            EPOS_Kernel::get<1>( tup ) = this->object;                              \
+            EPOS_Kernel::syscall(                                                   \
+                    EPOS_Kernel::Skeleton<cv skeleton_type, ret>                    \
                     ::method< &skeleton_type::name >                                \
                     ::call,                                                         \
                     (void*) &tup                                                    \
                 );                                                                  \
-            return get<2>( tup );                                                   \
+            return EPOS_Kernel::get<2>( tup );                                      \
         }
 
 #define STUB_METHOD_0_VOID( name, cv )                                          \
         void name() cv {                                                        \
             EPOS_Kernel::tuple< EPOS_Kernel::tuple<>, cv skeleton_type* > tup;  \
-            get<1>( tup ) = this->object;                                       \
-            syscall(                                                            \
-                    Skeleton<cv skeleton_type, void>                            \
+            EPOS_Kernel::get<1>( tup ) = this->object;                          \
+            EPOS_Kernel::syscall(                                               \
+                    EPOS_Kernel::Skeleton<cv skeleton_type, void>               \
                     ::method< &skeleton_type::name >                            \
                     ::call,                                                     \
                     (void*) &tup                                                \
@@ -142,24 +142,24 @@ struct DestructorSkeleton {
 #define STUB_METHOD_1( ret, name, t1, p1, cv )                                          \
         ret name( t1 p1 ) cv {                                                          \
             EPOS_Kernel::tuple< EPOS_Kernel::tuple<t1>, cv skeleton_type*, ret > tup;   \
-            get<0>( tup ) = tuple<t1>( p1 );                                            \
-            get<1>( tup ) = this->object;                                               \
-            syscall(                                                                    \
-                    Skeleton<cv skeleton_type, ret, t1>                                 \
+            EPOS_Kernel::get<0>( tup ) = tuple<t1>( p1 );                               \
+            EPOS_Kernel::get<1>( tup ) = this->object;                                  \
+            EPOS_Kernel::syscall(                                                       \
+                    EPOS_Kernel::Skeleton<cv skeleton_type, ret, t1>                    \
                     ::method< &skeleton_type::name >                                    \
                     ::call,                                                             \
                     (void*) &tup                                                        \
                 );                                                                      \
-            return get<2>( tup );                                                       \
+            return EPOS_Kernel::get<2>( tup );                                          \
         }
 
 #define STUB_METHOD_1_VOID( name, t1, p1, cv )                                      \
         void name( t1 p1 ) cv {                                                     \
             EPOS_Kernel::tuple< EPOS_Kernel::tuple<t1>, cv skeleton_type* > tup;    \
-            get<0>( tup ) = tuple<t1>( p1 );                                        \
-            get<1>( tup ) = this->object;                                           \
-            syscall(                                                                \
-                    Skeleton<cv skeleton_type, void, t1>                            \
+            EPOS_Kernel::get<0>( tup ) = tuple<t1>( p1 );                           \
+            EPOS_Kernel::get<1>( tup ) = this->object;                              \
+            EPOS_Kernel::syscall(                                                   \
+                    EPOS_Kernel::Skeleton<cv skeleton_type, void, t1>               \
                     ::method< &skeleton_type::name >                                \
                     ::call,                                                         \
                     (void*) &tup                                                    \
@@ -169,24 +169,24 @@ struct DestructorSkeleton {
 #define STUB_METHOD_2( ret, name, t1, p1, t2, p2, cv )                                      \
         ret name( t1 p1, t2 p2 ) cv {                                                       \
             EPOS_Kernel::tuple< EPOS_Kernel::tuple<t1, t2>, cv skeleton_type*, ret > tup;   \
-            get<0>( tup ) = tuple<t1, t2>( p1, p2 );                                        \
-            get<1>( tup ) = this->object;                                                   \
-            syscall(                                                                        \
-                    Skeleton<cv skeleton_type, ret, t1, t2>                                 \
+            EPOS_Kernel::get<0>( tup ) = tuple<t1, t2>( p1, p2 );                           \
+            EPOS_Kernel::get<1>( tup ) = this->object;                                      \
+            EPOS_Kernel::syscall(                                                           \
+                    EPOS_Kernel::Skeleton<cv skeleton_type, ret, t1, t2>                    \
                     ::method< &skeleton_type::name >                                        \
                     ::call,                                                                 \
                     (void*) &tup                                                            \
                 );                                                                          \
-            return get<2>( tup );                                                           \
+            return EPOS_Kernel::get<2>( tup );                                              \
         }
 
 #define STUB_METHOD_2_VOID( name, t1, p1, t2, p2, cv )                              \
         void name( t1 p1, t2 p2 ) cv {                                              \
             EPOS_Kernel::tuple< EPOS_Kernel::tuple<t1, t2>, cv skeleton_type* > tup;\
-            get<0>( tup ) = tuple<t1, t2>( p1, p2 );                                \
-            get<1>( tup ) = this->object;                                           \
-            syscall(                                                                \
-                    Skeleton<cv skeleton_type, void, t1, t2>                        \
+            EPOS_Kernel::get<0>( tup ) = tuple<t1, t2>( p1, p2 );                   \
+            EPOS_Kernel::get<1>( tup ) = this->object;                              \
+            EPOS_Kernel::syscall(                                                   \
+                    EPOS_Kernel::Skeleton<cv skeleton_type, void, t1, t2>           \
                     ::method< &skeleton_type::name >                                \
                     ::call,                                                         \
                     (void*) &tup                                                    \
@@ -196,24 +196,24 @@ struct DestructorSkeleton {
 #define STUB_METHOD_3( ret, name, t1, p1, t2, p2, t3, p3, cv )                                  \
         ret name( t1 p1, t2 p2, t3 p3 ) cv {                                                    \
             EPOS_Kernel::tuple< EPOS_Kernel::tuple<t1, t2, t3>, cv skeleton_type*, ret > tup;   \
-            get<0>( tup ) = tuple<t1, t2, t3>( p1, p2, p3 );                                    \
-            get<1>( tup ) = this->object;                                                       \
-            syscall(                                                                            \
-                    Skeleton<cv skeleton_type, ret, t1, t2, t3>                                 \
+            EPOS_Kernel::get<0>( tup ) = tuple<t1, t2, t3>( p1, p2, p3 );                       \
+            EPOS_Kernel::get<1>( tup ) = this->object;                                          \
+            EPOS_Kernel::syscall(                                                               \
+                    EPOS_Kernel::Skeleton<cv skeleton_type, ret, t1, t2, t3>                    \
                     ::method< &skeleton_type::name >                                            \
                     ::call,                                                                     \
                     (void*) &tup                                                                \
                 );                                                                              \
-            return get<2>( tup );                                                               \
+            return EPOS_Kernel::get<2>( tup );                                                  \
         }
 
 #define STUB_METHOD_3_VOID( name, t1, p1, t2, p2, t3, p3, cv )                          \
         void name( t1 p1, t2 p2, t3 p3 ) cv {                                           \
             EPOS_Kernel::tuple< EPOS_Kernel::tuple<t1, t2, t3>, cv skeleton_type* > tup;\
-            get<0>( tup ) = tuple<t1, t2, t3>( p1, p2, p3 );                            \
-            get<1>( tup ) = this->object;                                               \
-            syscall(                                                                    \
-                    Skeleton<cv skeleton_type, void, t1, t2, t3>                        \
+            EPOS_Kernel::get<0>( tup ) = tuple<t1, t2, t3>( p1, p2, p3 );               \
+            EPOS_Kernel::get<1>( tup ) = this->object;                                  \
+            EPOS_Kernel::syscall(                                                       \
+                    EPOS_Kernel::Skeleton<cv skeleton_type, void, t1, t2, t3>           \
                     ::method< &skeleton_type::name >                                    \
                     ::call,                                                             \
                     (void*) &tup                                                        \
