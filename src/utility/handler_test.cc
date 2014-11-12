@@ -2,9 +2,9 @@
 
 #include <utility/ostream_kernel.h>
 #include <utility/handler.h>
-#include <alarm.h>
-#include <thread.h>
-#include <semaphore.h>
+#include <alarm_kernel.h>
+#include <thread_kernel.h>
+#include <semaphore_kernel.h>
 #include <chronometer.h>
 
 using namespace EPOS_Kernel;

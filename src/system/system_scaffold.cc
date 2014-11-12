@@ -5,7 +5,7 @@
 #include <machine.h>
 #include <display.h>
 #include <system.h>
-#include <thread.h>
+#include <thread_kernel.h>
 
 // LIBC Heritage
 extern "C" {

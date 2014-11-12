@@ -1,7 +1,7 @@
 // EPOS Alarm Abstraction Implementation
 
-#include <semaphore.h>
-#include <alarm.h>
+#include <semaphore_kernel.h>
+#include <alarm_kernel.h>
 #include <display.h>
 
 __BEGIN_SYS

@@ -1,8 +1,8 @@
 // EPOS Thread Abstraction Implementation
 
 #include <machine.h>
-#include <thread.h>
-#include <alarm.h>
+#include <thread_kernel.h>
+#include <alarm_kernel.h>
 
 __BEGIN_SYS
 

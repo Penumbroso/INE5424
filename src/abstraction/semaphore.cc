@@ -1,6 +1,6 @@
 // EPOS Semaphore Abstraction Implementation
 
-#include <semaphore.h>
+#include <semaphore_kernel.h>
 
 __BEGIN_SYS
 

@@ -1,6 +1,6 @@
 // EPOS Condition Variable Abstraction Implementation
 
-#include <condition.h>
+#include <condition_kernel.h>
 
 // This is actually no Condition Variable
 // check http://www.cs.duke.edu/courses/spring01/cps110/slides/sem/sld002.htm

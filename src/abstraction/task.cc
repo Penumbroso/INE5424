@@ -1,6 +1,6 @@
 // EPOS Task Abstraction Implementation
 
-#include <task.h>
+#include <task_kernel.h>
 
 __BEGIN_SYS
 

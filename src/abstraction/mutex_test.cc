@@ -1,9 +1,9 @@
 // EPOS Mutex Abstraction Test Program
 
 #include <utility/ostream_kernel.h>
-#include <thread.h>
-#include <mutex.h>
-#include <alarm.h>
+#include <thread_kernel.h>
+#include <mutex_kernel.h>
+#include <alarm_kernel.h>
 #include <display.h>
 
 using namespace EPOS_Kernel;

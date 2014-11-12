@@ -1,9 +1,9 @@
 // EPOS Thread Abstraction Initialization
 
 #include <system.h>
-#include <thread.h>
-#include <alarm.h>
-#include <task.h>
+#include <thread_kernel.h>
+#include <alarm_kernel.h>
+#include <task_kernel.h>
 
 extern "C" { void __epos_app_entry(); }
 

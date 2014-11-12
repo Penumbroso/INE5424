@@ -4,7 +4,7 @@
 #define __synchronizer_h
 
 #include <cpu.h>
-#include <thread.h>
+#include <thread_kernel.h>
 
 __BEGIN_SYS
 

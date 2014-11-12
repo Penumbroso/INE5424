@@ -27,7 +27,7 @@
 #define MACH pc
 #define __MACH_TRAITS_H	        __HEADER_MACH(traits)
 
-#define APPLICATION fork
+#define APPLICATION stub_skeleton_test
 #define __APPLICATION_TRAITS_H  __HEADER_APPLICATION(APPLICATION)
 
 //============================================================================

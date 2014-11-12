@@ -8,7 +8,7 @@
 #include <tsc.h>
 #include <rtc.h>
 #include <timer.h>
-#include <semaphore.h>
+#include <semaphore_kernel.h>
 
 __BEGIN_SYS
 

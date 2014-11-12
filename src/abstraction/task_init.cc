@@ -3,7 +3,7 @@
 #include <utility/elf.h>
 #include <mmu.h>
 #include <system.h>
-#include <task.h>
+#include <task_kernel.h>
 
 __BEGIN_SYS
 

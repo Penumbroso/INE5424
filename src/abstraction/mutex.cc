@@ -1,6 +1,6 @@
 // EPOS Mutex Abstraction Implementation
 
-#include <mutex.h>
+#include <mutex_kernel.h>
 
 __BEGIN_SYS
 

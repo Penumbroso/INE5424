@@ -1,7 +1,7 @@
 // EPOS Alarm Abstraction Test Program
 
 #include <utility/ostream_kernel.h>
-#include <alarm.h>
+#include <alarm_kernel.h>
 
 using namespace EPOS_Kernel;
 

@@ -2,7 +2,7 @@
 
 #include <utility/ostream_kernel.h>
 #include <chronometer.h>
-#include <alarm.h>
+#include <alarm_kernel.h>
 
 using namespace EPOS_Kernel;
 

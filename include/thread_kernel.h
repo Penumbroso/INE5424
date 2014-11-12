@@ -173,7 +173,7 @@ protected:
 
 __END_SYS
 
-#include <task.h>
+#include <task_kernel.h>
 
 __BEGIN_SYS
 

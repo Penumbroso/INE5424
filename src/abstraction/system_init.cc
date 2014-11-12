@@ -1,8 +1,8 @@
 // EPOS System Abstraction Initialization
 
 #include <system.h>
-#include <alarm.h>
-#include <task.h>
+#include <alarm_kernel.h>
+#include <task_kernel.h>
 
 __BEGIN_SYS
 

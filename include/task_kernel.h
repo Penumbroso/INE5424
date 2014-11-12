@@ -1,6 +1,6 @@
 // EPOS Task Abstraction Declarations
 
-#include <thread.h>
+#include <thread_kernel.h>
 
 #ifndef __task_h
 #define __task_h

@@ -2,7 +2,7 @@
 
 #include <utility/heap.h>
 #include <mmu.h>
-#include <thread.h>
+#include <thread_kernel.h>
 
 __BEGIN_SYS
 

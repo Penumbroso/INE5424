@@ -3,7 +3,7 @@
 #ifndef __active_h
 #define __active_h
 
-#include <thread.h>
+#include <thread_kernel.h>
 
 __BEGIN_SYS
 

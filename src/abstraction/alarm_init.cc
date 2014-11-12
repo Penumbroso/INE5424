@@ -1,7 +1,7 @@
 // EPOS Alarm Abstraction Initialization
 
 #include <system.h>
-#include <alarm.h>
+#include <alarm_kernel.h>
 
 __BEGIN_SYS
 
