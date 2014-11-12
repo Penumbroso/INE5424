@@ -36,8 +36,8 @@ void Thread::init()
     Thread * first;
     
     if(multitask) {
-    	first = new (SYSTEM) Thread(*Task::_master, entry, RUNNING, MAIN);
-    	new (SYSTEM) Thread(*Task::_master, &idle, READY, IDLE);
+    	first = new (SYSTEM) Thread(Task::_master, entry, RUNNING, MAIN);
+    	new (SYSTEM) Thread(Task::_master, &idle, READY, IDLE);
     } else {
     	first = new (SYSTEM) Thread(entry, RUNNING, MAIN);
     	new (SYSTEM) Thread(&idle, READY, IDLE);

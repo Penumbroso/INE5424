@@ -9,16 +9,15 @@
 #include <address_space.h>
 #include <segment.h>
 
-
 __BEGIN_SYS
+
 class Task
 {
-    // Type used in public methods
+public:
     typedef CPU::Log_Addr Log_Addr;
 
-public:
     /* Constructs a task with the given code and data segments. */
-    Task(const Segment & cs, const Segment & ds);
+    Task(const Segment * cs, const Segment * ds);
     ~Task();
 
     // Getters

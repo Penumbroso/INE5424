@@ -8,12 +8,12 @@ __BEGIN_SYS
 Task * Task::_master;
 
 // Constructor/destructor
-Task::Task(const Segment& c, const Segment& d )
+Task::Task(const Segment* c, const Segment* d )
     : _as(new (SYSTEM) Address_Space)
-    , _cs(&c)
-    , _ds(&d)
-    , _code(_as->attach(c))
-    , _data(_as->attach(d))
+    , _cs(c)
+    , _ds(d)
+    , _code(_as->attach(*c))
+    , _data(_as->attach(*d))
 {
     db<Task>(TRC) << "Task(cs=" << _cs << ",ds=" << _ds << ") => " << this << endl;
 }

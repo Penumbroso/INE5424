@@ -181,6 +181,17 @@ struct FunctionSkeleton< void, Args... > {
             return EPOS_Kernel::get<1>(tup);                    \
         }
 
+#define STUB_FUNCTION_0_VOID( name, skeleton )                  \
+        void name() {                                           \
+            EPOS_Kernel::tuple< EPOS_Kernel::tuple<> > tup;     \
+            EPOS_Kernel::syscall(                               \
+                    EPOS_Kernel::FunctionSkeleton<void>         \
+                    ::function< &skeleton >                     \
+                    ::call,                                     \
+                    (void*) &tup                                \
+                );                                              \
+        }
+
 #define STUB_METHOD_1( ret, name, t1, p1, cv )                                          \
         ret name( t1 p1 ) cv {                                                          \
             EPOS_Kernel::tuple< EPOS_Kernel::tuple<t1>, cv skeleton_type*, ret > tup;   \

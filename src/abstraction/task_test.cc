@@ -1,9 +1,9 @@
-// EPOS Task Test Program
+// EPOS EPOS::Task Test Program
 
 #include <utility/ostream_kernel.h>
 #include <alarm.h>
-#include <thread_kernel.h>
-#include <task_kernel.h>
+#include <thread.h>
+#include <task.h>
 
 using namespace EPOS_Kernel;
 
@@ -12,21 +12,21 @@ const int iterations = 10;
 int func_a(void);
 int func_b(void);
 
-Thread * a;
-Thread * b;
-Thread * m;
+EPOS::Thread * a;
+EPOS::Thread * b;
+EPOS::Thread * m;
 
 OStream cout;
 
 int main()
 {
-    cout << "Task test\n";
+    cout << "EPOS::Task test\n";
 
-    m = Thread::self();
+    m = EPOS::Thread::self();
 
     cout << "I'll try to clone myself:\n";
 
-    const Task * task0 = Task::self();
+    const EPOS::Task * task0 = EPOS::Task::self();
     Address_Space * as0 = task0->address_space();
     cout << "My address space's page directory is located at " << as0 << "\n";
 
@@ -61,9 +61,9 @@ int main()
     as0->detach(ds1);
     cout << " done!" << endl;
 
-    Task * task1 = new (SYSTEM) Task(cs1, ds1);
-    a = new (SYSTEM) Thread(*task1, &func_a);
-    b = new (SYSTEM) Thread(&func_b);
+    EPOS::Task * task1 = new (SYSTEM) EPOS::Task(cs1, ds1);
+    a = new (SYSTEM) EPOS::Thread(*task1, &func_a);
+    b = new (SYSTEM) EPOS::Thread(&func_b);
 
     m->suspend();
 
@@ -77,7 +77,7 @@ int main()
     int status_a = a->join();
     int status_b = b->join();
 
-    cout << "Thread A exited with status " << status_a 
+    cout << "EPOS::Thread A exited with status " << status_a 
          << " and thread B exited with status " << status_b << "\n";
 
     delete a;
@@ -95,10 +95,10 @@ int func_a(void)
         for(int i = 0; i < 79; i++)
             cout << "a";
         cout << "\n";
-        Thread::yield();
+        EPOS::Thread::yield();
     }
 
-    Thread::self()->suspend();
+    EPOS::Thread::self()->suspend();
 
     return 'A';   
 }
@@ -109,12 +109,12 @@ int func_b(void)
         for(int i = 0; i < 79; i++)
             cout << "b";
         cout << "\n";
-        Thread::yield();
+        EPOS::Thread::yield();
     }
 
     m->resume();
 
-    Thread::self()->suspend();
+    EPOS::Thread::self()->suspend();
 
     return 'B';   
 }
