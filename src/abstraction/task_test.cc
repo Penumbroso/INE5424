@@ -1,7 +1,7 @@
 // EPOS Task Test Program
 
 #include <utility/ostream_kernel.h>
-#include <alarm_kernel.h>
+#include <alarm.h>
 #include <thread_kernel.h>
 #include <task_kernel.h>
 
@@ -69,7 +69,7 @@ int main()
 
     cout << "Both threads are now done and have suspended themselves. I'll now wait for 1 second and then wake them up so they can exit ...\n";
 
-    Alarm::delay(1000000);
+    EPOS::Alarm::delay(1000000);
 
     a->resume();
     b->resume();

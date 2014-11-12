@@ -13,7 +13,7 @@ Alarm::Queue Alarm::_request;
 
 
 // Methods
-Alarm::Alarm(const Microsecond & time, Handler * handler, int times):
+Alarm::Alarm(Microsecond time, Handler * handler, int times):
     _ticks(ticks(time)), _handler(handler), _times(times), _link(this, _ticks)
 {
     lock();
@@ -44,7 +44,7 @@ Alarm::~Alarm()
 
 
 // Class methods
-void Alarm::delay(const Microsecond & time)
+void Alarm::delay(Microsecond time)
 {
     db<Alarm>(TRC) << "Alarm::delay(time=" << time << ")" << endl;
 

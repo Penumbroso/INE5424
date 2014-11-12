@@ -73,6 +73,26 @@ struct DestructorSkeleton {
         delete t;
     }
 };
+template< typename R, typename ... Args >
+struct FunctionSkeleton {
+    template< R (*F)( Args... ) >
+    struct function {
+        static void call( void * data ) {
+            tuple< tuple<Args...>, R >* tup = (tuple< tuple<Args...>, R>*) data;
+            get<1>(*tup) = tuple_call( F, get<0>(*tup) );
+        }
+    };
+};
+template< typename ... Args >
+struct FunctionSkeleton< void, Args... > {
+    template< void (*F)( Args... ) >
+    struct function {
+        static void call( void * data ) {
+            tuple<Args...>* tup = (tuple<Args...>*) data;
+            tuple_call( F, *tup );
+        }
+    };
+};
 
 } // namespace EPOS_Kernel
 
@@ -106,12 +126,22 @@ struct DestructorSkeleton {
         object = EPOS_Kernel::get<1>( tup );                                                            \
     }
 
-#define STUB_CONSTRUCTOR_2( stub_name, t1, p1, t2, p2 )                                                 \
-    stub_name( t1 p1, t2 p2 ) {                                                                         \
-        EPOS_Kernel::tuple< EPOS_Kernel::tuple<t1, t2>, skeleton_type* > tup;                           \
-        EPOS_Kernel::get<0>( tup ) = EPOS_Kernel::tuple<t1>( p1, p2 );                                  \
-        EPOS_Kernel::syscall( EPOS_Kernel::Skeleton<skeleton_type, void, t1>::construct, (void*)&tup ); \
-        object = EPOS_Kernel::get<1>( tup );                                                            \
+#define STUB_CONSTRUCTOR_2( stub_name, t1, p1, t2, p2 )                         \
+    stub_name( t1 p1, t2 p2 ) {                                                 \
+        EPOS_Kernel::tuple< EPOS_Kernel::tuple<t1, t2>, skeleton_type* > tup;   \
+        EPOS_Kernel::get<0>( tup ) = EPOS_Kernel::tuple<t1, t2>( p1, p2 );      \
+        EPOS_Kernel::syscall( EPOS_Kernel::Skeleton<skeleton_type, void, t1, t2>\
+                ::construct, (void*)&tup );                                     \
+        object = EPOS_Kernel::get<1>( tup );                                    \
+    }
+
+#define STUB_CONSTRUCTOR_3( stub_name, t1, p1, t2, p2, t3, p3 )                     \
+    stub_name( t1 p1, t2 p2, t3 p3 ) {                                              \
+        EPOS_Kernel::tuple< EPOS_Kernel::tuple<t1, t2, t3>, skeleton_type* > tup;   \
+        EPOS_Kernel::get<0>( tup ) = EPOS_Kernel::tuple<t1, t2, t3>( p1, p2, p3 );  \
+        EPOS_Kernel::syscall( EPOS_Kernel::Skeleton<skeleton_type, void, t1, t2, t3>\
+                ::construct, (void*)&tup );                                         \
+        object = EPOS_Kernel::get<1>( tup );                                        \
     }
 
 #define STUB_METHOD_0( ret, name, cv )                                              \
@@ -139,6 +169,18 @@ struct DestructorSkeleton {
                 );                                                              \
         }                                                                       
 
+#define STUB_FUNCTION_0( ret, name, skeleton )                  \
+        ret name() {                                            \
+            EPOS_Kernel::tuple< EPOS_Kernel::tuple<>, ret > tup;\
+            EPOS_Kernel::syscall(                               \
+                    EPOS_Kernel::FunctionSkeleton<ret>          \
+                    ::function< &skeleton >                     \
+                    ::call,                                     \
+                    (void*) &tup                                \
+                );                                              \
+            return EPOS_Kernel::get<1>(tup);                    \
+        }
+
 #define STUB_METHOD_1( ret, name, t1, p1, cv )                                          \
         ret name( t1 p1 ) cv {                                                          \
             EPOS_Kernel::tuple< EPOS_Kernel::tuple<t1>, cv skeleton_type*, ret > tup;   \
@@ -164,6 +206,17 @@ struct DestructorSkeleton {
                     ::call,                                                         \
                     (void*) &tup                                                    \
                 );                                                                  \
+        }
+
+#define STUB_FUNCTION_1_VOID( name, t1, p1, skeleton )      \
+        void name( t1 p1 ) {                                \
+            EPOS_Kernel::tuple< t1 > tup( p1 );             \
+            EPOS_Kernel::syscall(                           \
+                    EPOS_Kernel::FunctionSkeleton<void, t1> \
+                    ::function< &skeleton >                 \
+                    ::call,                                 \
+                    (void*) &tup                            \
+                );                                          \
         }
 
 #define STUB_METHOD_2( ret, name, t1, p1, t2, p2, cv )                                      \
