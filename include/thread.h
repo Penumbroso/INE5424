@@ -37,20 +37,18 @@ namespace EPOS {
             object = EPOS_Kernel::get<1>( tup );
         }
 
-        STUB_METHOD_0_VOID( suspend, )
-        STUB_METHOD_0_VOID( resume, )
-        STUB_METHOD_0_VOID( pass, )
+        STUB_METHOD_0( void, suspend, )
+        STUB_METHOD_0( void, resume, )
+        STUB_METHOD_0( void, pass, )
         STUB_METHOD_0( int, join, )
-        static STUB_FUNCTION_0_VOID( yield, skeleton_type::yield )
-        
+        static STUB_FUNCTION_0( void, yield, skeleton_type::yield )
 
+    private:
+        static STUB_FUNCTION_0( skeleton_type * volatile, _self, skeleton_type::self )
+    public:
         static Thread * self() {
-            EPOS_Kernel::tuple< EPOS_Kernel::tuple<>, skeleton_type * > tup;
-            EPOS_Kernel::syscall( EPOS_Kernel::FunctionSkeleton<skeleton_type * volatile>
-                        ::function< skeleton_type::self >::call,
-                        (void*) &tup );
             Thread * ret = new Thread;
-            ret->object = EPOS_Kernel::get<1>( tup );
+            ret->object = _self();
             return ret;
         }
 

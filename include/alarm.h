@@ -12,6 +12,6 @@ namespace EPOS {
         STUB_CONSTRUCTOR_3( Alarm, Microsecond, time, EPOS_Kernel::Handler *, handler, int, times );
 
         static STUB_FUNCTION_0( Hertz, frequency, skeleton_type::frequency )
-        static STUB_FUNCTION_1_VOID( delay, Microsecond, time, skeleton_type::delay )
+        static STUB_FUNCTION_1( void, delay, Microsecond, time, skeleton_type::delay )
     STUB_END
 }

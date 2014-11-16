@@ -195,7 +195,7 @@ struct FunctionSkeleton< void, Args... > {
 #define STUB_FUNCTION_1( ret, name, t1, p1, skeleton )                      \
         ret name( t1 p1 ) {                                                 \
             EPOS_Kernel::FunctionSkeleton< ret, t1 >::tuple_type tup;       \
-            get<0>(tup) = tuple<t1>(p1);                                    \
+            EPOS_Kernel::get<0>(tup) = EPOS_Kernel::tuple<t1>(p1);          \
             EPOS_Kernel::syscall(                                           \
                     EPOS_Kernel::FunctionSkeleton<ret, t1>                  \
                     ::function< &skeleton >                                 \
