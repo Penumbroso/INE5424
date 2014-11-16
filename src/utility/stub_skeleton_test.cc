@@ -65,7 +65,7 @@ namespace EPOS {
     STUB_BEGIN( S, ::EPOS_Kernel::S )
         STUB_CONSTRUCTOR_0( S )
         STUB_CONSTRUCTOR_1( S, double, d )
-        STUB_METHOD_0_VOID( f, )
+        STUB_METHOD_0( void, f, )
         STUB_METHOD_1( int, f, int, p1, )
         STUB_METHOD_2( int, f, char, p1, double, p2, const )
     STUB_END
