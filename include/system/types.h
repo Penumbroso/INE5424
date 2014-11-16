@@ -5,7 +5,7 @@ typedef __SIZE_TYPE__ size_t;
 #ifndef __types_h
 #define __types_h
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Memory allocators
 enum System_Allocator
@@ -18,7 +18,13 @@ enum Scratchpad_Allocator
     SCRATCHPAD
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
+
+namespace EPOS {
+    // bring memory allocators to user namespace
+    using EPOS_Kernel::SYSTEM;
+    using EPOS_Kernel::SCRATCHPAD;
+} // namespace EPOS
 
 extern "C"
 {
@@ -35,7 +41,7 @@ void * operator new[](size_t, const EPOS_Kernel::System_Allocator &);
 void * operator new(size_t, const EPOS_Kernel::Scratchpad_Allocator &);
 void * operator new[](size_t, const EPOS_Kernel::Scratchpad_Allocator &);
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // System call - must not be inline
 void syscall( void (* function )( void * ), void * parameter );
@@ -186,6 +192,6 @@ template<> struct Type<Task> { static const Type_Id ID = TASK_ID; };
 template<> struct Type<Address_Space> { static const Type_Id ID = ADDRESS_SPACE_ID; };
 template<> struct Type<Segment> { static const Type_Id ID = SEGMENT_ID; };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

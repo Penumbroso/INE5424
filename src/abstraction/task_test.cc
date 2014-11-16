@@ -1,32 +1,32 @@
-// EPOS EPOS::Task Test Program
+// EPOS Task Test Program
 
-#include <utility/ostream_kernel.h>
+#include <utility/ostream.h>
 #include <alarm.h>
 #include <thread.h>
 #include <task.h>
 
-using namespace EPOS_Kernel;
+using namespace EPOS;
 
 const int iterations = 10;
 
 int func_a(void);
 int func_b(void);
 
-EPOS::Thread * a;
-EPOS::Thread * b;
-EPOS::Thread * m;
+Thread * a;
+Thread * b;
+Thread * m;
 
 OStream cout;
 
 int main()
 {
-    cout << "EPOS::Task test\n";
+    cout << "Task test\n";
 
-    m = EPOS::Thread::self();
+    m = Thread::self();
 
     cout << "I'll try to clone myself:\n";
 
-    const EPOS::Task * task0 = EPOS::Task::self();
+    const Task * task0 = Task::self();
     Address_Space * as0 = task0->address_space();
     cout << "My address space's page directory is located at " << as0 << "\n";
 
@@ -61,15 +61,15 @@ int main()
     as0->detach(ds1);
     cout << " done!" << endl;
 
-    EPOS::Task * task1 = new (SYSTEM) EPOS::Task(cs1, ds1);
-    a = new (SYSTEM) EPOS::Thread(*task1, &func_a);
-    b = new (SYSTEM) EPOS::Thread(&func_b);
+    Task * task1 = new (SYSTEM) Task(cs1, ds1);
+    a = new (SYSTEM) Thread(*task1, &func_a);
+    b = new (SYSTEM) Thread(&func_b);
 
     m->suspend();
 
     cout << "Both threads are now done and have suspended themselves. I'll now wait for 1 second and then wake them up so they can exit ...\n";
 
-    EPOS::Alarm::delay(1000000);
+    Alarm::delay(1000000);
 
     a->resume();
     b->resume();
@@ -77,7 +77,7 @@ int main()
     int status_a = a->join();
     int status_b = b->join();
 
-    cout << "EPOS::Thread A exited with status " << status_a 
+    cout << "Thread A exited with status " << status_a 
          << " and thread B exited with status " << status_b << "\n";
 
     delete a;
@@ -95,10 +95,10 @@ int func_a(void)
         for(int i = 0; i < 79; i++)
             cout << "a";
         cout << "\n";
-        EPOS::Thread::yield();
+        Thread::yield();
     }
 
-    EPOS::Thread::self()->suspend();
+    Thread::self()->suspend();
 
     return 'A';   
 }
@@ -109,12 +109,12 @@ int func_b(void)
         for(int i = 0; i < 79; i++)
             cout << "b";
         cout << "\n";
-        EPOS::Thread::yield();
+        Thread::yield();
     }
 
     m->resume();
 
-    EPOS::Thread::self()->suspend();
+    Thread::self()->suspend();
 
     return 'B';   
 }
