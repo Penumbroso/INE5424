@@ -58,6 +58,14 @@ struct S { // Sample system class
     int f( char, double ) const {
         return i;
     }
+
+    static int val;
+    static int f( char ) {
+        return 5+val;
+    }
+    static void f( float j ) {
+        val = j;
+    }
 };
 } // namespace EPOS_Kernel
 
@@ -68,8 +76,13 @@ namespace EPOS {
         STUB_METHOD_0( void, f, )
         STUB_METHOD_1( int, f, int, p1, )
         STUB_METHOD_2( int, f, char, p1, double, p2, const )
+
+        static STUB_FUNCTION_1( int, f, char, dummy, ::EPOS_Kernel::S::f )
+        static STUB_FUNCTION_1( void, f, float, j, ::EPOS_Kernel::S::f )
     STUB_END
 } // namespace EPOS
+
+int EPOS_Kernel::S::val;
 
 int main() {
     // syscall test
@@ -118,4 +131,12 @@ int main() {
 
     EPOS::S st( 14 );
     dynamic_assert( st.object->i == 14 );
+
+    EPOS_Kernel::S::val = 9;
+    dynamic_assert( EPOS::S::f( 'a' ) == 14 );
+    EPOS_Kernel::S::val = 8;
+    dynamic_assert( EPOS::S::f( 'a' ) == 13 );
+    EPOS::S::f( 3.5f );
+    dynamic_assert( EPOS_Kernel::S::val == 3 );
+    dynamic_assert( EPOS::S::f( 'a' ) == 8 );
 }
