@@ -2,9 +2,15 @@
 
 #include <machine.h>
 #include <thread_kernel.h>
+#include <thread.h>
 #include <alarm_kernel.h>
 
-__BEGIN_SYS
+namespace EPOS {
+    // Static attribute declaration
+    Thread * Thread::aux = 0;
+} // namespace EPOS
+
+namespace EPOS_Kernel {
 
 // Class attributes
 volatile unsigned int Thread::_thread_count;
@@ -181,6 +187,14 @@ void Thread::resume()
     }
 }
 
+EPOS::Thread * Thread::stub( EPOS::Thread ** stub_ptr ) {
+    if( _stub == 0 ) {
+        _stub = *stub_ptr;
+        *stub_ptr = 0;
+    }
+    return _stub;
+}
+
 
 // Class methods
 void Thread::yield()
@@ -337,4 +351,4 @@ unsigned int This_Thread::id()
     return _not_booting ? reinterpret_cast<volatile unsigned int>(Thread::self()) : Machine::cpu_id() + 1;
 }
 
-__END_SYS
+} //namespace EPOS_Kernel

@@ -10,7 +10,11 @@
 #include <system.h>
 #include <scheduler.h>
 
-__BEGIN_SYS
+namespace EPOS {
+    class Thread;
+}
+
+namespace EPOS_Kernel {
 
 class Thread
 {
@@ -103,6 +107,14 @@ public:
     void suspend() { suspend(false); }
     void resume();
 
+    /* Workaround to guarantee that the thread is tied to its stub.
+     * If the current _sub pointer points to something not null,
+     * the pointer that the argument points is left unaltered.
+     * Otherwise, the stub is modified to be *stub_ptr and null is
+     * assigned to *stub_ptr.
+     * In any case, return the resulting stub. */
+    EPOS::Thread * stub( EPOS::Thread ** stub_ptr );
+
     static Thread * volatile self() { return running(); }
     static void yield();
     static void exit(int status = 0);
@@ -158,6 +170,7 @@ private:
     static void init();
 
 protected:
+    EPOS::Thread * _stub;
     const Task * _task;
     char * _stack;
     Context * volatile _context;
@@ -171,15 +184,15 @@ protected:
     static Scheduler<Thread> _scheduler;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #include <task_kernel.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 
 inline Thread::Thread(int (* entry)(), State state, Criterion criterion, unsigned int stack_size)
-: _task(Task::self()), _state(state), _waiting(0), _joining(0), _link(this, criterion)
+: _stub(0), _task(Task::self()), _state(state), _waiting(0), _joining(0), _link(this, criterion)
 {
     lock();
 
@@ -191,7 +204,7 @@ inline Thread::Thread(int (* entry)(), State state, Criterion criterion, unsigne
 
 template<typename T1>
 inline Thread::Thread(int (* entry)(T1 a1), T1 a1, State state, Criterion criterion, unsigned int stack_size)
-: _task(Task::self()), _state(state), _waiting(0), _joining(0), _link(this, criterion)
+: _stub(0), _task(Task::self()), _state(state), _waiting(0), _joining(0), _link(this, criterion)
 {
     lock();
 
@@ -203,7 +216,7 @@ inline Thread::Thread(int (* entry)(T1 a1), T1 a1, State state, Criterion criter
 
 template<typename T1, typename T2>
 inline Thread::Thread(int (* entry)(T1 a1, T2 a2), T1 a1, T2 a2, State state, Criterion criterion, unsigned int stack_size)
-: _task(Task::self()), _state(state), _waiting(0), _joining(0), _link(this, criterion)
+: _stub(0), _task(Task::self()), _state(state), _waiting(0), _joining(0), _link(this, criterion)
 {
     lock();
 
@@ -215,7 +228,7 @@ inline Thread::Thread(int (* entry)(T1 a1, T2 a2), T1 a1, T2 a2, State state, Cr
 
 template<typename T1, typename T2, typename T3>
 inline Thread::Thread(int (* entry)(T1 a1, T2 a2, T3 a3), T1 a1, T2 a2, T3 a3, State state, Criterion criterion, unsigned int stack_size)
-: _task(Task::self()), _state(state), _waiting(0), _joining(0), _link(this, criterion)
+: _stub(0), _task(Task::self()), _state(state), _waiting(0), _joining(0), _link(this, criterion)
 {
     lock();
 
@@ -227,7 +240,7 @@ inline Thread::Thread(int (* entry)(T1 a1, T2 a2, T3 a3), T1 a1, T2 a2, T3 a3, S
 
 template<typename T1, typename T2, typename T3, typename T4>
 inline Thread::Thread(int (* entry)(T1 a1, T2 a2, T3 a3, T4 a4), T1 a1, T2 a2, T3 a3, T4 a4, State state, Criterion criterion, unsigned int stack_size)
-: _task(Task::self()), _state(state), _waiting(0), _joining(0), _link(this, criterion)
+: _stub(0), _task(Task::self()), _state(state), _waiting(0), _joining(0), _link(this, criterion)
 {
     lock();
 
@@ -238,7 +251,7 @@ inline Thread::Thread(int (* entry)(T1 a1, T2 a2, T3 a3, T4 a4), T1 a1, T2 a2, T
 }
 
 inline Thread::Thread(const Task * task, int (* entry)(), State state, Criterion criterion, unsigned int stack_size)
-: _task(task), _state(state), _waiting(0), _joining(0), _link(this, criterion)
+: _stub(0), _task(task), _state(state), _waiting(0), _joining(0), _link(this, criterion)
 {
     lock();
 
@@ -250,7 +263,7 @@ inline Thread::Thread(const Task * task, int (* entry)(), State state, Criterion
 
 template<typename T1>
 inline Thread::Thread(const Task * task, int (* entry)(T1 a1), T1 a1, State state, Criterion criterion, unsigned int stack_size)
-: _task(task), _state(state), _waiting(0), _joining(0), _link(this, criterion)
+: _stub(0), _task(task), _state(state), _waiting(0), _joining(0), _link(this, criterion)
 {
     lock();
 
@@ -262,7 +275,7 @@ inline Thread::Thread(const Task * task, int (* entry)(T1 a1), T1 a1, State stat
 
 template<typename T1, typename T2>
 inline Thread::Thread(const Task * task, int (* entry)(T1 a1, T2 a2), T1 a1, T2 a2, State state, Criterion criterion, unsigned int stack_size)
-: _task(task), _state(state), _waiting(0), _joining(0), _link(this, criterion)
+: _stub(0), _task(task), _state(state), _waiting(0), _joining(0), _link(this, criterion)
 {
     lock();
 
@@ -274,7 +287,7 @@ inline Thread::Thread(const Task * task, int (* entry)(T1 a1, T2 a2), T1 a1, T2 
 
 template<typename T1, typename T2, typename T3>
 inline Thread::Thread(const Task * task, int (* entry)(T1 a1, T2 a2, T3 a3), T1 a1, T2 a2, T3 a3, State state, Criterion criterion, unsigned int stack_size)
-: _task(task), _state(state), _waiting(0), _joining(0), _link(this, criterion)
+: _stub(0), _task(task), _state(state), _waiting(0), _joining(0), _link(this, criterion)
 {
     lock();
 
@@ -286,7 +299,7 @@ inline Thread::Thread(const Task * task, int (* entry)(T1 a1, T2 a2, T3 a3), T1 
 
 template<typename T1, typename T2, typename T3, typename T4>
 inline Thread::Thread(const Task * task, int (* entry)(T1 a1, T2 a2, T3 a3, T4 a4), T1 a1, T2 a2, T3 a3, T4 a4, State state, Criterion criterion, unsigned int stack_size)
-: _task(task), _state(state), _waiting(0), _joining(0), _link(this, criterion)
+: _stub(0), _task(task), _state(state), _waiting(0), _joining(0), _link(this, criterion)
 {
     lock();
 
@@ -309,6 +322,6 @@ private:
     Thread * _handler;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

@@ -233,7 +233,7 @@ struct FunctionSkeleton< void, Args... > {
 #define STUB_METHOD_1( ret, name, t1, p1, cv )                                              \
         ret name( t1 p1 ) cv {                                                              \
             EPOS_Kernel::Skeleton< cv skeleton_type, ret, t1 >::tuple_type tup;             \
-            EPOS_Kernel::get<0>( tup ) = tuple<t1>( p1 );                                   \
+            EPOS_Kernel::get<0>( tup ) = EPOS_Kernel::tuple<t1>( p1 );                      \
             EPOS_Kernel::get<1>( tup ) = this->object;                                      \
             EPOS_Kernel::syscall(                                                           \
                     EPOS_Kernel::Skeleton<cv skeleton_type, ret, t1>                        \
@@ -247,7 +247,7 @@ struct FunctionSkeleton< void, Args... > {
 #define STUB_METHOD_2( ret, name, t1, p1, t2, p2, cv )                                          \
         ret name( t1 p1, t2 p2 ) cv {                                                           \
             EPOS_Kernel::Skeleton< cv skeleton_type, ret, t1, t2 >::tuple_type tup;             \
-            EPOS_Kernel::get<0>( tup ) = tuple<t1, t2>( p1, p2 );                               \
+            EPOS_Kernel::get<0>( tup ) = EPOS_Kernel::tuple<t1, t2>( p1, p2 );                  \
             EPOS_Kernel::get<1>( tup ) = this->object;                                          \
             EPOS_Kernel::syscall(                                                               \
                     EPOS_Kernel::Skeleton<cv skeleton_type, ret, t1, t2>                        \
@@ -261,7 +261,7 @@ struct FunctionSkeleton< void, Args... > {
 #define STUB_METHOD_3( ret, name, t1, p1, t2, p2, t3, p3, cv )                                      \
         ret name( t1 p1, t2 p2, t3 p3 ) cv {                                                        \
             EPOS_Kernel::Skeleton< cv skeleton_type, ret, t1, t2, t3 >::tuple_type tup;             \
-            EPOS_Kernel::get<0>( tup ) = tuple<t1, t2, t3>( p1, p2, p3 );                           \
+            EPOS_Kernel::get<0>( tup ) = EPOS_Kernel::tuple<t1, t2, t3>( p1, p2, p3 );              \
             EPOS_Kernel::get<1>( tup ) = this->object;                                              \
             EPOS_Kernel::syscall(                                                                   \
                     EPOS_Kernel::Skeleton<cv skeleton_type, ret, t1, t2, t3>                        \

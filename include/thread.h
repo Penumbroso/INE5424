@@ -44,12 +44,30 @@ namespace EPOS {
         static STUB_FUNCTION_0( void, yield, skeleton_type::yield )
 
     private:
+        // Auxiliar methods and functions to Thread::self()
         static STUB_FUNCTION_0( skeleton_type * volatile, _self, skeleton_type::self )
+        STUB_METHOD_1( Thread *, stub, Thread**, stub_ptr, )
+        static Thread * aux; // automate a function call to EPOS_Kernel::Thread::stub
     public:
         static Thread * self() {
-            Thread * ret = new Thread;
-            ret->object = _self();
-            return ret;
+            /* The idea is to put a pointer to the stub in the skeleton, but to
+             * make the linking on demand.
+             *
+             * When this function is executed, if aux is null, we allocate a new
+             * stub in user heap, and assign the return of Thread::self() as the
+             * skeleton of this struct. If aux was not null, this means that we
+             * already had a spare stub, so we will use this object.
+             *
+             * We then execute aux->stub. This redirects to Thread::stub. If the
+             * skeleton did not had a stub assigned to it, it will use the given
+             * Thread* as its stub and assign null to our pointer. Otherwise,
+             * it will just return the pointer to us.
+             *
+             * It should be noted that this solution works well only in a
+             * single-task environment.*/
+            if( aux == 0 ) aux = new Thread;
+            aux->object = _self();
+            return aux->stub( &aux );
         }
 
     STUB_END
