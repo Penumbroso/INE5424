@@ -35,14 +35,16 @@ namespace EPOS {
         STUB_METHOD_0( Log_Addr, code, const )
         STUB_METHOD_0( Log_Addr, data, const )
 
+    private:
+        // Auxiliar methods and functions to Thread::self()
+        static STUB_FUNCTION_0( skeleton_type *, _self, skeleton_type::self )
+        STUB_METHOD_1( Task *, stub, Task**, stub_ptr, )
+        static Task * aux; // automate a function call to EPOS_Kernel::Thread::stub
+    public:
         static Task * self() {
-            EPOS_Kernel::tuple< EPOS_Kernel::tuple<>, skeleton_type * > tup;
-            EPOS_Kernel::syscall( EPOS_Kernel::FunctionSkeleton<const skeleton_type *>
-                        ::function< skeleton_type::self >::call,
-                        (void*) &tup );
-            Task * ret = new Task;
-            ret->object = EPOS_Kernel::get<1>( tup );
-            return ret;
+            if( aux == 0 ) aux = new Task;
+            aux->object = _self();
+            return aux->stub( &aux );
         }
 
     STUB_END

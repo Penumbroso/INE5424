@@ -9,7 +9,11 @@
 #include <address_space.h>
 #include <segment.h>
 
-__BEGIN_SYS
+namespace EPOS {
+    class Task;
+} // namespace EPOS
+
+namespace EPOS_Kernel {
 
 class Task
 {
@@ -27,14 +31,17 @@ public:
           Log_Addr        code()          const { return _code; }
           Log_Addr        data()          const { return _data; }
 
+    // Setter
+    EPOS::Task * stub( EPOS::Task ** stub_ptr );
+
     // Class methods
-    static const Task * self() { return multitask ? Thread::self()->task() : _master; }
+    static Task * self() { return multitask ? Thread::self()->task() : _master; }
     static void init();
 
 protected:
     // Constructor used in initialization
     Task(Address_Space * as, const Segment * cs, const Segment * ds, Log_Addr code, Log_Addr data)
-    : _as(as), _cs(cs), _ds(ds), _code(code), _data(data) {}
+    : _stub(0), _as(as), _cs(cs), _ds(ds), _code(code), _data(data) {}
 
 private:
     friend class System;
@@ -46,6 +53,7 @@ private:
     typedef class Queue<Thread> Queue;
 
     // Instance atributes
+    EPOS::Task * _stub;
     Address_Space * _as; // Address Space
     const Segment * _cs; // Code Segment
     const Segment * _ds; // Data Segment
@@ -63,6 +71,6 @@ private:
     void activate() const { _as->activate(); }
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

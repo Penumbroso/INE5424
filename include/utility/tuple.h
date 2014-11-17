@@ -33,7 +33,7 @@ template< typename ... Args >
 bool operator==( const tuple<Args...>& lhs, const tuple<Args...>& rhs ) {
     return lhs.head == rhs.head && lhs.tail == rhs.tail;
 }
-bool operator==( const tuple<> &, const tuple<> & ) {
+inline bool operator==( const tuple<> &, const tuple<> & ) {
     return true;
 }
 template< typename ... Args >

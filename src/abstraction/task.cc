@@ -1,15 +1,21 @@
 // EPOS Task Abstraction Implementation
 
 #include <task_kernel.h>
+#include <task.h>
 
-__BEGIN_SYS
+namespace EPOS {
+    Task * Task::aux = 0;
+}
+
+namespace EPOS_Kernel {
 
 // Class attributes
 Task * Task::_master;
 
 // Constructor/destructor
 Task::Task(const Segment* c, const Segment* d )
-    : _as(new (SYSTEM) Address_Space)
+    : _stub(0)
+    , _as(new (SYSTEM) Address_Space)
     , _cs(c)
     , _ds(d)
     , _code(_as->attach(*c))
@@ -26,4 +32,12 @@ Task::~Task()
         delete _threads.remove()->object();
 }
 
-__END_SYS
+EPOS::Task * Task::stub( EPOS::Task ** ptr_stub ) {
+    if( _stub == 0 ) {
+        _stub = *ptr_stub;
+        *ptr_stub = 0;
+    }
+    return _stub;
+}
+
+} // namespace EPOS_Kernel
