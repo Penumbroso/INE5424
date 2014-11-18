@@ -6,6 +6,7 @@
 #include <application.h>
 #include <address_space.h>
 #include <segment.h>
+#include <system/framework.h>
 
 __BEGIN_SYS
 

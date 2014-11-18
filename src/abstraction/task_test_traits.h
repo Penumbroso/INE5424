@@ -12,18 +12,19 @@ struct Traits
     static const bool enabled = true;
     static const bool debugged = true;
     static const bool hysterically_debugged = false;
+    static const bool identified = false;
 };
 
 template <> struct Traits<Build>
 {
-    enum {LIBRARY, BUILTIN};
+    enum {LIBRARY, BUILTIN, KERNEL};
     static const unsigned int MODE = BUILTIN;
 
     enum {IA32};
-    static const unsigned int ARCH = IA32;
+    static const unsigned int ARCHITECTURE = IA32;
 
     enum {PC};
-    static const unsigned int MACH = PC;
+    static const unsigned int MACHINE = PC;
 
     enum {Legacy};
     static const unsigned int MODEL = Legacy;
@@ -84,21 +85,24 @@ template <> struct Traits<Serial_Display>: public Traits<void>
 __END_SYS
 
 #include __ARCH_TRAITS_H
-#include __HEADER_MACH(config)
+#include __MACH_CONFIG_H
 #include __MACH_TRAITS_H
 
 __BEGIN_SYS
 
 template <> struct Traits<Application>: public Traits<void>
 {
-    static const unsigned int STACK_SIZE = 16 * 1024;
+    // static const unsigned int STACK_SIZE = Traits<Machine>::STACK_SIZE;
+    // static const unsigned int HEAP_SIZE = Traits<Machine>::HEAP_SIZE;
+	static const unsigned int STACK_SIZE = 16 * 1024;
     static const unsigned int HEAP_SIZE = 16 * 1024 * 1024;
+    static const unsigned int MAX_THREADS = Traits<Machine>::MAX_THREADS;
 };
 
 template <> struct Traits<System>: public Traits<void>
 {
     static const unsigned int mode = Traits<Build>::MODE;
-    static const bool multithread = true;
+    static const bool multithread = (Traits<Application>::MAX_THREADS > 1);
     static const bool multitask = (mode != Traits<Build>::LIBRARY);
     static const bool multicore = (Traits<Build>::CPUS > 1) && multithread;
     static const bool multiheap = (mode != Traits<Build>::LIBRARY) || Traits<Scratchpad>::enabled;
@@ -108,10 +112,9 @@ template <> struct Traits<System>: public Traits<void>
 
     static const bool reboot = true;
 
-    static const unsigned int STACK_SIZE = 4 * 1024;
-    static const unsigned int HEAP_SIZE = 128 * Traits<Application>::STACK_SIZE;
+    static const unsigned int STACK_SIZE = Traits<Machine>::STACK_SIZE;
+    static const unsigned int HEAP_SIZE = (Traits<Application>::MAX_THREADS + 1) * Traits<Application>::STACK_SIZE;
 };
-
 
 // Abstractions
 template <> struct Traits<Task>: public Traits<void>
@@ -157,3 +160,4 @@ template <> struct Traits<Synchronizer>: public Traits<void>
 __END_SYS
 
 #endif
+

@@ -99,8 +99,8 @@ public:
         LAddr app_stack;
         LAddr app_heap;
         Size  app_data_size;
-        PAddr ext;
-        Size  ext_size;
+        PAddr app_extra;
+        Size  app_extra_size;
     };
 
     // Time Map (built by SETUP)

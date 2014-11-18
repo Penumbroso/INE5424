@@ -118,7 +118,7 @@ protected:
 
     static void lock() { CPU::int_disable(); }
     static void unlock() { CPU::int_enable(); }
-    static bool locked() { return CPU::int_enabled(); }
+    static bool locked() { return CPU::int_disabled(); }
 
     void suspend(bool locked);
 
