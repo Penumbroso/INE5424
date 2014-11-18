@@ -4,6 +4,7 @@
 #include <alarm.h>
 #include <thread.h>
 #include <task.h>
+#include <system/framework.h>
 
 using namespace EPOS;
 

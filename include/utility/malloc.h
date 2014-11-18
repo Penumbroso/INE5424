@@ -11,10 +11,10 @@ extern "C"
 {
     // Standard C Library allocators
     inline void * malloc(size_t bytes) {
-        if(EPOS::Traits<EPOS::System>::multiheap)
-            return EPOS::Application::_heap->alloc(bytes);
+        if(_SYS::Traits<_SYS::System>::multiheap)
+            return _SYS::Application::_heap->alloc(bytes);
         else
-            return EPOS::System::_heap->alloc(bytes);
+            return _SYS::System::_heap->alloc(bytes);
     }
 
     inline void * calloc(size_t n, unsigned int bytes) {
@@ -24,10 +24,10 @@ extern "C"
     }
 
     inline void free(void * ptr) {
-        if(EPOS::Traits<EPOS::System>::multiheap)
-            EPOS::Heap::typed_free(ptr);
+        if(_SYS::Traits<_SYS::System>::multiheap)
+            _SYS::Heap::typed_free(ptr);
         else
-            EPOS::Heap::untyped_free(EPOS::System::_heap, ptr);
+            _SYS::Heap::untyped_free(_SYS::System::_heap, ptr);
     }
 }
 
