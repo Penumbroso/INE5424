@@ -47,6 +47,7 @@ public:
  	PAddr ext_top;          // Boot Image EXTRA segment top address
         PAddr idt;              // IDT
         PAddr gdt;              // GDT
+        PAddr tss0;             // TSS0 (only for system call)
         PAddr sys_pt;           // System Page Table
         PAddr sys_pd;           // System Page Directory
         PAddr sys_info;         // System Info
