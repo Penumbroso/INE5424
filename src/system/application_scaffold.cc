@@ -4,6 +4,7 @@
 #include <application.h>
 #include <system/framework.h>
 
+extern "C" { void user_display_puts(const char * s); }
 extern "C" { void _exec(void * msg); }
 
 extern "C" {
@@ -16,11 +17,11 @@ extern "C" {
     }
 
     void _print(const char * s) {
-        _API::Display::puts(s);
+        user_display_puts(s);
     }
 
     int _syscall(void * m) {
-        _exec(m);
+        //_exec(m); /// TODO for P3
         return 0;
     }
 }
