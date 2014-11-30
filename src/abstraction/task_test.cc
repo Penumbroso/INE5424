@@ -4,6 +4,7 @@
 #include <alarm.h>
 #include <thread.h>
 #include <task.h>
+#include <system/framework.h>
 
 using namespace EPOS;
 
@@ -61,9 +62,9 @@ int main()
     as0->detach(ds1);
     cout << " done!" << endl;
 
-    Task * task1 = new (SYSTEM) Task(cs1, ds1);
-    a = new (SYSTEM) Thread(*task1, &func_a);
-    b = new (SYSTEM) Thread(&func_b);
+    Task * task1 = new Task(cs1, ds1);
+    a = new Thread(*task1, &func_a);
+    b = new Thread(&func_b);
 
     m->suspend();
 
@@ -77,7 +78,7 @@ int main()
     int status_a = a->join();
     int status_b = b->join();
 
-    cout << "Thread A exited with status " << status_a 
+    cout << "Thread A exited with status " << status_a
          << " and thread B exited with status " << status_b << "\n";
 
     delete a;
@@ -88,6 +89,7 @@ int main()
 
     return 0;
 }
+
 
 int func_a(void)
 {
@@ -100,7 +102,7 @@ int func_a(void)
 
     Thread::self()->suspend();
 
-    return 'A';   
+    return 'A';
 }
 
 int func_b(void)
@@ -116,5 +118,6 @@ int func_b(void)
 
     Thread::self()->suspend();
 
-    return 'B';   
+    return 'B';
 }
+

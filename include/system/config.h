@@ -12,10 +12,10 @@
 
 #define ASM                     __asm__ __volatile__
 
-#define __HEADER_ARCH(X)            <arch/ARCH/X.h>
-#define __HEADER_MACH(X)            <mach/MACH/X.h>
-#define __HEADER_APPLICATION_T(X)   <../app/X##_traits.h>
-#define __HEADER_APPLICATION(X)     __HEADER_APPLICATION_T(X)
+#define __HEADER_ARCH(X)        <arch/ARCH/X.h>
+#define __HEADER_MACH(X)        <mach/MACH/X.h>
+#define APPLICATION xxx
+#define __APPLICATION_TRAITS_H  __HEADER_APPLICATION(APPLICATION)
 
 //============================================================================
 // ARCHITECTURE, MACHINE, AND APPLICATION SELECTION
@@ -23,10 +23,8 @@
 //============================================================================
 #define ARCH xxx
 #define __ARCH_TRAITS_H	        __HEADER_ARCH(traits)
-
 #define MACH xxx
 #define __MACH_TRAITS_H	        __HEADER_MACH(traits)
-
 #define APPLICATION xxx
 #define __APPLICATION_TRAITS_H  __HEADER_APPLICATION(APPLICATION)
 

@@ -2,10 +2,26 @@
 
 include ../makedefs
 
+APP_PATH := $(APPLICATION)_aux
+ISDIR := $(shell test -d $(APP_PATH) && echo 0)
+
+ifeq ($(ISDIR), 0)
+SRC := $(shell find ./$(APP_PATH)/src/ -mindepth 1 -name "*.cc" -type f)
+OBJS := $(subst .cc,.do,$(SRC))
+else
+OBJS :=
+endif
+
 all: install
 
-$(APPLICATION):	$(APPLICATION).o $(LIB)/*
-		$(ALD) $(ALDFLAGS) -o $@ $(APPLICATION).o
+.SUFFIXES: .do .cc
+
+.cc.do :	$(SRC)
+		$(CXX) $(CXXFLAGS) -o $@ $< $(ENABLE_THREADS)
+
+
+$(APPLICATION):	$(APPLICATION).o $(LIB)/* $(OBJS)
+		$(ALD) $(ALDFLAGS) -o $@ $(APPLICATION).o $(OBJS)
 
 $(APPLICATION).o: $(APPLICATION).cc $(SRC)
 		$(ACC) $(ACCFLAGS) -o $@ $<
@@ -20,4 +36,4 @@ endif
 		$(CLEAN) $(APPLICATION).tmp
 
 clean:
-		$(CLEAN) *.o $(APPLICATION)
+		$(CLEAN) *.o $(APPLICATION) $(OBJS)

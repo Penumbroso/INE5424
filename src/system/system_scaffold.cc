@@ -5,7 +5,12 @@
 #include <machine.h>
 #include <display.h>
 #include <system.h>
+<<<<<<< HEAD
 #include <thread_kernel.h>
+=======
+#include <thread.h>
+#include <system/agent.h>
+>>>>>>> professor
 
 // LIBC Heritage
 extern "C" {
@@ -28,7 +33,7 @@ extern "C" {
 
 __BEGIN_SYS
 
-// This class purpose is simply to define a well-known entry point for 
+// This class purpose is simply to define a well-known entry point for
 // the system. It must be declared as the first global object in
 // system_scaffold.cc
 class First_Object

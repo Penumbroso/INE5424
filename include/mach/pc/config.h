@@ -3,8 +3,8 @@
 #ifndef __pc_config_h
 #define __pc_config_h
 
-#include <utility/meta.h>
-#include __APPLICATION_TRAITS_H
+#include <system/meta.h>
+#include __APPL_TRAITS_H
 
 #define __CPU_H         __HEADER_ARCH(cpu)
 #define __TSC_H         __HEADER_ARCH(tsc)
@@ -18,7 +18,6 @@
 #define __EEPROM_H      __HEADER_MACH(eeprom)
 #define __UART_H        __HEADER_MACH(uart)
 #define __DISPLAY_H     __HEADER_MACH(display)
-#define __NIC_H         __HEADER_MACH(nic)
 #define __SCRATCHPAD_H  __HEADER_MACH(scratchpad)
 
 __BEGIN_SYS
@@ -34,7 +33,7 @@ typedef PC_Timer        Timer;
 typedef PC_RTC          RTC;
 typedef PC_EEPROM       EEPROM;
 typedef PC_UART         UART;
-typedef conditional<Traits<Serial_Display>::enabled, Serial_Display, PC_Display>::type Display;
+typedef IF<Traits<Serial_Display>::enabled, Serial_Display, PC_Display>::Result Display;
 typedef PC_Scratchpad   Scratchpad;
 
 __END_SYS

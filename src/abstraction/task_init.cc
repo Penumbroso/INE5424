@@ -7,7 +7,8 @@
 
 __BEGIN_SYS
 
-void Task::init() {
+void Task::init()
+{
     db<Init, Task>(TRC) << "Task::init()" << endl;
 
     System_Info<Machine> * si = System::info();
