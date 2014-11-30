@@ -2,7 +2,7 @@
 
 #include <arch/ia32/cpu.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Class attributes
 unsigned int IA32::_cpu_clock;
@@ -50,4 +50,4 @@ void IA32::switch_context(Context * volatile * o, Context * volatile n)
         "	popfl				\n");
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

@@ -2,7 +2,7 @@
 
 #include <mach/pc/ic.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 void PC_IC::entry()
 {
@@ -788,4 +788,4 @@ void PC_IC::entry()
         : : "m"(id), "c"(dispatch));
 };
 
-__END_SYS
+} // namespace EPOS_Kernel

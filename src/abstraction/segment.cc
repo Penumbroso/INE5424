@@ -2,7 +2,7 @@
 
 #include <segment.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Methods
 Segment::Segment(unsigned int bytes, Flags flags): Chunk(bytes, flags)
@@ -51,4 +51,4 @@ int Segment::resize(int amount)
     return Chunk::resize(amount);
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

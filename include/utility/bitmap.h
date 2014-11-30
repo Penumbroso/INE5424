@@ -5,7 +5,7 @@
 
 #include "string.h"
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 template<unsigned int BITS>
 class Bitmap
@@ -58,6 +58,6 @@ private:
      unsigned int _map[SIZE];
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

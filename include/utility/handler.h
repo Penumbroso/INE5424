@@ -5,7 +5,7 @@
 
 #include <system/config.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class Handler
 {
@@ -48,6 +48,6 @@ private:
     T * _ptr;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

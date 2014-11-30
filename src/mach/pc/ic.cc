@@ -5,7 +5,7 @@
 
 extern "C" { void _exit(int s); }
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Class attributes
 APIC::Log_Addr APIC::_base;
@@ -132,4 +132,4 @@ void APIC::ipi_send(unsigned int cpu, unsigned int interrupt)
     while((read(ICR0_31) & ICR_PENDING));
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

@@ -5,7 +5,7 @@
 
 #include <uart.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class Display_Common
 {
@@ -132,7 +132,7 @@ private:
     static int _column;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #ifdef __DISPLAY_H
 #include __DISPLAY_H

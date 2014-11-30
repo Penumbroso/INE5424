@@ -5,7 +5,7 @@
 #ifndef __pc_scratchpad_h
 #define __pc_scratchpad_h
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class PC_Scratchpad: public Scratchpad_Common
 {
@@ -22,6 +22,6 @@ private:
     static void init();
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

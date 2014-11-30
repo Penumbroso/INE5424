@@ -5,7 +5,7 @@
 
 #include <thread_kernel.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class Active: public Thread
 {
@@ -21,6 +21,6 @@ private:
     static int entry(Active * runnable) { return runnable->run(); }
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

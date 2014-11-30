@@ -6,7 +6,7 @@
 #include <pci.h>
 #include "memory_map.h"
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class PC_PCI: public PCI_Common
 {
@@ -107,6 +107,6 @@ private:
     static Reg32 _base_address[Region::N];
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

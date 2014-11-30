@@ -5,7 +5,7 @@
 
 #include <tsc.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class Timer_Common
 {
@@ -19,7 +19,7 @@ public:
     typedef unsigned int Channel;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #ifdef __TIMER_H
 #include __TIMER_H

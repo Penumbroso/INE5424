@@ -3,7 +3,7 @@
 #include <utility/ostream_kernel.h>
 #include <application.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Global objects
 OStream cout;
@@ -13,4 +13,4 @@ OStream cerr;
 char Application::_preheap[];
 Heap * Application::_heap;
 
-__END_SYS
+} // namespace EPOS_Kernel

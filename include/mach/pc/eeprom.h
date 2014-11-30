@@ -6,7 +6,7 @@
 #include <eeprom.h>
 #include "rtc.h"
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class PC_EEPROM: public EEPROM_Common, private MC146818
 {
@@ -22,6 +22,6 @@ public:
     int size() const { return cmos_size(); }
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

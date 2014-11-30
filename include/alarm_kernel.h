@@ -10,7 +10,7 @@
 #include <timer.h>
 #include <semaphore_kernel.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class Alarm
 {
@@ -75,6 +75,6 @@ private:
     Microsecond _time;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

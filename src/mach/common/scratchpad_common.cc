@@ -4,9 +4,9 @@
 #include <segment.h>
 #include <scratchpad.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 Segment * Scratchpad_Common::_segment;
 Heap * Scratchpad_Common::_heap;
 
-__END_SYS
+} // namespace EPOS_Kernel

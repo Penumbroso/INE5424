@@ -5,7 +5,7 @@
 
 #include <system/config.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class TSC_Common
 {
@@ -17,7 +17,7 @@ public:
     typedef unsigned long long Time_Stamp;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #ifdef __TSC_H
 #include __TSC_H

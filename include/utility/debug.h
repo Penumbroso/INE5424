@@ -5,7 +5,7 @@
 
 #include <utility/ostream_kernel.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class Debug
 {
@@ -120,7 +120,7 @@ public:
     }
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif
 

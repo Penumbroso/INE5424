@@ -6,7 +6,7 @@
 #include <cpu.h>
 #include <tsc.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class IA32_TSC: private TSC_Common
 {
@@ -26,6 +26,6 @@ public:
     }
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

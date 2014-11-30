@@ -6,7 +6,7 @@
 #include <utility/handler.h>
 #include <synchronizer.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // This is actually no Condition Variable
 // check http://www.cs.duke.edu/courses/spring01/cps110/slides/sem/sld002.htm
@@ -35,7 +35,7 @@ private:
     Condition * _handler;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif
 

@@ -6,7 +6,7 @@
 #include <mmu.h>
 #include <segment.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class Address_Space: private MMU::Directory
 {
@@ -31,6 +31,6 @@ public:
     Phy_Addr physical(Log_Addr address);
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

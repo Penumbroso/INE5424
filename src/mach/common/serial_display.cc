@@ -2,11 +2,11 @@
 
 #include <display.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Class attributes
 UART Serial_Display::_uart;
 int Serial_Display::_line;
 int Serial_Display::_column;
 
-__END_SYS
+} // namespace EPOS_Kernel

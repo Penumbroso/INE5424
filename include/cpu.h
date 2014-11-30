@@ -5,7 +5,7 @@
 
 #include <system/config.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class CPU_Common
 {	
@@ -118,13 +118,13 @@ protected:
     }
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #ifdef __CPU_H
 #include __CPU_H
 #endif
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 template<typename T>
 inline T align32(const T & addr) { return (addr + 3) & ~3U; }
@@ -133,6 +133,6 @@ inline T align64(const T & addr) { return (addr + 7) & ~7U; }
 template<typename T>
 inline T align128(const T & addr) { return (addr + 15) & ~15U; }
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

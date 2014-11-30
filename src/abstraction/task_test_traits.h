@@ -3,7 +3,7 @@
 
 #include <system/config.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Global Configuration
 template <typename T>
@@ -81,13 +81,13 @@ template <> struct Traits<Serial_Display>: public Traits<void>
     static const int TAB_SIZE = 8;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #include __ARCH_TRAITS_H
 #include __HEADER_MACH(config)
 #include __MACH_TRAITS_H
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 template <> struct Traits<Application>: public Traits<void>
 {
@@ -154,6 +154,6 @@ template <> struct Traits<Synchronizer>: public Traits<void>
     static const bool enabled = Traits<System>::multithread;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

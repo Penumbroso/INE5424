@@ -40,7 +40,7 @@
 #include "list.h"
 #include "spin.h"
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Wrapper for non-atomic queues  
 template <typename T, bool atomic>
@@ -206,6 +206,6 @@ template <typename T,
           typename El = List_Elements::Doubly_Linked_Ordered<T, R> >
 class Relative_Queue: public Queue_Wrapper<Relative_List<T, R, El>, false> {};
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

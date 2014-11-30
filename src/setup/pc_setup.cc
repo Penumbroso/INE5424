@@ -35,7 +35,7 @@ extern "C" {
     }
 }
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // SETUP does not handle global constructors, so kout and kerr must be
 // manually initialized before use (at setup())
@@ -950,7 +950,7 @@ void PC_Setup::calibrate_timers()
     db<Setup>(INF) << "PC_Setup::calibrate_timers:BUS clock=" << si->tm.bus_clock / 1000000 << " MHz" << endl;
 }
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 using namespace EPOS_Kernel;
 

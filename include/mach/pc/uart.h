@@ -6,7 +6,7 @@
 #include <uart.h>
 #include <cpu.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // National Semiconductors NS16550AF (PC16550D) UART
 class NS16550AF
@@ -173,6 +173,6 @@ public:
     void loopback(bool flag) { NS16550AF::loopback(flag); }
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

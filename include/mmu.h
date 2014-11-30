@@ -5,7 +5,7 @@
 
 #include <cpu.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 template <unsigned int DIRECTORY_BITS, 
           unsigned int PAGE_BITS, 
@@ -81,7 +81,7 @@ public:
     static Log_Addr align_directory(const Log_Addr & addr) { return (addr + sizeof(Page) * sizeof(Page) - 1) &  ~(sizeof(Page) * sizeof(Page) - 1); }
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #ifdef __MMU_H
 #include __MMU_H

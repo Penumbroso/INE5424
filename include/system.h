@@ -6,7 +6,7 @@
 #include <utility/heap.h>
 #include <segment.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class System
 {
@@ -33,7 +33,7 @@ private:
     static Heap * _heap;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 inline void * operator new(size_t bytes, const EPOS_Kernel::System_Allocator & allocator) {
     return EPOS_Kernel::System::_heap->alloc(bytes);

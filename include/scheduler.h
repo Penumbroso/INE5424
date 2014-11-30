@@ -7,7 +7,7 @@
 #include <cpu.h>
 #include <machine.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // All scheduling criteria, or disciplines, must define operator int() with
 // the semantics of returning the desired order of a given object within the
@@ -164,6 +164,6 @@ public:
     }
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

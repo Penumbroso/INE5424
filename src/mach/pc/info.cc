@@ -3,7 +3,7 @@
 #include <utility/debug.h>
 #include <mach/pc/info.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 Debug & operator<<(Debug & db, const System_Info<PC> & si)
 {
@@ -92,4 +92,4 @@ Debug & operator<<(Debug & db, const System_Info<PC> & si)
     return db;
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

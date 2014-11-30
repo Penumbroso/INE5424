@@ -7,7 +7,7 @@
 
 extern "C" { void __epos_app_entry(); }
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 void Thread::init()
 {
@@ -50,4 +50,4 @@ void Thread::init()
     first->_context->load();
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

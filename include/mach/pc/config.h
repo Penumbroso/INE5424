@@ -21,7 +21,7 @@
 #define __NIC_H         __HEADER_MACH(nic)
 #define __SCRATCHPAD_H  __HEADER_MACH(scratchpad)
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 typedef IA32            CPU;
 typedef IA32_MMU        MMU;
@@ -37,6 +37,6 @@ typedef PC_UART         UART;
 typedef conditional<Traits<Serial_Display>::enabled, Serial_Display, PC_Display>::type Display;
 typedef PC_Scratchpad   Scratchpad;
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

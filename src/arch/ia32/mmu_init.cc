@@ -3,7 +3,7 @@
 #include <mmu.h>
 #include <system.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 void IA32_MMU::init()
 {
@@ -42,5 +42,5 @@ void IA32_MMU::init()
     db<Init, IA32_MMU>(INF) << "IA32_MMU::master page directory=" << _master << endl;
 }
 
-__END_SYS
+} // namespace EPOS_Kernel
 

@@ -6,7 +6,7 @@
 #include <segment.h>
 #include <scratchpad.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 void PC_Scratchpad::init()
 {
@@ -16,4 +16,4 @@ void PC_Scratchpad::init()
     _heap = new (SYSTEM) Heap(Address_Space(MMU::current()).attach(*_segment), _segment->size());
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

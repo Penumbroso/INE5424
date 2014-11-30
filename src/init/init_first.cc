@@ -4,7 +4,7 @@
 #include <mmu.h>
 #include <thread_kernel.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class Init_First
 {
@@ -25,4 +25,4 @@ public:
 // OS, for it activates the first application thread (usually main()) 
 Init_First init_first;
 
-__END_SYS
+} // namespace EPOS_Kernel

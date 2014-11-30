@@ -5,7 +5,7 @@
 
 #include <cpu.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class IA32: public CPU_Common
 {
@@ -611,6 +611,6 @@ inline CPU::Reg16 htons(CPU::Reg16 v) { return CPU::htons(v); }
 inline CPU::Reg32 ntohl(CPU::Reg32 v) { return CPU::ntohl(v); }
 inline CPU::Reg16 ntohs(CPU::Reg16 v) { return CPU::ntohs(v); }
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

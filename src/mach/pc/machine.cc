@@ -2,7 +2,7 @@
 
 #include <mach/pc/machine.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Class attributes
 volatile unsigned int PC::_n_cpus;
@@ -38,4 +38,4 @@ void PC::reboot()
         i8255::ms_delay(1);
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

@@ -4,7 +4,7 @@
 #include <alarm_kernel.h>
 #include <task_kernel.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 void System::init()
 {
@@ -15,4 +15,4 @@ void System::init()
         Task::init();
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

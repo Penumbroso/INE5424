@@ -7,7 +7,7 @@
 
 extern "C" { void _print(const char * s); }
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class OStream
 {
@@ -185,6 +185,6 @@ extern OStream::Oct oct;
 extern OStream::Bin bin;
 extern OStream kout, kerr;
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

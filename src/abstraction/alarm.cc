@@ -4,7 +4,7 @@
 #include <alarm_kernel.h>
 #include <display.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Class attributes
 Alarm_Timer * Alarm::_timer;
@@ -96,4 +96,4 @@ void Alarm::handler()
     }
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

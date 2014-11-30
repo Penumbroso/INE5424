@@ -3,7 +3,7 @@
 #include <timer.h>
 #include <ic.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 void PC_Timer::init()
 {
@@ -19,4 +19,4 @@ void PC_Timer::init()
     CPU::int_enable();
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

@@ -26,7 +26,7 @@ extern "C" {
     }
 }
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // This class purpose is simply to define a well-known entry point for 
 // the system. It must be declared as the first global object in
@@ -52,4 +52,4 @@ char System::_preheap[];
 Segment * System::_heap_segment;
 Heap * System::_heap;
 
-__END_SYS
+} // namespace EPOS_Kernel

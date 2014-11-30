@@ -6,7 +6,7 @@
 #include <system.h>
 #include <system/info.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 void IA32::init()
 {
@@ -22,4 +22,4 @@ void IA32::init()
         db<Init, MMU>(WRN) << "MMU is disabled!" << endl;
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

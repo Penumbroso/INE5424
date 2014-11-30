@@ -7,7 +7,7 @@
 #include <address_space.h>
 #include <segment.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class Init_Application
 {
@@ -33,4 +33,4 @@ public:
 // to the system) and there constructed at first.
 Init_Application init_application;
 
-__END_SYS
+} // namespace EPOS_Kernel

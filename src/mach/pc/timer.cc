@@ -4,7 +4,7 @@
 #include <ic.h>
 #include <mach/pc/timer.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Class attributes
 PC_Timer * PC_Timer::_channels[CHANNELS];
@@ -29,4 +29,4 @@ void PC_Timer::int_handler(const Interrupt_Id & i)
     }
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

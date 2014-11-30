@@ -2,7 +2,7 @@
 
 #include <mach/pc/pci.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Class attributes
 PC_PCI::Phy_Addr PC_PCI::_phy_io_mem;
@@ -95,4 +95,4 @@ PC_PCI::Locator PC_PCI::scan(const PC_PCI::Vendor_Id & v,
     return Locator(Locator::INVALID, Locator::INVALID);
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

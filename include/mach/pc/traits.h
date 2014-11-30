@@ -4,7 +4,7 @@
 
 #include <system/config.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class PC_Common;
 template <> struct Traits<PC_Common>: public Traits<void>
@@ -114,6 +114,6 @@ template <> struct Traits<PC_Scratchpad>: public Traits<PC_Common>
     static const unsigned int SIZE = Traits<PC_Display>::LINES * Traits<PC_Display>::COLUMNS;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

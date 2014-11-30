@@ -5,7 +5,7 @@
 #include <system.h>
 #include <task_kernel.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 void Task::init() {
     db<Init, Task>(TRC) << "Task::init()" << endl;
@@ -24,4 +24,4 @@ void Task::init() {
 
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

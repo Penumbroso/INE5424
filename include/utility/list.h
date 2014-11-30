@@ -5,7 +5,7 @@
 
 #include <system/config.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // List Element Rank (for ordered lists)
 class List_Element_Rank
@@ -1153,6 +1153,6 @@ private:
     unsigned int _grouped_size;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
  
 #endif

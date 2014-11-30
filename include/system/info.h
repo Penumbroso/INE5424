@@ -5,12 +5,12 @@
 
 #include <system/config.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 template <class Machine>
 struct System_Info {};
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #include __HEADER_MACH(info)
 

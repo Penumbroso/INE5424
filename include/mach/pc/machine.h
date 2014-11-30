@@ -13,7 +13,7 @@
 #include "memory_map.h"
 #include "ic.h"
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class PC: public Machine_Common
 {
@@ -69,7 +69,7 @@ private:
     static volatile unsigned int _n_cpus;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #include "pci.h"
 #include "timer.h"
