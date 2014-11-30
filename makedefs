@@ -67,7 +67,7 @@ armv7_COMP_PREFIX	:= /usr/local/arm/gcc-4.4.4/bin/arm-
 COMP_PREFIX		= $($(ARCH)_COMP_PREFIX)
 
 # Boot Memory Map
-MACH_TRAITS	= $(INCLUDE)/mach/$(MACH)/$(MMOD)_traits.h 
+MACH_TRAITS	= $(INCLUDE)/mach/$(MACH)/traits.h
 MEM_BASE	= $(call GETTK,MEM_BASE,$(MACH_TRAITS))
 MEM_TOP		= $(call GETTK,MEM_TOP,$(MACH_TRAITS))
 MEM_SIZE	= $(shell echo "(`printf "%d" $(MEM_TOP)` + 1 - `printf "%d" $(MEM_BASE)`) / 1024"|bc)
@@ -84,12 +84,12 @@ BOOT_LENGTH_MAX = $(call GETTK,BOOT_LENGTH_MAX,$(MACH_TRAITS))
 #Machine specifics
 pc_CC_FLAGS             := -Wa,--32
 pc_AS_FLAGS             := --32
-pc_LD_FLAGS             := 
+pc_LD_FLAGS             :=
 pc_EMULATOR             = qemu-system-i386 -smp $(CPUS) -m $(MEM_SIZE)k -nographic -no-reboot -fda
 
 cortex_m_CC_FLAGS       := -mcpu=cortex-m3 -mthumb -mno-thumb-interwork -mfpu=fpa #-Wa,-mimplicit-it=arm -marm 
 cortex_m_AS_FLAGS       := -mcpu=cortex-m3 -mthumb -mfpu=fpa
-cortex_m_LD_FLAGS       := 
+cortex_m_LD_FLAGS       :=
 cortex_m_EMULATOR       = qemu-system-arm -cpu cortex-m3 -machine lm3s811evb -m $(MEM_SIZE)k -nographic -no-reboot -kernel
 
 $(MACH)_CODE_NAME       := .init
