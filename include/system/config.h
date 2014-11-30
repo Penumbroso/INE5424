@@ -14,18 +14,18 @@
 
 #define __HEADER_ARCH(X)        <arch/ARCH/X.h>
 #define __HEADER_MACH(X)        <mach/MACH/X.h>
-#define APPLICATION xxx
-#define __APPLICATION_TRAITS_H  __HEADER_APPLICATION(APPLICATION)
+#define __HEADER_APPLICATION_T(X) <../app/X##_traits.h>
+#define __HEADER_APPLICATION(X) __HEADER_APPLICATION_T(X)
 
 //============================================================================
 // ARCHITECTURE, MACHINE, AND APPLICATION SELECTION
 // This section is generated automatically from makedefs
 //============================================================================
-#define ARCH xxx
+#define ARCH ia32
 #define __ARCH_TRAITS_H	        __HEADER_ARCH(traits)
-#define MACH xxx
+#define MACH pc
 #define __MACH_TRAITS_H	        __HEADER_MACH(traits)
-#define APPLICATION xxx
+#define APPLICATION fork
 #define __APPLICATION_TRAITS_H  __HEADER_APPLICATION(APPLICATION)
 
 //============================================================================
