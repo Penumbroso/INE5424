@@ -7,7 +7,7 @@
 #include <address_space.h>
 #include <segment.h>
 
-extern "C" { void * _end; } // defined by GCC
+extern "C" void * _end; // defined by GCC
 
 __BEGIN_SYS
 
