@@ -11,6 +11,7 @@ struct Traits
 {
     static const bool enabled = true;
     static const bool debugged = true;
+    static const bool hysterically_debugged = false;
 };
 
 template <> struct Traits<Build>
@@ -37,20 +38,21 @@ template <> struct Traits<Debug>
 
 template <> struct Traits<Lists>: public Traits<void>
 {
-    static const bool debugged = false;
+    static const bool debugged = histerically_debugged;
 };
 
 template <> struct Traits<Spin>: public Traits<void>
 {
-    static const bool debugged = false;
+    static const bool debugged = histerically_debugged;
 };
 
 template <> struct Traits<Heap>: public Traits<void>
 {
+    static const bool debugged = histerically_debugged;
 };
 
 
-// System Parts (mostly to fine control debbugin)
+// System Parts (mostly to fine control debbuging)
 template <> struct Traits<Boot>: public Traits<void>
 {
 };

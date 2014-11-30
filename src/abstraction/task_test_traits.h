@@ -26,9 +26,6 @@ template <> struct Traits<Build>
     enum {PC};
     static const unsigned int MACHINE = PC;
 
-    enum {Legacy};
-    static const unsigned int MODEL = Legacy;
-
     static const unsigned int CPUS = 1;
     static const unsigned int NODES = 1; // > 1 => NETWORKING
 };
@@ -85,7 +82,7 @@ template <> struct Traits<Serial_Display>: public Traits<void>
 __END_SYS
 
 #include __ARCH_TRAITS_H
-#include __MACH_CONFIG_H
+#include __HEADER_MACH(config)
 #include __MACH_TRAITS_H
 
 __BEGIN_SYS
@@ -94,7 +91,7 @@ template <> struct Traits<Application>: public Traits<void>
 {
     // static const unsigned int STACK_SIZE = Traits<Machine>::STACK_SIZE;
     // static const unsigned int HEAP_SIZE = Traits<Machine>::HEAP_SIZE;
-	static const unsigned int STACK_SIZE = 16 * 1024;
+    static const unsigned int STACK_SIZE = 16 * 1024;
     static const unsigned int HEAP_SIZE = 16 * 1024 * 1024;
     static const unsigned int MAX_THREADS = Traits<Machine>::MAX_THREADS;
 };
@@ -160,4 +157,3 @@ template <> struct Traits<Synchronizer>: public Traits<void>
 __END_SYS
 
 #endif
-

@@ -5,12 +5,7 @@
 #include <machine.h>
 #include <display.h>
 #include <system.h>
-<<<<<<< HEAD
 #include <thread_kernel.h>
-=======
-#include <thread.h>
-#include <system/agent.h>
->>>>>>> professor
 
 // LIBC Heritage
 extern "C" {

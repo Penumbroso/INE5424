@@ -48,7 +48,6 @@ TRAITS		= $(APP)/$(APPLICATION)_traits.h
 MODE		= $(call TOLOWER,$(call GETTK,MODE,$(TRAITS)))
 ARCH		= $(call TOLOWER,$(call GETTK,ARCHITECTURE,$(TRAITS)))
 MACH            = $(call TOLOWER,$(call GETTK,MACHINE,$(TRAITS)))
-MMOD            = $(call TOLOWER,$(call GETTK,MODEL,$(TRAITS)))
 CPUS		= $(call GETTK,CPUS,$(TRAITS))
 NODES		= $(call GETTK,NODES,$(TRAITS))
 LIBARCH		= $(LIB)/lib$(LARCHNAME)_$(ARCH).a

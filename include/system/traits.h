@@ -25,8 +25,6 @@ template <> struct Traits<Build>
     enum {PC};
     static const unsigned int MACHINE = PC;
 
-    enum {Legacy};
-    static const unsigned int MODEL = Legacy;
 
     static const unsigned int CPUS = 1;
     static const unsigned int NODES = 1; // > 1 => NETWORKING
@@ -84,7 +82,7 @@ template <> struct Traits<Serial_Display>: public Traits<void>
 __END_SYS
 
 #include __ARCH_TRAITS_H
-#include __MACH_CONFIG_H
+#include __HEADER_MACH(config)
 #include __MACH_TRAITS_H
 
 __BEGIN_SYS
