@@ -12,7 +12,7 @@
 
 // LIBC Heritage
 extern "C" {
-    using namespace EPOS::S;
+    __USING_SYS;
 
     void _start() __attribute__ ((section (".init")));
 
@@ -35,13 +35,16 @@ extern "C" {
     }
 }
 
+__BEGIN_UTIL
+OStream::Endl endl;
+OStream::Begl begl;
+__END_UTIL
+
 __BEGIN_SYS
 
 // SETUP does not handle global constructors, so kout and kerr must be
 // manually initialized before use (at setup())
 OStream kout, kerr;
-OStream::Endl endl;
-OStream::Begl begl;
 
 // "_start" Synchronization Globals
 volatile char * Stacks;
@@ -56,7 +59,7 @@ volatile bool Paging_Ready = false;
 // PC_Setup is responsible for bringing the machine into a usable state. It
 // sets up several IA32 data structures (IDT, GDT, etc), builds a basic
 // memory model (flat) and a basic thread model (exclusive task/exclusive
-// thread).
+// thread). 
 //------------------------------------------------------------------------
 class PC_Setup
 {
@@ -71,6 +74,7 @@ private:
     // Logical memory map
     static const unsigned int IDT = Memory_Map<PC>::IDT;
     static const unsigned int GDT = Memory_Map<PC>::GDT;
+    static const unsigned int TSS0 = Memory_Map<PC>::TSS0;
     static const unsigned int PHY_MEM = Memory_Map<PC>::PHY_MEM;
     static const unsigned int SYS_PT = Memory_Map<PC>::SYS_PT;
     static const unsigned int SYS_PD = Memory_Map<PC>::SYS_PD;
@@ -112,6 +116,7 @@ private:
     void setup_sys_pt();
     void setup_sys_pd();
     void enable_paging();
+    void setup_tss0();
 
     void load_parts();
     void call_next();
@@ -171,7 +176,7 @@ PC_Setup::PC_Setup(char * boot_image)
         setup_sys_pt();
         setup_sys_pd();
 
-        // Enable paging
+        // Enable paging 
         // We won't be able to print anything before the remap() bellow
         db<Setup>(INF) << "IP=" << CPU::ip() << endl;
         db<Setup>(INF) << "SP=" << reinterpret_cast<void *>(CPU::sp()) << endl;
@@ -186,6 +191,9 @@ PC_Setup::PC_Setup(char * boot_image)
         PC_Display::remap(Memory_Map<PC>::VGA); // Display can be Serial_Display, so PC_Display here!
  	APIC::remap(Memory_Map<PC>::APIC);
 
+        // Configure a TSS for system calls and inter-level interrupt handling
+ 	setup_tss0();
+
         // Load EPOS parts (e.g. INIT, SYSTEM, APP)
         load_parts();
 
@@ -197,7 +205,7 @@ PC_Setup::PC_Setup(char * boot_image)
         // Wait for the Boot CPU to setup page tables
         while(!Paging_Ready);
 
-        // Enable paging
+        // Enable paging 
         enable_paging();
     }
 
@@ -370,7 +378,7 @@ void PC_Setup::build_lm()
         }
     }
 
-    // Check for EXTRA data in the boot image
+    // Check for EXTRA data in the boot image		
     if(si->lm.has_ext) {
         si->lm.app_extra = Phy_Addr(&bi[si->bm.extras_offset]);
         si->lm.app_extra_size = si->bm.img_size - si->bm.extras_offset;
@@ -397,7 +405,7 @@ void PC_Setup::build_pmm()
     // System Page Table (1 x sizeof(Page))
     top_page -= 1;
     si->pmm.sys_pt = top_page * sizeof(Page);
-
+    
     // System Page Directory (1 x sizeof(Page))
     top_page -= 1;
     si->pmm.sys_pd = top_page * sizeof(Page);
@@ -405,6 +413,10 @@ void PC_Setup::build_pmm()
     // System Info (1 x sizeof(Page))
     top_page -= 1;
     si->pmm.sys_info = top_page * sizeof(Page);
+
+    // TSS0 (1 x sizeof(Page))
+    top_page -= 1;
+    si->pmm.tss0 = top_page * sizeof(Page);
 
     // Page tables to map the whole physical memory
     // = NP/NPTE_PT * sizeof(Page)
@@ -457,7 +469,7 @@ void PC_Setup::build_pmm()
     } else {
         si->pmm.ext_base = 0;
         si->pmm.ext_top = 0;
-    }
+    }	
 }
 
 //========================================================================
@@ -526,7 +538,7 @@ void PC_Setup::say_hi()
 }
 
 //========================================================================
-void PC_Setup::enable_paging()
+void PC_Setup::enable_paging() 
 {
     // Set IDTR (limit = 1 x sizeof(Page))
     CPU::idtr(sizeof(Page) - 1, IDT);
@@ -604,12 +616,14 @@ void PC_Setup::setup_gdt()
     gdt[CPU::GDT_FLT_DATA]  = GDT_Entry(0,  0xfffff, CPU::SEG_FLT_DATA);
     gdt[CPU::GDT_APP_CODE]  = GDT_Entry(0,  0xfffff, CPU::SEG_APP_CODE);
     gdt[CPU::GDT_APP_DATA]  = GDT_Entry(0,  0xfffff, CPU::SEG_APP_DATA);
+    gdt[CPU::GDT_TSS0]      = GDT_Entry(TSS0, 0xfff, CPU::SEG_TSS0);
 
     db<Setup>(INF) << "GDT[NULL=" << CPU::GDT_NULL     << "]=" << gdt[CPU::GDT_NULL] << endl;
     db<Setup>(INF) << "GDT[SYCD=" << CPU::GDT_SYS_CODE << "]=" << gdt[CPU::GDT_SYS_CODE] << endl;
     db<Setup>(INF) << "GDT[SYDT=" << CPU::GDT_SYS_DATA << "]=" << gdt[CPU::GDT_SYS_DATA] << endl;
     db<Setup>(INF) << "GDT[APCD=" << CPU::GDT_APP_CODE << "]=" << gdt[CPU::GDT_APP_CODE] << endl;
     db<Setup>(INF) << "GDT[APDT=" << CPU::GDT_APP_DATA << "]=" << gdt[CPU::GDT_APP_DATA] << endl;
+    db<Setup>(INF) << "GDT[TSS0=" << CPU::GDT_TSS0     << "]=" << gdt[CPU::GDT_TSS0] << endl;
 }
 
 //========================================================================
@@ -620,6 +634,7 @@ void PC_Setup::setup_sys_pt()
         	   << ",pt="   << (void *)si->pmm.sys_pt
         	   << ",pd="   << (void *)si->pmm.sys_pd
         	   << ",info=" << (void *)si->pmm.sys_info
+        	   << ",tss0=" << Phy_Addr(si->pmm.tss0) 
         	   << ",mem="  << (void *)si->pmm.phy_mem_pts
         	   << ",io="   << (void *)si->pmm.io_pts
         	   << ",sysc=" << (void *)si->pmm.sys_code
@@ -648,6 +663,9 @@ void PC_Setup::setup_sys_pt()
 
     // GDT
     sys_pt[MMU::page(GDT)] = si->pmm.gdt | Flags::SYS;
+
+    // TSS0
+    sys_pt[MMU::page(TSS0)] = si->pmm.tss0 | Flags::SYS;
 
     // Set an entry to this page table, so the system can access it later
     sys_pt[MMU::page(SYS_PT)] = si->pmm.sys_pt | Flags::SYS;
@@ -739,6 +757,35 @@ void PC_Setup::setup_sys_pd()
     sys_pd[MMU::directory(SYS_CODE)] = si->pmm.sys_pt | Flags::SYS;
 
     db<Setup>(INF) << "SPD=" << *reinterpret_cast<Page_Table *>(sys_pd) << endl;
+}
+
+//========================================================================
+void PC_Setup::setup_tss0()
+{
+    db<Setup>(TRC) << "setup_tss0(tss0=" << Log_Addr(TSS0) << ")" << endl;
+
+    // Get TSS0's logical address (after enabling paging)
+    TSS * tss0 = reinterpret_cast<TSS *>(TSS0);
+
+    // Clear TSS0
+    memset(tss0, 0, sizeof(Page));
+
+    // Configure only the segment selectors and the kernel stack on the bootstrap CPU
+    tss0->ss0 = CPU::SEL_SYS_DATA;
+    tss0->esp0 = SYS_STACK + Traits<System>::STACK_SIZE;
+    tss0->cs        = (CPU::GDT_SYS_CODE << 3)  | CPU::PL_APP;
+    tss0->ss        = (CPU::GDT_SYS_DATA << 3)  | CPU::PL_APP;
+    tss0->ds        = tss0->ss;
+    tss0->es        = tss0->ss;
+    tss0->fs        = tss0->ss;
+    tss0->gs        = tss0->ss;
+
+    // Load TR with TSS0
+    CPU::Reg16 tr = CPU::SEL_TSS0;
+    CPU::tr(tr);
+    tr = CPU::tr();
+
+    db<Setup>(INF) << "TR=" << tr << ",TSS0={ss0=" << tss0->ss0 << ",esp0=" << Log_Addr(tss0->esp0) << "}" << endl;
 }
 
 //========================================================================
@@ -959,10 +1006,10 @@ extern "C" { void _start(); }
 extern "C" { void setup(char * bi); }
 
 //========================================================================
-// _start
+// _start		  
 //
-// "_start" MUST BE PC_SETUP's first function, since PC_BOOT assumes
-// offset "0" to be the entry point. It is a kind of bridge between the
+// "_start" MUST BE PC_SETUP's first function, since PC_BOOT assumes 
+// offset "0" to be the entry point. It is a kind of bridge between the 
 // assembly world of PC_BOOT and the C++ world of PC_SETUP. It's main
 // tasks are:
 //
@@ -1005,7 +1052,7 @@ void _start()
 
         // Broadcast INIT IPI to all APs excluding self
         APIC::ipi_init(si->bm.cpu_status);
-
+        
         // Broadcast STARTUP IPI to all APs excluding self
         // Non-boot CPUs will run a simplified boot strap just to
         // trampoline them into protected mode
@@ -1030,7 +1077,7 @@ void _start()
 
         // Load SETUP considering the address in the ELF header
         // Be careful: by reloading SETUP, global variables have been reset to
-        // the values stored in the ELF data segment
+        // the values stored in the ELF data segment 
         // Also check if this wouldn't destroy the boot image
         char * addr = reinterpret_cast<char *>(elf->segment_address(0));
         int size = elf->segment_size(0);
@@ -1050,7 +1097,7 @@ void _start()
         // Passes a pointer to the just allocated stack pool to other CPUs
         Stacks = dst;
         Stacks_Ready = true;
-
+        
     } else { // Additional CPUs (APs)
 
         // Inform BSP that this AP has been initialized
@@ -1086,14 +1133,14 @@ void _start()
 
     // Pass the boot image to SETUP
     ASM("pushl %0" : : "r" (Stacks));
-
+    
     // Call setup()
     // the assembly is necessary because the compiler generates
     // relative calls and we need an absolute one
     ASM("call *%0" : : "r" (&setup));
 }
 
-void setup(char * bi)
+void setup(char * bi) 
 {
     if(!Traits<System>::multicore || (APIC::id() == 0)) {
         kerr  << endl;
