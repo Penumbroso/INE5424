@@ -1,6 +1,10 @@
 // EPOS IA32 CPU Mediator Implementation
 
 #include <arch/ia32/cpu.h>
+#include <system.h>
+#include <ic.h>
+
+extern "C" { void _exec(void *); }
 
 __BEGIN_SYS
 
@@ -31,10 +35,35 @@ void IA32::Context::save() volatile
 
 void IA32::Context::load() const volatile
 {
-    // POPA ignores the ESP saved by PUSHA. ESP is just normally incremented. 
-    ASM("	movl    4(%esp), %esp	# sp = this			\n"
-        "	popal							\n"
- 	"	popfl							\n");
+    if(Traits<System>::mode == Traits<Build>::KERNEL) {
+        // Discards the context pushed into the stack during thread creation but the entry point (eip)
+        ASM("       movl    4(%esp), %esp       # sp = this             \n"
+            "       popal                       # pop context           \n"
+            "       popfl                                               \n");
+
+        // Reload Segment Registers with user-level selectors
+        ASM("       mov     %0, %%ds                                    \n"
+            "       mov     %0, %%es                                    \n"
+            "       mov     %0, %%fs                                    \n"
+            "       mov     %0, %%gs                                    \n"
+            : : "r"(SEL_APP_DATA));
+
+        // Restore the thread's entry point left on the stack while initializing its context
+        ASM("       popl    %esi                # si = this->_eip       \n");
+
+        // Fake a cross-level stack for a return from kernel to user-level: ss, esp, eflags, cs, eip
+        ASM("       pushl   %0                                          \n"
+            "       pushl   %2                                          \n"
+            "       pushf                                               \n"
+            "       pushl   %1                                          \n"
+            "       push    %%esi                                       \n"
+            "       iret                                                \n"
+            : : "r"(SEL_APP_DATA), "r"(SEL_APP_CODE), "r"(System::info()->lm.app_heap));
+    } else
+        // POPA ignores the ESP saved by PUSHA. ESP is just normally incremented
+        ASM("	    movl    4(%esp), %esp	# sp = this     	\n"
+            "       popal				        	\n"
+            "	    popfl					        \n");
 }
 
 void IA32::switch_context(Context * volatile * o, Context * volatile n)
@@ -48,6 +77,22 @@ void IA32::switch_context(Context * volatile * o, Context * volatile n)
         "	movl    44(%esp), %esp	# new	\n"
         "	popal				\n"
         "	popfl				\n");
+}
+
+int IA32::syscall(void * m)
+{
+    int ret;
+    ASM("int %1" : "=a"(ret) : "i"(IC::INT_SYSCALL), "a"(m));
+    return ret;
+}
+
+void IA32::syscall_entry()
+{
+    // Do the system call by calling _exec with the message pointed by AX
+    ASM("       pushl   %eax                                            \n"
+        "       call    _exec                                           \n"
+        "       popl    %eax                                            \n"
+        "       iret                                                    \n");
 }
 
 __END_SYS
