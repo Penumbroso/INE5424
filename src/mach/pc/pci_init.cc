@@ -3,7 +3,7 @@
 #include <pci.h>
 #include <system.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 void PC_PCI::init()
 {
@@ -24,4 +24,4 @@ void PC_PCI::init()
     CPU::int_enable();
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

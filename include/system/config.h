@@ -6,10 +6,6 @@
 //============================================================================
 // DEFINITIONS
 //============================================================================
-#define __BEGIN_SYS             namespace EPOS_Kernel {
-#define __END_SYS               }
-#define _SYS                    ::EPOS_Kernel
-
 #define ASM                     __asm__ __volatile__
 
 #define __HEADER_ARCH(X)        <arch/ARCH/X.h>

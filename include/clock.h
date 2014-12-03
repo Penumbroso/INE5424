@@ -5,7 +5,7 @@
 
 #include <rtc.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class Clock
 {
@@ -25,6 +25,6 @@ public:
     void date(const Date & d) { return RTC::date(d); }
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

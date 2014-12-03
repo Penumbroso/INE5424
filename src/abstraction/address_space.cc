@@ -4,7 +4,7 @@
 #include <task_kernel.h>
 #include <address_space.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Methods
 Address_Space::Address_Space(MMU::Page_Directory * pd) : MMU::Directory(pd)
@@ -52,4 +52,4 @@ Address_Space::Phy_Addr Address_Space::physical(Address_Space::Log_Addr address)
     return Directory::physical(address);
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

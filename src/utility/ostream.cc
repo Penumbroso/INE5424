@@ -2,7 +2,7 @@
 
 #include <utility/ostream_kernel.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 const char OStream::_digits[] = "0123456789abcdef";
 
@@ -94,4 +94,4 @@ int OStream::ptoa(const void * p, char * s)
     return j + 2;
 }    
 
-__END_SYS
+} // namespace EPOS_Kernel

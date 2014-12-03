@@ -5,7 +5,7 @@
 
 #include <system/config.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class UART_Common
 {
@@ -21,7 +21,7 @@ public:
     };
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #ifdef __UART_H
 #include __UART_H

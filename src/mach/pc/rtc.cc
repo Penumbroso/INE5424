@@ -2,7 +2,7 @@
 
 #include <mach/pc/rtc.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 PC_RTC::Date PC_RTC::date()
 {
@@ -35,4 +35,4 @@ void PC_RTC::date(const Date & d)
     reg(SECONDS, d.second());
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

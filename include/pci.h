@@ -5,7 +5,7 @@
 
 #include <cpu.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class PCI_Common
 {
@@ -249,7 +249,7 @@ public:
     };
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #ifdef __PCI_H
 #include __PCI_H

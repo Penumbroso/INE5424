@@ -3,7 +3,7 @@
 #include <system.h>
 #include <alarm_kernel.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 void Alarm::init()
 {
@@ -12,4 +12,4 @@ void Alarm::init()
     _timer = new (SYSTEM) Alarm_Timer(handler);
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

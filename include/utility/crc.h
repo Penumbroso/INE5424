@@ -5,7 +5,7 @@
 
 #include <system/config.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class CRC
 {
@@ -31,7 +31,7 @@ public:
 };
 
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 
 #endif

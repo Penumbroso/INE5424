@@ -5,7 +5,7 @@
 
 #include <system/config.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 namespace Math {
 
@@ -64,6 +64,6 @@ float fast_log(const float &val)
 };
 
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

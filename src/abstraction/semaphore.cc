@@ -2,7 +2,7 @@
 
 #include <semaphore_kernel.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 Semaphore::Semaphore(int v): _value(v)
 {
@@ -39,4 +39,4 @@ void Semaphore::v()
         end_atomic();
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

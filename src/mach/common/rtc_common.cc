@@ -2,7 +2,7 @@
 
 #include <rtc.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 RTC_Common::Date::Date(const Second & seconds, unsigned long epoch_days)
 {
@@ -44,4 +44,4 @@ RTC_Common::Second RTC_Common::Date::to_offset(unsigned long epoch_days) const
 }
 
 
-__END_SYS
+} // namespace EPOS_Kernel

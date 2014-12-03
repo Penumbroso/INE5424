@@ -10,7 +10,7 @@
 #include <cpu.h>
 #include <mmu.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class IA32_MMU: public MMU_Common<10, 10, 12>
 {
@@ -370,6 +370,6 @@ private:
     static Page_Directory * _master;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

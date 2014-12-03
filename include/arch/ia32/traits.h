@@ -4,7 +4,7 @@
 
 #include <system/config.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 template <> struct Traits<IA32>: public Traits<void>
 {
@@ -23,6 +23,6 @@ template <> struct Traits<IA32_MMU>: public Traits<void>
 {
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

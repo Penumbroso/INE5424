@@ -6,7 +6,7 @@
 #include <system/config.h>
 #include "elf-linux.h"
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class ELF: private Elf32_Ehdr
 {
@@ -47,7 +47,7 @@ private:
     Elf32_Phdr * seg(int i) { return &pht()[i];  }
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
  
 #endif
 

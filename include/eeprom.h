@@ -5,7 +5,7 @@
 
 #include <system/config.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class EEPROM_Common
 {
@@ -16,7 +16,7 @@ public:
     typedef unsigned int Address;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #ifdef __EEPROM_H
 #include __EEPROM_H

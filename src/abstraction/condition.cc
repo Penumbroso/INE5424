@@ -5,7 +5,7 @@
 // This is actually no Condition Variable
 // check http://www.cs.duke.edu/courses/spring01/cps110/slides/sem/sld002.htm
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Methods
 
@@ -134,4 +134,4 @@ void Condition::broadcast() {
 //     volatile int _time_stamp;
 // };
 
-__END_SYS
+} // namespace EPOS_Kernel

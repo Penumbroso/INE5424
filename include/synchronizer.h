@@ -6,7 +6,7 @@
 #include <cpu.h>
 #include <thread_kernel.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class Synchronizer_Common
 {
@@ -34,6 +34,6 @@ private:
     Queue _queue;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

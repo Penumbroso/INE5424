@@ -7,7 +7,7 @@
 #include "list.h"
 #include "vector.h"
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Hash Table with a single Synonym List
 // In order to change the hash function, simply redefine the operator % for
@@ -198,6 +198,6 @@ private:
     List _table[SIZE];
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
  
 #endif

@@ -1,7 +1,7 @@
 #include <utility/random.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 unsigned long int Random::_seed;
 
-__END_SYS
+} // namespace EPOS_Kernel

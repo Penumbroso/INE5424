@@ -10,7 +10,7 @@
 
 #include <system/config.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class Random
 {
@@ -35,6 +35,6 @@ private:
     static unsigned long _seed;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

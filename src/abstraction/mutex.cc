@@ -2,7 +2,7 @@
 
 #include <mutex_kernel.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 Mutex::Mutex(): _locked(false)
 {
@@ -37,4 +37,4 @@ void Mutex::unlock()
     wakeup(); // implicit end_atomic()
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

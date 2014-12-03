@@ -4,7 +4,7 @@
 
 extern "C" { void _panic(); }
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Methods
 void Heap::out_of_memory()
@@ -14,4 +14,4 @@ void Heap::out_of_memory()
     _panic();
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

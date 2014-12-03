@@ -5,7 +5,7 @@
 
 #include <system/info.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 template<>
 struct System_Info<PC>
@@ -121,6 +121,6 @@ public:
     Time_Map tm;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

@@ -5,7 +5,7 @@
 
 #include <system/memory_map.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 template <>
 struct Memory_Map<PC>
@@ -43,6 +43,6 @@ struct Memory_Map<PC>
     };
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

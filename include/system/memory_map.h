@@ -5,7 +5,7 @@
 
 #include <system/config.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 template <class Machine>
 struct Memory_Map {};
@@ -13,7 +13,7 @@ struct Memory_Map {};
 template <class Machine>
 struct IO_Map {};
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #include __HEADER_MACH(memory_map)
 

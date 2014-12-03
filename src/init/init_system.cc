@@ -6,7 +6,7 @@
 #include <address_space.h>
 #include <segment.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class Init_System
 {
@@ -60,4 +60,4 @@ public:
 // Global object "init_system" must be constructed first.
 Init_System init_system;
 
-__END_SYS
+} // namespace EPOS_Kernel

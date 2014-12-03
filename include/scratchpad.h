@@ -6,7 +6,7 @@
 #include <utility/heap.h>
 #include <segment.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class Scratchpad_Common
 {
@@ -21,7 +21,7 @@ protected:
     static Heap * _heap;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #ifdef __SCRATCHPAD_H
 #include __SCRATCHPAD_H

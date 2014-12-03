@@ -6,7 +6,7 @@
 #include <tsc.h>
 #include <rtc.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class Chronometer
 {
@@ -44,6 +44,6 @@ private:
     Time_Stamp _stop;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

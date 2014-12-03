@@ -2,7 +2,7 @@
 
 #include <machine.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 void PC::init()
 {
@@ -21,4 +21,4 @@ void PC::init()
         PC_Scratchpad::init();
 }
 
-__END_SYS
+} // namespace EPOS_Kernel

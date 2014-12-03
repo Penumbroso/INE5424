@@ -5,7 +5,7 @@
 
 #include "list.h"
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Vector
 template <typename T, unsigned int SIZE, 
@@ -77,6 +77,6 @@ private:
     Element * _vector[SIZE];
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
  
 #endif

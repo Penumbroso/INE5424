@@ -3,7 +3,7 @@
 #include <utility/ostream_kernel.h>
 #include <application.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Global objects
 OStream cout;
@@ -14,4 +14,4 @@ System_Info<Machine> * System::_si = reinterpret_cast<System_Info<Machine> *>(Me
 char Application::_preheap[];
 Heap * Application::_heap;
 
-__END_SYS
+} // namespace EPOS_Kernel

@@ -7,7 +7,7 @@
 #include <utility/list.h>
 #include <utility/spin.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Heap
 class Heap: private Grouping_List<char>
@@ -91,6 +91,6 @@ private:
     void out_of_memory();
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

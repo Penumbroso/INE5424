@@ -6,7 +6,7 @@
 #include <system/config.h>
 #include <utility/debug.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class RTC_Common
 {
@@ -73,7 +73,7 @@ public:
     };
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #ifdef __RTC_H
 #include __RTC_H

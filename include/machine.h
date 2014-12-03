@@ -5,7 +5,7 @@
 
 #include <system/config.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class Machine_Common
 {
@@ -13,7 +13,7 @@ protected:
     Machine_Common() {}
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #ifdef __MACH_H
 #include __MACH_H

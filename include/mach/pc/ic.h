@@ -7,7 +7,7 @@
 #include <ic.h>
 #include <mach/pc/memory_map.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Intel 8259A Interrupt Controller (master and slave are seen as a unit)
 class i8259A
@@ -521,6 +521,6 @@ private:
     static Interrupt_Handler _int_vector[INTS];
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

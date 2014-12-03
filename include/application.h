@@ -12,7 +12,7 @@ extern "C"
     void free(void *);
 }
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class Application
 {
@@ -28,7 +28,7 @@ private:
     static Heap * _heap;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #include <utility/malloc.h>
 

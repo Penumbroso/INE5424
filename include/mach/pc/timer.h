@@ -9,7 +9,7 @@
 #include <timer.h>
 #include <machine.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Intel 8253 (i82C54) Timer (tree counters, only counter 0 available to OS)
 class i8253
@@ -355,6 +355,6 @@ public:
     User_Timer(const Microsecond & quantum, const Handler & handler): PC_Timer(1000000 / quantum, handler, USER, true) {}
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

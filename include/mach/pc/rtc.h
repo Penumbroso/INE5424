@@ -6,7 +6,7 @@
 #include <cpu.h>
 #include <rtc.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Motorola MC146818 RTC (features an alarm and a batery-backup RAM (CMOS) too)
 class MC146818
@@ -142,6 +142,6 @@ public:
     static Second seconds_since_epoch() { return date().to_offset(EPOCH_DAYS); }
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

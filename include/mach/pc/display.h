@@ -5,7 +5,7 @@
 
 #include <display.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 // Colour Graphics Adapter based on MC6845
 class MC6845
@@ -146,6 +146,6 @@ private:
     static Frame_Buffer _frame_buffer;
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif

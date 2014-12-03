@@ -5,7 +5,7 @@
 
 #include <mmu.h>
 
-__BEGIN_SYS
+namespace EPOS_Kernel {
 
 class Segment: public MMU::Chunk
 {
@@ -26,6 +26,6 @@ public:
     int resize(int amount);
 };
 
-__END_SYS
+} // namespace EPOS_Kernel
 
 #endif
