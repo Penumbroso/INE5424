@@ -99,14 +99,14 @@ public:
         SEG_TRAP	= 0x0f,
         SEG_32		= 0x40,
         SEG_4K		= 0x80,
-        SEG_FLT_CODE    = (SEG_PRE  | SEG_NOSYS	| SEG_CODE | SEG_ACC),
-        SEG_FLT_DATA    = (SEG_PRE  | SEG_NOSYS	| SEG_RW   | SEG_ACC),
-        SEG_APP_CODE    = (SEG_PRE  | SEG_NOSYS | SEG_DPL2 | SEG_DPL1 | SEG_CODE | SEG_RW    | SEG_ACC),   // P, DPL=3, S, C, W, A
-        SEG_APP_DATA    = (SEG_PRE  | SEG_NOSYS	| SEG_DPL2 | SEG_DPL1 | SEG_RW    | SEG_ACC),   // P, DPL=3, S,    W, A
-        SEG_SYS_CODE    = (SEG_PRE  | SEG_NOSYS	| SEG_CODE | SEG_ACC),
-        SEG_SYS_DATA    = (SEG_PRE  | SEG_NOSYS	| SEG_RW   | SEG_ACC),
-        SEG_IDT_ENTRY   = (SEG_PRE  | SEG_INT   | SEG_DPL2 | SEG_DPL1 | SEG_ACC),
-        SEG_TSS0        = (SEG_PRE  | SEG_TSS   | SEG_ACC)
+        SEG_FLT_CODE    = (SEG_PRE  | SEG_NOSYS	| SEG_CODE | SEG_RW   | SEG_ACC  ),
+        SEG_FLT_DATA    = (SEG_PRE  | SEG_NOSYS	| SEG_RW   | SEG_ACC  ),
+        SEG_SYS_CODE    = (SEG_PRE  | SEG_NOSYS	| SEG_CODE | SEG_RW   | SEG_ACC  ),
+        SEG_SYS_DATA    = (SEG_PRE  | SEG_NOSYS	| SEG_RW   | SEG_ACC  ),
+        SEG_APP_CODE    = (SEG_PRE  | SEG_NOSYS | SEG_DPL2 | SEG_DPL1 | SEG_CODE | SEG_RW   | SEG_ACC),   // P, DPL=3, S, C, W, A
+        SEG_APP_DATA    = (SEG_PRE  | SEG_NOSYS | SEG_DPL2 | SEG_DPL1 | SEG_RW   | SEG_ACC  ),   // P, DPL=3, S,    W, A
+        SEG_IDT_ENTRY   = (SEG_PRE  | SEG_INT   | SEG_DPL2 | SEG_DPL1 ),
+        SEG_TSS0        = (SEG_PRE  | SEG_TSS   | SEG_DPL2 | SEG_DPL1 )
     };
 
     // DPL/RPL for application (user) and system (supervisor) modes 
@@ -132,10 +132,10 @@ public:
     enum {
         SEL_FLT_CODE  = (GDT_FLT_CODE << 3)  | PL_SYS,
         SEL_FLT_DATA  = (GDT_FLT_DATA << 3)  | PL_SYS,
-        SEL_APP_CODE  = (GDT_APP_CODE << 3)  | PL_APP,
-        SEL_APP_DATA  = (GDT_APP_DATA << 3)  | PL_APP,
         SEL_SYS_CODE  = (GDT_SYS_CODE << 3)  | PL_SYS,
         SEL_SYS_DATA  = (GDT_SYS_DATA << 3)  | PL_SYS,
+        SEL_APP_CODE  = (GDT_APP_CODE << 3)  | PL_APP,
+        SEL_APP_DATA  = (GDT_APP_DATA << 3)  | PL_APP,
         SEL_TSS0      = (GDT_TSS0     << 3)  | PL_SYS
     };
 
@@ -144,13 +144,8 @@ public:
     public:
         GDT_Entry() {}
         GDT_Entry(Reg32 b, Reg32 l, Reg8 f)
-            : limit_15_00((Reg16)l),
-              base_15_00((Reg16)b),
-              base_23_16((Reg8)(b >> 16)),
-              p_dpl_s_type(f),
-              g_d_0_a_limit_19_16(((f & SEG_NOSYS)?SEG_4K | SEG_32 : 0) |
-        			  ((Reg8)(l >> 16))),
-              base_31_24((Reg8)(b >> 24)) {}
+        : limit_15_00((Reg16)l), base_15_00((Reg16)b), base_23_16((Reg8)(b >> 16)), p_dpl_s_type(f),
+          g_d_0_a_limit_19_16(((f & SEG_NOSYS) ? (SEG_4K | SEG_32) : 0) | ((Reg8)(l >> 16))), base_31_24((Reg8)(b >> 24)) {}
 
         friend Debug & operator<<(Debug & db, const GDT_Entry & g) {
             db << "{bas=" << (void *)((g.base_31_24 << 24) | (g.base_23_16 << 16) | g.base_15_00) 
@@ -179,16 +174,12 @@ public:
     public:
         IDT_Entry() {}
         IDT_Entry(Reg16 s, Reg32 o, Reg16 f)
-            : offset_15_00((Reg16)o),
-              selector(s << 3),
-              zero(0),
-              p_dpl_0_d_1_1_0(f),
-              offset_31_16((Reg16)(o >> 16)) {}
+        : offset_15_00((Reg16)o), selector(s), zero(0), p_dpl_0_d_1_1_0(f), offset_31_16((Reg16)(o >> 16)) {}
 
         Reg32 offset() const { return (offset_31_16 << 16) | offset_15_00; }
 
         friend Debug & operator<<(Debug & db, const IDT_Entry & i) {
-            db << "{sel=" << (i.selector >> 3) 
+            db << "{sel=" << i.selector
                << ",off=" << (void *)i.offset()
                << ",p=" << (i.p_dpl_0_d_1_1_0 >> 7) 
                << ",dpl=" << ((i.p_dpl_0_d_1_1_0 >> 5) & 0x3)
@@ -267,7 +258,7 @@ public:
                << ",esi=" << c._esi
                << ",edi=" << c._edi
                << ",ebp=" << reinterpret_cast<void *>(c._ebp)
-               << ",esp=" << reinterpret_cast<void *>(c._esp)
+               << ",esp=" << &c
                << ",eip=" << reinterpret_cast<void *>(c._eip)
                << ",cs="  << cs()
                << ",ds="  << ds()
@@ -275,7 +266,7 @@ public:
                << ",fs="  << fs()
                << ",gs="  << gs()
                << ",ss="  << ss()
-               << ",cr3=" << reinterpret_cast<void *>(pdp())
+//               << ",cr3=" << reinterpret_cast<void *>(pdp())
                << "}"     << dec;
             return db;
         }
@@ -318,6 +309,9 @@ public:
 
     static void switch_context(Context * volatile * o, Context * volatile n);
 
+    static int syscall(void * m);
+    static void syscall_entry();
+
     static Flags flags() { return eflags(); }
     static void flags(const Flags flags) { eflags(flags); }
 
@@ -332,28 +326,28 @@ public:
     static Reg32 pdp() { return cr3() ; }
     static void pdp(const Reg32 pdp) { cr3(pdp); }
 
-    template <typename T>
+    template<typename T>
     static T tsl(volatile T & lock) {
         register T old = 1;
         ASM("lock xchg %0, %2" : "=a"(old) : "a"(old), "m"(lock) : "memory");
         return old;
     }
 
-    template <typename T>
+    template<typename T>
     static T finc(volatile T & value) {
         register T old = 1;
         ASM("lock xadd %0, %2" : "=a"(old) : "a"(old), "m"(value) : "memory");
         return old;
     }
 
-    template <typename T>
+    template<typename T>
     static T fdec(volatile T & value) {
         register T old = -1;
         ASM("lock xadd %0, %2" : "=a"(old) : "a"(old), "m"(value) : "memory");
         return old;
     }
 
-    template <typename T>
+    template<typename T>
     static T cas(volatile T & value, T compare, T replacement) {
         ASM("lock cmpxchgl %2, %3\n" : "=a"(compare) : "a"(compare), "r"(replacement), "m"(value) : "memory");
         return compare;
@@ -533,6 +527,15 @@ public: // IA32 specific methods
     }
     static Reg16 gs() {
         Reg16 value; ASM("mov %%gs,%0" : "=r"(value) :); return value;
+    }
+
+    static Reg16 tr() {
+        Reg16 tr;
+        ASM("str %0" : "=r"(tr) :);
+        return tr;
+    }
+    static void tr(Reg16 tr) {
+        ASM("ltr %0" : : "r"(tr));
     }
 
     static void bts(Log_Addr addr, const int bit) {
