@@ -92,10 +92,8 @@ __BEGIN_SYS
 
 template <> struct Traits<Application>: public Traits<void>
 {
-    // static const unsigned int STACK_SIZE = Traits<Machine>::STACK_SIZE;
-    // static const unsigned int HEAP_SIZE = Traits<Machine>::HEAP_SIZE;
-	static const unsigned int STACK_SIZE = 16 * 1024;
-    static const unsigned int HEAP_SIZE = 16 * 1024 * 1024;
+    static const unsigned int STACK_SIZE = Traits<Machine>::STACK_SIZE;
+    static const unsigned int HEAP_SIZE = Traits<Machine>::HEAP_SIZE;
     static const unsigned int MAX_THREADS = Traits<Machine>::MAX_THREADS;
 };
 
@@ -126,7 +124,7 @@ template <> struct Traits<Thread>: public Traits<void>
 {
     static const bool smp = Traits<System>::multicore;
 
-    typedef Scheduling_Criteria::RR Criterion;
+    typedef Scheduling_Criteria::FCFS Criterion;
     static const unsigned int QUANTUM = 10000; // us
 
     static const bool trace_idle = hysterically_debugged;

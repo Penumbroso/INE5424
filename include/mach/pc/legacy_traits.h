@@ -8,12 +8,12 @@
 __BEGIN_SYS
 
 class PC_Common;
-template <> struct Traits<PC_Common>: public Traits<void>
+template<> struct Traits<PC_Common>: public Traits<void>
 {
     static const bool debugged = Traits<void>::debugged;
 };
 
-template <> struct Traits<PC>: public Traits<PC_Common>
+template<> struct Traits<PC>: public Traits<PC_Common>
 {
     static const unsigned int CPUS = Traits<Build>::CPUS;
 
@@ -45,23 +45,23 @@ template <> struct Traits<PC>: public Traits<PC_Common>
     static const unsigned int SYS_DATA  = 0xff740000;
 
     // Default Sizes and Quantities
-    static const unsigned int STACK_SIZE = 16 * 1024;
-    static const unsigned int HEAP_SIZE = MEM_TOP / 2;
+    static const unsigned int STACK_SIZE = 128 * 1024;
+    static const unsigned int HEAP_SIZE = 16 * 1024 * 1024;
     static const unsigned int MAX_THREADS = 8;
 };
 
-template <> struct Traits<PC_PCI>: public Traits<PC_Common>
+template<> struct Traits<PC_PCI>: public Traits<PC_Common>
 {
     static const int MAX_BUS = 0;
     static const int MAX_DEV_FN = 0xff;
 };
 
-template <> struct Traits<PC_IC>: public Traits<PC_Common>
+template<> struct Traits<PC_IC>: public Traits<PC_Common>
 {
     static const bool debugged = hysterically_debugged;
 };
 
-template <> struct Traits<PC_Timer>: public Traits<PC_Common>
+template<> struct Traits<PC_Timer>: public Traits<PC_Common>
 {
     static const bool debugged = hysterically_debugged;
 
@@ -71,7 +71,7 @@ template <> struct Traits<PC_Timer>: public Traits<PC_Common>
     static const int FREQUENCY = 1000; // Hz
 };
 
-template <> struct Traits<PC_RTC>: public Traits<PC_Common>
+template<> struct Traits<PC_RTC>: public Traits<PC_Common>
 {
     static const unsigned int EPOCH_DAY = 1;
     static const unsigned int EPOCH_MONTH = 1;
@@ -79,11 +79,11 @@ template <> struct Traits<PC_RTC>: public Traits<PC_Common>
     static const unsigned int EPOCH_DAYS = 719499;
 };
 
-template <> struct Traits<PC_EEPROM>: public Traits<PC_Common>
+template<> struct Traits<PC_EEPROM>: public Traits<PC_Common>
 {
 };
 
-template <> struct Traits<PC_UART>: public Traits<PC_Common>
+template<> struct Traits<PC_UART>: public Traits<PC_Common>
 {
     static const unsigned int UNITS = 2;
 
@@ -100,7 +100,7 @@ template <> struct Traits<PC_UART>: public Traits<PC_Common>
     static const unsigned int COM4 = 0x2e8; // to 0x2ef, no IRQ
 };
 
-template <> struct Traits<PC_Display>: public Traits<PC_Common>
+template<> struct Traits<PC_Display>: public Traits<PC_Common>
 {
     static const int COLUMNS = 80;
     static const int LINES = 25;
@@ -108,7 +108,7 @@ template <> struct Traits<PC_Display>: public Traits<PC_Common>
     static const unsigned int FRAME_BUFFER_ADDRESS = 0xb8000;
 };
 
-template <> struct Traits<PC_Scratchpad>: public Traits<PC_Common>
+template<> struct Traits<PC_Scratchpad>: public Traits<PC_Common>
 {
     static const bool enabled = false;
     static const unsigned int ADDRESS = Traits<PC_Display>::FRAME_BUFFER_ADDRESS;

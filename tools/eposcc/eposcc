@@ -31,7 +31,7 @@ ANL_COMP_FLGS="-DANALYZE"
 
 CONFIGURATOR=eposcfg
 
-COMP_FLGS="-include $INC/application.h"
+COMP_FLGS="-include $INC/system/framework.h"
 COMP_HDRS="$INC"
 
 C_COMPILER="$TOOLS_PREFIX""gcc"
