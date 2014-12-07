@@ -58,7 +58,8 @@ public:
         IRQ_MATH        = 13,
         IRQ_DISK1       = 14,
         IRQ_DISK2       = 15,
-        IRQ_LAST        = IRQ_DISK2
+        IRQ_LAST        = IRQ_DISK2,
+        IRQ_SYSCALL     = 1
     };
 
     // Interrupts
@@ -69,7 +70,7 @@ public:
         INT_KEYBOARD	= HARD_INT + IRQ_KEYBOARD,
         INT_LAST_HARD   = HARD_INT + IRQ_LAST,
         INT_RESCHEDULER = SOFT_INT,
-        INT_SYSCALL
+        INT_SYSCALL = SOFT_INT + IRQ_SYSCALL
     };
 
 public:
@@ -517,7 +518,7 @@ private:
     static void exc_pf (const Interrupt_Id & i, Reg32 error, Reg32 eip, Reg32 cs, Reg32 eflags);
     static void exc_gpf(const Interrupt_Id & i, Reg32 error, Reg32 eip, Reg32 cs, Reg32 eflags);
     static void exc_fpu(const Interrupt_Id & i, Reg32 error, Reg32 eip, Reg32 cs, Reg32 eflags);
-
+    static void syscall();
     static void init();
 
 private:

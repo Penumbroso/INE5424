@@ -13,7 +13,7 @@ extern "C" {
     }
 
     void _exit(int s) {
-        _API::Thread::exit(s); for(;;);
+        _API::Thread::exit(s); //for(;;);
     }
 
     void _print(const char * s) {
@@ -21,8 +21,10 @@ extern "C" {
     }
 
     int _syscall(void * m) {
-        //_exec(m); /// TODO for P3
-        return 0;
+        int ret = 0;
+        ASM("int $49; \n");
+        return ret;
+
     }
 }
 

@@ -30,6 +30,7 @@ void PC_IC::init()
     _int_vector[CPU::EXC_DOUBLE] = reinterpret_cast<Interrupt_Handler>(exc_pf);
     _int_vector[CPU::EXC_GPF] = reinterpret_cast<Interrupt_Handler>(exc_gpf);
     _int_vector[CPU::EXC_NODEV] = reinterpret_cast<Interrupt_Handler>(exc_fpu);
+    _int_vector[IC::INT_SYSCALL] = reinterpret_cast<Interrupt_Handler>(syscall);
 
     remap();
     disable();

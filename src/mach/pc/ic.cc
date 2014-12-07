@@ -2,10 +2,13 @@
 
 #include <mach/pc/ic.h>
 #include <machine.h>
+#include <utility/ostream.h>
 
 extern "C" { void _exit(int s); }
 
 __BEGIN_SYS
+
+OStream cout;
 
 // Class attributes
 APIC::Log_Addr APIC::_base;
@@ -25,6 +28,12 @@ void PC_IC::exc_not(const Interrupt_Id & i, Reg32 error, Reg32 eip, Reg32 cs, Re
 
     db<IC>(WRN) << "The running thread will now be terminated!" << endl;
     _exit(-1);
+}
+
+void PC_IC::syscall(){
+    cout<<"passou\n\n\n"<<endl;
+    IA32::syscall_entry();
+
 }
 
 void PC_IC::exc_pf(const Interrupt_Id & i, Reg32 error, Reg32 eip, Reg32 cs, Reg32 eflags)
