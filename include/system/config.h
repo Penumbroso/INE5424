@@ -17,6 +17,7 @@ namespace EPOS {
 #define __BEGIN_SYS             namespace EPOS { namespace S {
 #define __END_SYS               }}
 #define _SYS                    ::EPOS::S
+#define __USING_SYS             using namespace EPOS::S;
 
 #define __BEGIN_CORE            namespace EPOS { namespace S {
 #define __END_CORE              }}

@@ -100,9 +100,6 @@ public:
     template<typename T1, typename T2, typename T3>
     int receive(T1 a1, T2 a2, T3 a3) { Message msg(_adapter); msg.invoke(Method::SELF, a1, a2, a3); return msg.result(); }
 
-    // Printing utility
-    static void puts(const char * s) { /* TODO */ }
-
 private:
     Adapter<Component> * _adapter;
 };

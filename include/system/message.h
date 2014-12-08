@@ -30,6 +30,7 @@ public:
         THREAD_PASS,
         THREAD_YIELD,
         THREAD_EXIT,
+        THREAD_WAIT_NEXT,
         TASK_ADDRESS_SPACE = COMPONENT,
         TASK_CODE_SEGMENT,
         TASK_DATA_SEGMENT,
@@ -50,7 +51,7 @@ public:
         SYNCHRONIZER_SIGNAL,
         SYNCHRONIZER_BROADCAST,
         ALARM_DELAY = COMPONENT,
-        DISPLAY_PUTS = COMPONENT,
+        PRINT = COMPONENT,
         UNDEFINED = -1
     };
 

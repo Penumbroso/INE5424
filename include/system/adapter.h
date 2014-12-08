@@ -102,10 +102,6 @@ public:
 	leave();
 	return res;
     }
-
-    // Printing utility
-    static void puts(const char * s) { static_enter(); Component::puts(s); static_leave(); }
-
 };
 
 __END_SYS
