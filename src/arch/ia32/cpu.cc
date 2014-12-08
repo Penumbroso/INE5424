@@ -82,7 +82,7 @@ void IA32::switch_context(Context * volatile * o, Context * volatile n)
 int IA32::syscall(void * m)
 {
     int ret = 0;
-    // ASM("int %1" : "=a"(ret) : "i"(IC::INT_SYSCALL), "a"(m));
+    ASM("int %1" : "=a"(ret) : "i"(IC::INT_SYSCALL), "a"(m));
     return ret;
 }
 

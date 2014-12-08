@@ -125,9 +125,6 @@ public:
 	return _stub->receive(a1, a2, a3);
     }
 
-    // Printing utility
-    static void puts(const char * s) { _Stub::puts(s); }
-
 private:
     _Stub * _stub;
 };

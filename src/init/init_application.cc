@@ -28,11 +28,7 @@ public:
 
         // Initialize Application's heap
         db<Init>(INF) << "Initializing application's heap: " << endl;
-        if(Traits<System>::multiheap) { // Heap in data segment arranged by SETUP
-            db<Init>(INF) << "Memory_Map<Machine>::APP_DATA: " << (void *) Memory_Map<Machine>::APP_DATA << endl;
-            db<Init>(INF) << "System::info()->app_stack: " << (void *) System::info()->lm.app_stack << endl;
-            db<Init>(INF) << "Traits<Application>::STACK_SIZE: " << (void *) Traits<Application>::STACK_SIZE << endl;
-           
+        if(Traits<System>::multiheap) { // Heap in data segment arranged by SETUP         
             unsigned int stack = MMU::align_page(Memory_Map<Machine>::APP_DATA + Traits<Application>::STACK_SIZE);
             unsigned int heap = stack + MMU::align_page(Traits<Application>::STACK_SIZE);
             Application::_heap = new (&Application::_preheap[0]) Heap((void *) heap, HEAP_SIZE);
