@@ -48,6 +48,7 @@ class Setup;
 class Init;
 class System;
 class Application;
+class Utility;
 
 // Hardware Mediators - CPU
 class IA32;
@@ -155,6 +156,7 @@ enum
     ALARM_ID,
     CHRONOMETER_ID,
 
+    UTILITY_ID = 50,
     UNKNOWN_TYPE_ID,
     LAST_TYPE_ID = UNKNOWN_TYPE_ID - 1
 };

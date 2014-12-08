@@ -8,12 +8,57 @@
 
 __BEGIN_SYS
 
-template <typename Component>
+template<typename Component>
 class Agent
 {
 public:
     static void act(Message * msg) {
         msg->reply(Result(-1));
+    }
+};
+
+
+#include <alarm.h>
+template <>
+class Agent<Alarm>
+{
+public:
+    static void act(Message * msg) {
+        db<Alarm>(TRC) << "Alarm Agent::act>>" << endl;
+
+        Result res = 0;
+
+        switch(msg->method()) {
+        case Method::DESTROY: {
+            db<Alarm>(TRC) << "Alarm Agent::DESTROY" << endl;
+            Adapter<Alarm> * alarm = reinterpret_cast<Adapter<Alarm> *>(msg->id().unit());
+            delete alarm;
+        }
+        break;
+        case Method::CREATE3: {
+            db<Alarm>(TRC) << "Alarm Agent::CREATE3" << endl;
+            Alarm::Microsecond time;
+            Handler* handler;
+            int times;
+            msg->in(time, handler, times);
+            msg->id(new Adapter<Alarm>(time, handler, times));
+        }
+        break;
+        case Method::ALARM_DELAY: {
+            db<Alarm>(TRC) << "Alarm Agent::ALARM_DELAY" << endl;
+            Alarm::Microsecond time;
+            msg->in(time);
+            Adapter<Alarm>::delay(time);
+        }
+        break;
+        default:
+            db<Alarm>(WRN) << "Alarm Agent: unknown method: " << msg->method() << endl;
+        break;
+        }
+
+        msg->reply(res);
+
+        db<Alarm>(TRC) << "<<Alarm Agent::act" << endl;
     }
 };
 
@@ -75,7 +120,7 @@ public:
 };
 
 #include <task.h>
-template <>
+template<>
 class Agent<Task>
 {
 public:
@@ -118,7 +163,7 @@ public:
 };
 
 #include <address_space.h>
-template <>
+template<>
 class Agent<Address_Space>
 {
 public:
@@ -166,7 +211,7 @@ public:
 
 
 #include <segment.h>
-template <>
+template<>
 class Agent<Segment>
 {
 public:
@@ -217,22 +262,19 @@ public:
     }
 };
 
-#include <display.h>
-template <>
-class Agent<Display>
+template<>
+class Agent<Utility>
 {
 public:
     static void act(Message * msg) {
         Result res = 0;
 
         switch(msg->method()) {
-        case Method::DISPLAY_PUTS: {
+        case Method::PRINT: {
             const char * s;
             msg->in(s);
-            Display::puts(s);
+            _print(s);
         }
-        break;
-
         }
 
         msg->reply(res);
