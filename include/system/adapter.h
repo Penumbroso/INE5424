@@ -19,15 +19,8 @@ public:
     typedef Component _Component;
 
 public:
-    Adapter() { static_leave(); }
-    template<typename T1>
-    Adapter(const T1 & a1): Component(a1) { static_leave(); }
-    template<typename T1, typename T2>
-    Adapter(const T1 & a1, const T2 & a2): Component(a1, a2) { static_leave(); }
-    template<typename T1, typename T2, typename T3>
-    Adapter(const T1 & a1, const T2 & a2, const T3 & a3): Component(a1, a2, a3) { static_leave(); }
-    template<typename T1, typename T2, typename T3, typename T4>
-    Adapter(const T1 & a1, const T2 & a2, const T3 & a3, const T4 & a4): Component(a1, a2, a3, a4) { static_leave(); }
+    template< typename ... Ts >
+    Adapter( const Ts &... ts ) : Component( ts... ) { static_leave(); }
 
     ~Adapter() { static_enter(); }
 
