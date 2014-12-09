@@ -106,57 +106,30 @@ public:
     template <typename T>
     void reply(const T & r) { _method = reinterpret_cast<int>(r); }
 
-    template<typename T1>
-    void out(const T1 & v1) {
-        *static_cast<T1 *>(reinterpret_cast<void *>(&_parms[0])) = v1;
+private:
+    template< typename Head, typename ... Tail >
+    static void out_aux( char * ptr, const Head & head, const Tail & ... tail ) {
+        *static_cast<Head *>(reinterpret_cast<void*>(ptr)) = head;
+        ptr += sizeof(Head);
+        out_aux( ptr, tail... );
     }
+    static void out_aux( char * ) {}
 
-    template<typename T1, typename T2>
-    void out(const T1 & v1, const T2 & v2) {
-        *static_cast<T1 *>(reinterpret_cast<void *>(&_parms[0])) = v1;
-        *static_cast<T2 *>(reinterpret_cast<void *>(&_parms[sizeof(T1)])) = v2;
+    template< typename Head, typename ... Tail >
+    static void in_aux( char * ptr, Head & head, Tail & ... tail ) {
+        head = *static_cast<Head *>(reinterpret_cast<void*>(ptr));
+        ptr += sizeof(Head);
+        in_aux( ptr, tail... );
     }
-
-    template<typename T1, typename T2, typename T3>
-    void out(const T1 & v1, const T2 & v2, const T3 & v3) {
-        *static_cast<T1 *>(reinterpret_cast<void *>(&_parms[0])) = v1;
-        *static_cast<T2 *>(reinterpret_cast<void *>(&_parms[sizeof(T1)])) = v2;
-        *static_cast<T3 *>(reinterpret_cast<void *>(&_parms[sizeof(T1) + sizeof(T2)])) = v3;
+    static void in_aux( char * ) {}
+public:
+    template< typename ... Ts >
+    void out( const Ts & ... ts ) {
+        out_aux( &_parms[0], ts... );
     }
-
-    template<typename T1, typename T2, typename T3, typename T4>
-    void out(const T1 & v1, const T2 & v2, const T3 & v3, const T4 & v4) {
-        *static_cast<T1 *>(reinterpret_cast<void *>(&_parms[0])) = v1;
-        *static_cast<T2 *>(reinterpret_cast<void *>(&_parms[sizeof(T1)])) = v2;
-        *static_cast<T3 *>(reinterpret_cast<void *>(&_parms[sizeof(T1) + sizeof(T2)])) = v3;
-        *static_cast<T4 *>(reinterpret_cast<void *>(&_parms[sizeof(T1) + sizeof(T2) + sizeof(T3)])) = v4;
-    }
-
-
-    template<typename T1>
-    void in(T1 & v1) {
-        v1 = *static_cast<T1 *>(reinterpret_cast<void *>(&_parms[0]));
-    }
-
-    template<typename T1, typename T2>
-    void in(T1 & v1, T2 & v2) {
-        v1 = *static_cast<T1 *>(reinterpret_cast<void *>(&_parms[0]));
-        v2 = *static_cast<T2 *>(reinterpret_cast<void *>(&_parms[sizeof(T1)]));
-    }
-
-    template<typename T1, typename T2, typename T3>
-    void in(T1 & v1, T2 & v2, T3 & v3) {
-        v1 = *static_cast<T1 *>(reinterpret_cast<void *>(&_parms[0]));
-        v2 = *static_cast<T2 *>(reinterpret_cast<void *>(&_parms[sizeof(T1)]));
-        v3 = *static_cast<T3 *>(reinterpret_cast<void *>(&_parms[sizeof(T1) + sizeof(T2)]));
-    }
-
-    template<typename T1, typename T2, typename T3, typename T4>
-    void in(T1 & v1, T2 & v2, T3 & v3, T4 & v4) {
-        v1 = *static_cast<T1 *>(reinterpret_cast<void *>(&_parms[0]));
-        v2 = *static_cast<T2 *>(reinterpret_cast<void *>(&_parms[sizeof(T1)]));
-        v3 = *static_cast<T3 *>(reinterpret_cast<void *>(&_parms[sizeof(T1) + sizeof(T2)]));
-        v4 = *static_cast<T4 *>(reinterpret_cast<void *>(&_parms[sizeof(T1) + sizeof(T2) + sizeof(T3)]));
+    template< typename ... Ts >
+    void in( Ts & ... ts ) {
+        in_aux( &_parms[0], ts... );
     }
 
 
