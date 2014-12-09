@@ -77,13 +77,14 @@ struct EQUAL<T, T>
 
 
 // LIST metaprogram
-template <typename T1 = void, typename T2 = void, typename T3 = void,
-          typename T4 = void, typename T5 = void, typename T6 = void>
-class LIST
+template< typename ... Ts > class LIST {};
+
+template< typename _Head, typename ... _Tail >
+class LIST< _Head, _Tail... >
 {
 private:
-    typedef T1 Head;
-    typedef LIST<T2, T3, T4, T5, T6> Tail;
+    typedef _Head Head;
+    typedef LIST< _Tail... > Tail;
 
 public:
     enum { Length = Tail::Length + 1 };
@@ -104,7 +105,7 @@ public:
 };
 
 template <>
-struct LIST<void, void, void, void, void, void>
+struct LIST<>
 { 
     enum { Length = 0 }; 
 
