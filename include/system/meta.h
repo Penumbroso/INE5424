@@ -5,6 +5,16 @@
 
 __BEGIN_SYS
 
+// Sum metaprogram
+template< typename ... Ts >
+struct TypeSum {
+    const static unsigned value = 0;
+};
+template< typename Head, typename ... Tail >
+struct TypeSum<Head, Tail...> {
+    const static unsigned value = sizeof(Head) + TypeSum<Tail...>::value;
+};
+
 // IF metaprogram
 template<bool condition, typename Then, typename Else>
 struct IF 
