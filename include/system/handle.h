@@ -44,25 +44,14 @@ protected:
 public:
     Handle() {_stub = new _Stub;}
 
-    template<typename T1>
-    Handle(const T1 & a1) { _stub = new _Stub(a1); }
-    template<typename T1, typename T2>
-    Handle(const T1 & a1, const T2 & a2) { _stub = new _Stub(a1, a2); }
-    template<typename T1, typename T2, typename T3>
-    Handle(const T1 & a1, const T2 & a2, const T3 & a3) { _stub = new _Stub(a1, a2, a3); }
-    template<typename T1, typename T2, typename T3, typename T4>
-    Handle(const T1 & a1, const T2 & a2, const T3 & a3, const T4 & a4) { _stub = new _Stub(a1, a2, a3, a4); }
+    template< typename ... Ts >
+    Handle(const Ts& ... ts )
+    { _stub = new _Stub( ts... ); }
 
-    template<typename T1>
-    Handle(const Handle<Task> & t, const T1 & a1) { _stub = new _Stub(*t._stub, a1); }
-    template<typename T1, typename T2>
-    Handle(const Handle<Task> & t, const T1 & a1, const T2 & a2) { _stub = new _Stub(*t._stub, a1, a2); }
-    template<typename T1, typename T2, typename T3>
-    Handle(const Handle<Task> & t, const T1 & a1, const T2 & a2, const T3 & a3) { _stub = new _Stub(*t._stub, a1, a2, a3); }
-    template<typename T1, typename T2, typename T3, typename T4>
-    Handle(const Handle<Task> & t, const T1 & a1, const T2 & a2, const T3 & a3, const T4 & a4) { _stub = new _Stub(*t._stub, a1, a2, a3, a4); }
-
-    Handle(const Handle<Segment> & cs, const Handle<Segment> & ds) { _stub = new _Stub(*cs._stub, *ds._stub); }
+    template< typename ... Ts >
+    Handle(const Handle<Task> & t, const Ts & ... ts ) {
+        _stub = new _Stub(*t._stub, ts...);
+    }
 
     ~Handle() { if(_stub) delete _stub; }
 
