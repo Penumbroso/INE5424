@@ -305,6 +305,32 @@ void Thread::implicit_exit()
 }
 
 
+void Thread::dispatch(Thread * prev, Thread * next, bool charge)
+{
+    if(charge) {
+        if(Criterion::timed)
+            _timer->reset();
+    }
+
+    if(prev != next) {
+        if(prev->_state == RUNNING)
+            prev->_state = READY;
+        next->_state = RUNNING;
+
+        db<Thread>(TRC) << "Thread::dispatch(prev=" << prev << ",next=" << next << ")" << endl;
+        db<Thread>(INF) << "prev={" << prev << ",ctx=" << *prev->_context << "}" << endl;
+        db<Thread>(INF) << "next={" << next << ",ctx=" << *next->_context << "}" << endl;
+
+        if(multitask && (next->_task != prev->_task))
+            next->_task->activate();
+
+        CPU::switch_context(&prev->_context, next->_context);
+    }
+
+    unlock();
+}
+
+
 int Thread::idle()
 {
     while(true) {

@@ -18,8 +18,8 @@ void PC_IC::init()
             idt[i] = CPU::IDT_Entry(CPU::SEL_SYS_CODE, Log_Addr(entry) + i * 16, CPU::SEG_IDT_ENTRY);
         else
             idt[i] = CPU::IDT_Entry(CPU::SEL_SYS_CODE, Log_Addr(entry) + CPU::EXC_LAST * 16, CPU::SEG_IDT_ENTRY);
-    // if(Traits<Build>::MODE == Traits<Build>::KERNEL)
-        
+    if(Traits<Build>::MODE == Traits<Build>::KERNEL)
+        idt[INT_SYSCALL] = CPU::IDT_Entry(CPU::SEL_SYS_CODE, Log_Addr(&CPU::syscall_entry), CPU::SEG_IDT_ENTRY);
 
     // Set all interrupt handlers to int_not()
     for(unsigned int i = 0; i < INTS; i++)

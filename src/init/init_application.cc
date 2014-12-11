@@ -7,6 +7,8 @@
 #include <address_space.h>
 #include <segment.h>
 
+extern "C" { char _end; } // defined by GCC
+
 __BEGIN_SYS
 
 class Init_Application
@@ -28,10 +30,10 @@ public:
 
         // Initialize Application's heap
         db<Init>(INF) << "Initializing application's heap: " << endl;
-        if(Traits<System>::multiheap) { // Heap in data segment arranged by SETUP         
-            unsigned int stack = MMU::align_page(Memory_Map<Machine>::APP_DATA + Traits<Application>::STACK_SIZE);
-            unsigned int heap = stack + MMU::align_page(Traits<Application>::STACK_SIZE);
-            Application::_heap = new (&Application::_preheap[0]) Heap((void *) heap, HEAP_SIZE);
+        if(Traits<System>::multiheap) { // Heap in data segment arranged by SETUP
+            char * stack = MMU::align_page(&_end);
+            char * heap = stack + MMU::align_page(Traits<Application>::STACK_SIZE);
+            Application::_heap = new (&Application::_preheap[0]) Heap(heap, HEAP_SIZE);
         } else
             for(unsigned int frames = MMU::allocable(); frames; frames = MMU::allocable())
                 System::_heap->free(MMU::alloc(frames), frames * sizeof(MMU::Page));

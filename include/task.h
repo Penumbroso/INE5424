@@ -18,14 +18,14 @@ class Task
 
 private:
     static const bool multitask = Traits<System>::multitask;
-
+    
     typedef CPU::Log_Addr Log_Addr;
     typedef CPU::Phy_Addr Phy_Addr;
     typedef CPU::Context Context;
     typedef class Queue<Thread> Queue;
 
 protected:
-    Task(Address_Space * as, Segment * cs, Segment * ds, Log_Addr code, Log_Addr data)
+    Task(Address_Space * as, const Segment * cs, const Segment * ds, Log_Addr code, Log_Addr data)
     : _as(as), _cs(cs), _ds(ds), _code(code), _data(data) {}
 
 public:
@@ -34,13 +34,13 @@ public:
 
     Address_Space * address_space() const { return _as; }
 
-    Segment * code_segment() const { return _cs; }
-    Segment * data_segment() const { return _ds; }
+    const Segment * code_segment() const { return _cs; }
+    const Segment * data_segment() const { return _ds; }
 
     Log_Addr code() const { return _code; }
     Log_Addr data() const { return _data; }
 
-    static Task * self() { assert(_master || !Traits<Task>::enabled); return multitask ? Thread::self()->task() : _master; }
+    static const Task * self() { assert(_master || !Traits<Task>::enabled); return multitask ? Thread::self()->task() : _master; }
 
 private:
     void activate() const { _as->activate(); }
@@ -49,8 +49,8 @@ private:
 
 private:
     Address_Space * _as;
-    Segment * _cs;
-    Segment * _ds;
+    const Segment * _cs;
+    const Segment * _ds;
     Log_Addr _code;
     Log_Addr _data;
 
