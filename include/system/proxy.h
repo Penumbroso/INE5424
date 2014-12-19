@@ -38,15 +38,51 @@ protected:
     Proxy(_Adapter * c) { _adapter = c; }
 
 public:
-    Proxy() { Message msg(Type<Component>::ID, 0); msg.invoke(Method::CREATE); _adapter = reinterpret_cast<_Adapter *>(msg.id().unit()); }
+    Proxy() {
+        Message msg(Type<Component>::ID, 0);
+        if(Type<Component>::ID == THREAD_ID)
+            msg.out(new char[Traits<Application>::STACK_SIZE]);
+        msg.invoke(Method::CREATE);
+        _adapter = reinterpret_cast<_Adapter *>(msg.id().unit());
+    }
     template<typename T1>
-    Proxy(const T1 & p1) { Message msg(Type<Component>::ID, 0); msg.out(p1); msg.invoke(Method::CREATE1); _adapter = reinterpret_cast<_Adapter *>(msg.id().unit()); }
+    Proxy(const T1 & p1) {
+        Message msg(Type<Component>::ID, 0);
+        if(Type<Component>::ID == THREAD_ID)
+            msg.out(p1, new char[Traits<Application>::STACK_SIZE]);
+        else
+            msg.out(p1);
+        msg.invoke(Method::CREATE1);
+        _adapter = reinterpret_cast<_Adapter *>(msg.id().unit());
+    }
     template<typename T1, typename T2>
-    Proxy(const T1 & p1, const T2 & p2) { Message msg(Type<Component>::ID, 0); msg.out(p1, p2); msg.invoke(Method::CREATE2); _adapter = reinterpret_cast<_Adapter *>(msg.id().unit()); }
+    Proxy(const T1 & p1, const T2 & p2) {
+        Message msg(Type<Component>::ID, 0);
+        if(Type<Component>::ID == THREAD_ID)
+            msg.out(p1, p2, new char[Traits<Application>::STACK_SIZE]);
+        else
+            msg.out(p1, p2); msg.invoke(Method::CREATE2);
+        _adapter = reinterpret_cast<_Adapter *>(msg.id().unit());
+    }
     template<typename T1, typename T2, typename T3>
-    Proxy(const T1 & p1, const T2 & p2, const T3 & p3) { Message msg(Type<Component>::ID, 0); msg.out(p1, p2, p3); msg.invoke(Method::CREATE3); _adapter = reinterpret_cast<_Adapter *>(msg.id().unit()); }
+    Proxy(const T1 & p1, const T2 & p2, const T3 & p3) {
+        Message msg(Type<Component>::ID, 0);
+        if(Type<Component>::ID == THREAD_ID)
+            msg.out(p1, p2, p3, new char[Traits<Application>::STACK_SIZE]);
+        else
+            msg.out(p1, p2, p3);
+        msg.invoke(Method::CREATE3);
+        _adapter = reinterpret_cast<_Adapter *>(msg.id().unit()); }
     template<typename T1, typename T2, typename T3, typename T4>
-    Proxy(const T1 & p1, const T2 & p2, const T3 & p3, const T4 & p4) { Message msg(Type<Component>::ID, 0); msg.out(p1, p2, p3, p4); msg.invoke(Method::CREATE4); _adapter = reinterpret_cast<_Adapter *>(msg.id().unit()); }
+    Proxy(const T1 & p1, const T2 & p2, const T3 & p3, const T4 & p4) {
+        Message msg(Type<Component>::ID, 0);
+        if(Type<Component>::ID == THREAD_ID)
+            msg.out(p1, p2, p3, p4, new char[Traits<Application>::STACK_SIZE]);
+        else
+            msg.out(p1, p2, p3, p4);
+        msg.invoke(Method::CREATE4);
+        _adapter = reinterpret_cast<_Adapter *>(msg.id().unit());
+    }
 
     Proxy(const Proxy<Task> & task, void (* entry)()) { Message msg(Type<Component>::ID, 0); msg.out(task._adapter, entry); msg.invoke(Method::CREATE6); _adapter = reinterpret_cast<_Adapter *>(msg.id().unit()); }
 

@@ -42,7 +42,7 @@ public:
     }
 
 
-    static Adapter<Component> * self() { static_enter(); Adapter<Component> * res = reinterpret_cast<Adapter<Component> *>(Component::self()); return res; }
+    static const Adapter<Component> * self() { static_enter(); const Adapter<Component> * res = reinterpret_cast<const Adapter<Component> *>(Component::self()); return res; }
 
     // Process management
     void suspend() { enter(); Component::suspend(); leave(); }
@@ -53,8 +53,8 @@ public:
     static void exit(int status) { static_enter(); Component::exit(status); static_leave(); }
 
     Address_Space * address_space() { enter(); Address_Space * res = Component::address_space(); leave(); return res; }
-    Segment * code_segment() { enter(); Segment * res = Component::code_segment(); leave(); return res; }
-    Segment * data_segment() { enter(); Segment * res = Component::data_segment(); leave(); return res; }
+    const Segment * code_segment() { enter(); const Segment * res = Component::code_segment(); leave(); return res; }
+    const Segment * data_segment() { enter(); const Segment * res = Component::data_segment(); leave(); return res; }
     CPU::Log_Addr code() { enter(); CPU::Log_Addr res = Component::code(); leave(); return res; }
     CPU::Log_Addr data() { enter(); CPU::Log_Addr res = Component::data(); leave(); return res; }
 

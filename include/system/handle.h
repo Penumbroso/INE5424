@@ -17,8 +17,8 @@ class Handled: public Handle<Component>
 public:
     Handled(): Handle<Component>(Handle<Component>::HANDLED) {
         db<Framework>(TRC) << "Handled() => [s= " << Handle<Component>::_stub << "]" << endl;
-        db<Framework>(WRN) << "sizeof(Component) = " << sizeof(Component) << endl;
-        db<Framework>(WRN) << "sizeof(Stub) = " << sizeof(typename Handle<Component>::_Stub) << endl;
+//        db<Framework>(WRN) << "sizeof(Component) = " << sizeof(Component) << endl;
+//        db<Framework>(WRN) << "sizeof(Stub) = " << sizeof(typename Handle<Component>::_Stub) << endl;
     }
 
     void * operator new(size_t s, void * c) {
